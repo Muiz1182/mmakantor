@@ -4,6 +4,7 @@ import { Header } from './components/Header';
 import { ContentFlow } from './components/ContentFlow';
 import { ViewSwitch } from './components/ViewSwitch';
 import { Plan2D } from './components/Plan2D';
+import { Stage3D } from './components/Stage3D';
 import { AgentPanel } from './components/AgentPanel';
 import './App.css';
 
@@ -52,7 +53,15 @@ export function App() {
             onResetCamera={() => {}}
           />
 
-          {viewMode === '2d' ? (
+          {viewMode === '3d' ? (
+            <Stage3D
+              agents={agents}
+              selectedAgentId={selectedAgentId}
+              onSelectAgent={selectAgent}
+              theme={theme}
+              onWebGLFallback={() => setViewMode('2d')}
+            />
+          ) : (
             <Plan2D
               agents={agents}
               agentsMap={agentsMap}
@@ -60,24 +69,6 @@ export function App() {
               onSelectAgent={selectAgent}
               pendingApprovalsCount={pendingApprovals.length}
             />
-          ) : (
-            <div className="stage-placeholder" role="region" aria-label="Pratinjau Mode 3D">
-              <div className="stage-placeholder-inner">
-                <span className="stage-icon">🏢</span>
-                <h3>Mode 3D Siap Dibangun (Tahap 2)</h3>
-                <p>
-                  Kerangka proyek dan denah 2D interaktif telah aktif di Tahap 1.
-                  Denah 3D Three.js dan animasi lorong akan diintegrasikan pada Tahap 2.
-                </p>
-                <button
-                  type="button"
-                  className="primary"
-                  onClick={() => setViewMode('2d')}
-                >
-                  Beralih ke Denah 2D Interaktif
-                </button>
-              </div>
-            </div>
           )}
         </div>
 
@@ -98,8 +89,8 @@ export function App() {
 
       <footer className="foot">
         <p>
-          Kantor MMA Production. Dibangun dengan Vite + React modular.
-          Mode denah 2D aktif dan dapat dioperasikan penuh menggunakan mouse atau keyboard.
+          Kantor MMA Production. Dibangun dengan Three.js dan React.
+          Karyawan berstatus menunggu atau perlu perhatian akan berjalan santai ke ruang lunch, PlayStation, kolam renang, atau asrama lewat lorong.
         </p>
       </footer>
     </div>

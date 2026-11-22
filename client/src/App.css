@@ -507,40 +507,58 @@ h1 {
   }
 }
 
-/* Stage Placeholder (3D Mode) */
-.stage-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 460px;
+/* Stage 3D Three.js */
+.stage {
+  position: relative;
+  height: clamp(400px, 66vh, 700px);
   border: 1px solid var(--line);
   border-radius: 14px;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 35%, var(--surface), var(--bg));
+}
+
+.stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.stage-tools {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+}
+
+.stage-tools .ghost {
   background: var(--surface);
-  padding: 32px;
-  text-align: center;
+  padding: 6px 14px;
+  font-size: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
-.stage-placeholder-inner {
-  max-width: 480px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.stage-icon {
-  font-size: 40px;
-}
-
-.stage-placeholder h3 {
-  font: 700 1.25rem var(--f-display);
-  color: var(--ink);
-}
-
-.stage-placeholder p {
+.hint {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 10px;
+  margin: 0;
+  font: 500 11.5px/1.4 var(--f-mono);
   color: var(--ink2);
-  line-height: 1.5;
-  font-size: 14px;
+  pointer-events: none;
+  z-index: 10;
+  background: color-mix(in srgb, var(--surface) 75%, transparent);
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  width: fit-content;
+}
+
+@media (max-width: 640px) {
+  .stage {
+    height: min(58vh, 440px);
+  }
 }
 
 /* Side Panel */

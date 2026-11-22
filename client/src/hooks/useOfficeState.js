@@ -15,7 +15,7 @@ export function useOfficeState() {
   const [approvals, setApprovals] = useState(INITIAL_APPROVALS);
   const [selectedAgentId, setSelectedAgentId] = useState('ceo');
   const [liveMessage, setLiveMessage] = useState('Selamat datang di Kantor MMA Production. Anda berperan sebagai CEO.');
-  const [viewMode, setViewMode] = useState('2d');
+  const [viewMode, setViewMode] = useState('3d');
   
   // Theme state
   const [theme, setTheme] = useState(() => {
