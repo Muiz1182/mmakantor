@@ -279,6 +279,17 @@ h1 {
   }
 }
 
+.webgl-alert {
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--signal) 12%, var(--surface));
+  border: 1px solid var(--signal);
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 13px;
+  margin-bottom: 12px;
+  line-height: 1.45;
+}
+
 /* Plan Head Controls */
 .planhead {
   display: flex;

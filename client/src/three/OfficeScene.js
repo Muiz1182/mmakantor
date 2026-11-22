@@ -81,7 +81,14 @@ function roundRect(ctx, px, py, w, h, r) {
 }
 
 export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getThemeTokens }) {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  } catch (err) {
+    console.warn('WebGLRenderer initialization failed:', err);
+    return null;
+  }
+
   renderer.setClearColor(0x000000, 0);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;

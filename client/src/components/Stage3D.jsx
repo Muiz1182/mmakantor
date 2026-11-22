@@ -31,23 +31,23 @@ export function Stage3D({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Check WebGL availability
+    let sceneInstance = null;
     try {
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      if (!gl) {
-        if (onWebGLFallback) onWebGLFallback();
-        return;
-      }
-    } catch (e) {
-      if (onWebGLFallback) onWebGLFallback();
-      return;
+      sceneInstance = initOfficeScene(canvas, {
+        onSelectAgent,
+        getAgentsData: () => agentsRef.current,
+        getThemeTokens
+      });
+    } catch (err) {
+      console.warn('Gagal menginisialisasi Three.js 3D:', err);
     }
 
-    const sceneInstance = initOfficeScene(canvas, {
-      onSelectAgent,
-      getAgentsData: () => agentsRef.current,
-      getThemeTokens
-    });
+    if (!sceneInstance) {
+      if (onWebGLFallback) {
+        setTimeout(() => onWebGLFallback(), 0);
+      }
+      return;
+    }
 
     sceneRef.current = sceneInstance;
 

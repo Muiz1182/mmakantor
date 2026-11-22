@@ -9,6 +9,8 @@ import { AgentPanel } from './components/AgentPanel';
 import './App.css';
 
 export function App() {
+  const [webglError, setWebglError] = React.useState(false);
+
   const {
     agents,
     agentsMap,
@@ -30,6 +32,11 @@ export function App() {
     toggleTheme
   } = useOfficeState();
 
+  const handleWebGLFallback = React.useCallback(() => {
+    setWebglError(true);
+    setViewMode('2d');
+  }, [setViewMode]);
+
   return (
     <div className="wrap">
       <Header
@@ -47,6 +54,12 @@ export function App() {
 
       <main className="app">
         <div id="planwrap">
+          {webglError && (
+            <div className="webgl-alert" role="alert">
+              <span>Akselerasi WebGL 3D tidak aktif pada browser Anda. Denah dialihkan otomatis ke Mode 2D yang dapat dioperasikan penuh.</span>
+            </div>
+          )}
+
           <ViewSwitch
             viewMode={viewMode}
             onChangeViewMode={setViewMode}
@@ -59,7 +72,7 @@ export function App() {
               selectedAgentId={selectedAgentId}
               onSelectAgent={selectAgent}
               theme={theme}
-              onWebGLFallback={() => setViewMode('2d')}
+              onWebGLFallback={handleWebGLFallback}
             />
           ) : (
             <Plan2D
