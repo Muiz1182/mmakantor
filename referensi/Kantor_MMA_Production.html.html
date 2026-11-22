@@ -1,0 +1,1207 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Kantor MMA Production</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: denah lantai dengan lima ruang (CEO, Strategi, Naskah, Studio, Publikasi); panel detail agent di kanan, turun ke bawah denah di layar sempit. */
+:root {
+  --bg: #ECEFF3;
+  --surface: #FFFFFF;
+  --ink: #13202C;
+  --ink2: #4B5967;
+  --line: #CAD2DA;
+  --wall: #5B6977;
+  --accent: #1D4ED8;
+  --accent-ink: #FFFFFF;
+  --ok: #1B8A57;
+  --signal: #C2410C;
+  --idle: #6B7885;
+  --z-ceo: #DDE2E8;
+  --z-plan: #D9E5F8;
+  --z-write: #F5E5C4;
+  --z-prod: #D3EADB;
+  --z-pub: #F2D8E1; --z-lunch: #F7E3C8; --z-ps: #DCD6F2; --z-pool: #CDE9F3; --z-dorm: #E3E0D6;
+  --av-bg-l: 86%;
+  --av-body-l: 44%;
+  --f-display: 'Space Grotesk', system-ui, sans-serif;
+  --f-body: 'Inter', system-ui, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E151C; --surface: #18222C; --ink: #E7EDF2; --ink2: #9DABB8; --line: #2C3A47; --wall: #51606E;
+    --accent: #7AA2FF; --accent-ink: #0E151C; --ok: #4CC38A; --signal: #FF8F57; --idle: #8795A2;
+    --z-ceo: #1F2933; --z-plan: #172945; --z-write: #3A2F17; --z-prod: #163226; --z-pub: #3B1E2A; --z-lunch: #3A2C1A; --z-ps: #262046; --z-pool: #143644; --z-dorm: #2B2A25;
+    --av-bg-l: 24%; --av-body-l: 62%;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E151C; --surface: #18222C; --ink: #E7EDF2; --ink2: #9DABB8; --line: #2C3A47; --wall: #51606E;
+  --accent: #7AA2FF; --accent-ink: #0E151C; --ok: #4CC38A; --signal: #FF8F57; --idle: #8795A2;
+  --z-ceo: #1F2933; --z-plan: #172945; --z-write: #3A2F17; --z-prod: #163226; --z-pub: #3B1E2A; --z-lunch: #3A2C1A; --z-ps: #262046; --z-pool: #143644; --z-dorm: #2B2A25;
+  --av-bg-l: 24%; --av-body-l: 62%;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 15px/1.5 var(--f-body); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.wrap {
+  max-width: 1200px; margin: 0 auto; padding-block: 24px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.top { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: flex-end; justify-content: space-between; margin-bottom: 18px; }
+h1 { font: 700 clamp(1.6rem, 4vw, 2.2rem)/1.1 var(--f-display); letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+.sub { color: var(--ink2); margin: 6px 0 0; max-width: 62ch; }
+.meta { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; min-width: 0; }
+.tally { display: flex; flex-wrap: wrap; gap: 4px 16px; font: 500 12px var(--f-mono); color: var(--ink2); justify-content: flex-end; }
+.tally b { color: var(--ink); font-weight: 500; }
+.live { min-height: 1.4em; font: 500 12px var(--f-mono); color: var(--ink2); text-align: right; }
+
+.label { font: 500 11px var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); margin: 0; }
+
+.flow { margin-bottom: 18px; }
+.flowlist { display: flex; gap: 6px; list-style: none; margin: 8px 0 0; padding: 0 0 8px; overflow-x: auto; }
+.flowlist li { display: flex; align-items: center; gap: 6px; flex: none; }
+.flowlist li:not(:last-child)::after { content: "›"; color: var(--ink2); }
+.step { display: flex; gap: 6px; align-items: center; white-space: nowrap; padding: 6px 12px; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; font: 500 12.5px var(--f-body); cursor: pointer; }
+.step .n { font: 500 11px var(--f-mono); color: var(--ink2); }
+.step:hover { border-color: var(--ink2); }
+.step.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.step.gate { border: 1px dashed var(--signal); }
+.step.gate.sel { border-style: solid; }
+
+.app { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (min-width: 980px) { .app { grid-template-columns: minmax(0, 1fr) 380px; } }
+
+.planhead { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; margin-bottom: 8px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font: 500 11px var(--f-mono); color: var(--ink2); }
+
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: transparent; padding: 4px 14px; font: 600 12px var(--f-body); color: var(--ink2); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.seg button:disabled { opacity: 0.4; cursor: not-allowed; }
+.stage { position: relative; height: clamp(400px, 66vh, 700px); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: radial-gradient(circle at 50% 35%, var(--surface), var(--bg)); }
+.stage canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+.stage-tools { position: absolute; top: 10px; right: 10px; }
+.stage-tools .ghost { background: var(--surface); padding: 5px 12px; font-size: 12px; }
+.hint { position: absolute; left: 12px; right: 12px; bottom: 8px; margin: 0; font: 500 11px/1.4 var(--f-mono); color: var(--ink2); pointer-events: none; }
+@media (max-width: 640px) { .stage { height: min(58vh, 440px); } }
+.plan {
+  display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; padding: 14px;
+  border: 1px solid var(--line); border-radius: 14px; background-color: var(--surface);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--line) 50%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--line) 50%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.room { grid-column: span 12; min-width: 0; display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 3px solid var(--wall); border-radius: 6px; background: var(--zone); }
+.r-ceo { --zone: var(--z-ceo); } .r-plan { --zone: var(--z-plan); } .r-write { --zone: var(--z-write); }
+.r-prod { --zone: var(--z-prod); } .r-pub { --zone: var(--z-pub); }
+.r-lunch { --zone: var(--z-lunch); } .r-ps { --zone: var(--z-ps); } .r-pool { --zone: var(--z-pool); } .r-dorm { --zone: var(--z-dorm); }
+.empty { margin: 0; color: var(--ink2); font-size: 12px; }
+.chip[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+@media (min-width: 640px) {
+  .r-ceo { grid-column: span 3; } .r-plan { grid-column: span 9; }
+  .r-write { grid-column: span 4; } .r-prod { grid-column: span 8; } .r-pub { grid-column: span 12; }
+  .r-lunch, .r-ps, .r-pool, .r-dorm { grid-column: span 3; }
+}
+.desks { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+
+.desk { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; padding: 14px 8px 10px; text-align: center; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+.desk::before { content: ""; position: absolute; top: 0; left: 50%; width: 34px; height: 5px; margin-left: -17px; border-radius: 0 0 3px 3px; background: var(--ink2); opacity: 0.55; }
+.desk:hover { border-color: var(--ink2); }
+.desk[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.desk .nm { font: 600 12.5px/1.2 var(--f-display); text-wrap: balance; }
+
+.av { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; flex: none; display: block; }
+.av .a1 { fill: hsl(var(--h) 45% var(--av-bg-l)); }
+.av .a2 { fill: hsl(var(--h) 50% var(--av-body-l)); }
+.av .a3 { fill: hsl(var(--h) 30% 78%); }
+.av.lg { width: 56px; height: 56px; }
+
+.pill { display: inline-flex; align-items: center; justify-content: center; gap: 5px; font: 500 10.5px/1.3 var(--f-mono); color: var(--ink2); text-align: left; }
+.dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--idle); display: inline-block; }
+.dot.working { background: var(--ok); animation: pulse 2.2s ease-out infinite; }
+.dot.waiting { background: transparent; border: 2px solid var(--idle); }
+.dot.attention { background: var(--signal); border-radius: 1px; transform: rotate(45deg); }
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 55%, transparent); }
+  100% { box-shadow: 0 0 0 6px transparent; }
+}
+
+.panel { min-width: 0; display: flex; flex-direction: column; gap: 18px; padding: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+@media (min-width: 980px) { .panel { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; } }
+.ph { display: flex; gap: 14px; align-items: center; }
+.ph h2 { font: 700 1.3rem/1.15 var(--f-display); margin: 0; }
+.ph h2:focus { outline: none; }
+.ph .who { display: flex; flex-direction: column; gap: 4px; min-width: 0; align-items: flex-start; }
+.desc { margin: 0; color: var(--ink2); }
+.panel section { display: flex; flex-direction: column; gap: 8px; }
+.panel p { margin: 0; }
+
+.tasks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.tasks label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+.tasks input { margin-top: 3px; accent-color: var(--accent); width: 16px; height: 16px; flex: none; }
+.tasks .done span { color: var(--ink2); text-decoration: line-through; }
+
+.out { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--bg); }
+.out ul { margin: 6px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chips .k { font-size: 12.5px; color: var(--ink2); margin-right: 2px; }
+.chip { padding: 3px 10px; border: 1px solid var(--line); background: var(--bg); border-radius: 999px; font: 500 12px var(--f-body); cursor: pointer; }
+.chip:hover { border-color: var(--ink2); }
+
+.limit { border: 1px dashed var(--signal); border-radius: 8px; padding: 10px 12px; font-size: 13.5px; }
+.limit .label { color: var(--signal); margin-bottom: 4px; }
+
+.primary, .ghost { border-radius: 8px; padding: 8px 14px; font: 600 13px var(--f-body); cursor: pointer; }
+.primary { background: var(--accent); color: var(--accent-ink); border: 1px solid var(--accent); }
+.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.ghost:hover { border-color: var(--ink2); }
+.assign { display: flex; gap: 8px; }
+.assign input { flex: 1; min-width: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); font: inherit; }
+@media (max-width: 640px) { .assign input { font-size: 16px; } }
+
+.apprs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.appr { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; padding: 12px; border: 1px solid var(--line); border-radius: 8px; }
+.appr strong { font: 600 14px/1.3 var(--f-display); }
+.appr p { color: var(--ink2); font-size: 13.5px; }
+.appr .ab { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
+.appr.ok, .appr.rev { background: var(--bg); }
+.appr .state { font: 500 12px var(--f-mono); color: var(--ok); }
+.appr.rev .state { color: var(--signal); }
+
+.back { display: none; align-self: flex-start; }
+@media (max-width: 979px) { .back { display: inline-block; } }
+
+.foot { margin: 20px 0 0; color: var(--ink2); font-size: 13px; max-width: 70ch; }
+
+@media (max-width: 640px) {
+  .meta, .tally, .live { align-items: flex-start; justify-content: flex-start; text-align: left; }
+}
+@media (prefers-reduced-motion: reduce) { .dot.working { animation: none; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Kantor MMA Production</h1>
+      <p class="sub">Satu kantor, tiga belas karyawan AI, Anda sebagai CEO. Satu tugas dipegang satu orang. Klik meja mana pun untuk melihat tugas dan hasilnya. Saat menunggu revisi atau project, karyawan pergi ke ruang lunch, PlayStation, kolam renang, atau asrama.</p>
+    </div>
+    <div class="meta">
+      <div class="tally" id="tally"></div>
+      <div class="live" id="live" aria-live="polite"></div>
+    </div>
+  </header>
+
+  <section class="flow" aria-label="Alur satu konten">
+    <p class="label">Alur satu konten, dari audit sampai tayang</p>
+    <ol class="flowlist" id="flow"></ol>
+  </section>
+
+  <div class="app">
+    <div id="planwrap">
+      <div class="planhead">
+        <p class="label">Denah kantor</p>
+        <div class="seg" role="group" aria-label="Mode tampilan denah">
+          <button type="button" data-mode="3d" aria-pressed="true">3D</button>
+          <button type="button" data-mode="2d" aria-pressed="false">2D</button>
+        </div>
+        <div class="legend" aria-label="Arti penanda status">
+          <span class="pill"><span class="dot working"></span>Bekerja</span>
+          <span class="pill"><span class="dot waiting"></span>Menunggu</span>
+          <span class="pill"><span class="dot attention"></span>Perlu perhatian</span>
+        </div>
+      </div>
+      <div class="stage" id="stage">
+        <canvas id="cv" role="img" aria-label="Kantor 3D. Untuk memilih agent tanpa mouse, pakai daftar alur di atas atau ganti ke tampilan 2D."></canvas>
+        <div class="stage-tools"><button class="ghost" id="reset-cam" type="button">Reset kamera</button></div>
+        <p class="hint">Seret untuk memutar · scroll atau cubit untuk zoom · seret dengan klik kanan atau dua jari untuk menggeser · tekan karakter untuk membuka tugasnya</p>
+      </div>
+      <div class="plan" id="plan" hidden></div>
+    </div>
+    <aside class="panel" id="panel" aria-label="Detail agent"></aside>
+  </div>
+
+  <p class="foot">Prototipe tampilan. Semua tugas, status, dan hasil di halaman ini adalah contoh. Agent belum tersambung ke AI atau ke akun Instagram, TikTok, dan YouTube.</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function () {
+  var esc = function (s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  };
+  var $ = function (s) { return document.querySelector(s); };
+
+  var ZONES = [
+    { id: 'ceo', label: 'Ruang CEO', cls: 'r-ceo' },
+    { id: 'plan', label: 'Ruang Strategi', cls: 'r-plan' },
+    { id: 'write', label: 'Meja Naskah', cls: 'r-write' },
+    { id: 'prod', label: 'Studio', cls: 'r-prod' },
+    { id: 'pub', label: 'Meja Publikasi', cls: 'r-pub' }
+  ];
+
+  var agents = [
+    { id: 'ceo', zone: 'ceo', nama: 'CEO', sub: 'Anda', hue: 215,
+      ringkas: 'Anda menentukan arah dan menyetujui semua yang akan tayang.',
+      now: 'Memeriksa antrean persetujuan dan menentukan fokus konten minggu depan.',
+      tugas: [ { t: 'Setujui item di antrean persetujuan', d: false }, { t: 'Pilih fokus konten minggu depan', d: false }, { t: 'Tentukan tema bulan Desember', d: true } ],
+      terima: ['naskah', 'caption', 'carousel', 'dm'], kirim: ['analis', 'perencana'] },
+    { id: 'auditor', zone: 'plan', nama: 'Auditor Profil', hue: 195, status: 'working', sLabel: 'Bekerja',
+      ringkas: 'Memeriksa bio, tampilan, dan konsistensi akun Instagram, TikTok, dan YouTube.',
+      now: 'Membandingkan gaya visual 12 postingan terakhir di tiga akun.',
+      tugas: [ { t: 'Cek bio dan tautan di Instagram, TikTok, YouTube', d: true }, { t: 'Bandingkan gaya visual 12 postingan terakhir', d: false }, { t: 'Susun daftar perbaikan profil', d: false } ],
+      out: { t: 'Temuan audit (contoh)', items: ['Bio Instagram belum menyebut apa yang ditawarkan dan untuk siapa.', 'Sampul highlight memakai tiga gaya yang berbeda.', 'Nama pengguna di TikTok dan YouTube tidak sama.'] },
+      terima: ['ceo'], kirim: ['analis'],
+      batas: 'Hanya membaca profil publik. Perubahan profil dilakukan Anda setelah hasil audit disetujui.' },
+    { id: 'analis', zone: 'plan', nama: 'Content Analyst', hue: 170, status: 'working', sLabel: 'Bekerja',
+      ringkas: 'Membaca performa konten lama untuk menemukan pola yang berhasil.',
+      now: 'Membaca retensi, simpan, dan bagikan dari 20 konten terakhir.',
+      tugas: [ { t: 'Ambil data 20 konten terakhir (retensi, simpan, bagikan)', d: true }, { t: 'Kelompokkan konten menurut format', d: false }, { t: 'Tulis tiga pola yang paling jelas', d: false } ],
+      out: { t: 'Pola performa (contoh)', items: ['Video di bawah 30 detik bertahan lebih lama daripada yang 60 detik.', 'Carousel berisi daftar paling sering disimpan.', 'Unggahan malam hari mendapat lebih banyak komentar.'] },
+      terima: ['auditor', 'ceo', 'upload', 'komentar', 'dm'], kirim: ['ide'],
+      batas: 'Angkanya baru nyata jika Anda mengekspor data statistik dari akun. Tanpa itu, agent hanya bisa menebak.' },
+    { id: 'ide', zone: 'plan', nama: 'Brainstorming', hue: 38, status: 'working', sLabel: 'Bekerja',
+      ringkas: 'Mengubah pola performa menjadi ide konten baru.',
+      now: 'Menulis 10 ide mentah dari tiga pola yang berhasil.',
+      tugas: [ { t: 'Baca pola dari Content Analyst', d: true }, { t: 'Tulis 10 ide mentah', d: false }, { t: 'Pilih 5 terbaik untuk Perencana Konten', d: false } ],
+      out: { t: 'Daftar ide (contoh)', items: ['Reels: satu kesalahan umum, satu perbaikan, 20 detik.', 'Carousel 7 slide: panduan langkah demi langkah.', 'YouTube: proses dari awal sampai jadi dalam satu hari.'] },
+      terima: ['analis'], kirim: ['perencana'] },
+    { id: 'perencana', zone: 'plan', nama: 'Perencana Konten', hue: 230, status: 'working', sLabel: 'Bekerja',
+      ringkas: 'Menyusun kalender: format, platform, dan jam tayang.',
+      now: 'Mengisi kalender dua minggu: 3 Reels, 2 carousel, 1 video panjang.',
+      tugas: [ { t: 'Tetapkan komposisi: 3 Reels, 2 carousel, 1 video panjang', d: true }, { t: 'Isi kalender dua minggu', d: false }, { t: 'Cocokkan jadwal dengan jam aktif penonton', d: false } ],
+      out: { t: 'Kalender pekan ini (contoh)', items: ['Senin · Carousel Instagram · 19.00', 'Kamis · Reels Instagram dan TikTok · 19.00', 'Sabtu · Video YouTube · 10.00'] },
+      terima: ['ide', 'ceo'], kirim: ['naskah', 'carousel'] },
+    { id: 'naskah', zone: 'write', nama: 'Penulis Naskah', hue: 28, status: 'attention', sLabel: 'Menunggu persetujuan',
+      ringkas: 'Menulis hook, naskah video, dan alur isi untuk tiap konten.',
+      now: 'Draf 2 naskah YouTube 8 menit menunggu persetujuan Anda.',
+      nowAfter: 'Menulis hook 3 detik untuk Reels berikutnya.',
+      tugas: [ { t: 'Tulis draf 1 naskah YouTube', d: true }, { t: 'Revisi menjadi draf 2', d: true }, { t: 'Tulis hook 3 detik untuk Reels', d: false } ],
+      out: { t: 'Pembuka naskah (contoh)', items: ['Hook: "Tiga hal ini bikin videomu ditinggal di detik ketiga."', 'Isi: satu masalah, satu contoh, satu langkah.'] },
+      terima: ['perencana'], kirim: ['kamera'] },
+    { id: 'kamera', zone: 'prod', nama: 'Videographer / Fotografer', hue: 155, status: 'attention', sLabel: 'Perlu orang lapangan',
+      ringkas: 'Menyiapkan shot list, storyboard, dan arahan pengambilan gambar.',
+      now: 'Shot list siap. Menunggu orang yang merekam di lapangan.',
+      tugas: [ { t: 'Susun shot list 12 adegan', d: true }, { t: 'Tentukan rasio: 9:16 untuk Reels, TikTok, Shorts; 16:9 untuk YouTube', d: true }, { t: 'Daftar properti dan lokasi', d: false }, { t: 'Rekam di lapangan (dikerjakan orang)', d: false } ],
+      out: { t: 'Shot list (contoh)', items: ['1. Pembuka lebar, 3 detik.', '2. Close-up tangan saat proses berjalan.', '3. Penutup menghadap kamera.'] },
+      terima: ['naskah'], kirim: ['editor'],
+      batas: 'AI tidak merekam di lapangan. Agent ini membuat shot list, storyboard, dan arahan. Yang mengambil gambar tetap orang.',
+      aksi: { label: 'Tandai footage sudah masuk', run: 'footage' } },
+    { id: 'editor', zone: 'prod', nama: 'Editor', hue: 120, status: 'waiting', sLabel: 'Menunggu footage',
+      ringkas: 'Menyusun potongan, teks layar, subtitle, dan ukuran ekspor per platform.',
+      now: 'Menunggu footage dari lapangan.',
+      tugas: [ { t: 'Terima shot list dan naskah', d: true }, { t: 'Potong dan susun footage', d: false }, { t: 'Tambah teks layar dan subtitle', d: false }, { t: 'Ekspor sesuai rasio tiap platform', d: false } ],
+      out: { t: 'Catatan edit (contoh)', items: ['Potong jeda di awal, taruh teks hook besar di detik 0 sampai 3.', 'Buat subtitle otomatis, lalu koreksi manual.', 'Ekspor 9:16 dengan ukuran 1080 × 1920.'] },
+      terima: ['kamera'], kirim: ['caption'],
+      batas: 'AI menyusun daftar potongan dan teks layar. Render akhir tetap lewat aplikasi edit video seperti CapCut.' },
+    { id: 'upload', zone: 'pub', nama: 'Upload Video', sub: 'Tim Pemegang Medsos', hue: 60, status: 'waiting', sLabel: 'Menunggu konten',
+      ringkas: 'Mengunggah video ke Instagram, TikTok, dan YouTube sesuai jadwal.',
+      now: 'Menunggu video dan caption yang sudah disetujui.',
+      nowAfter: 'Menyiapkan unggahan Kamis 19.00 di Instagram dan TikTok.',
+      tugas: [ { t: 'Siapkan judul dan thumbnail', d: false }, { t: 'Cek rasio dan durasi untuk tiap platform', d: false }, { t: 'Unggah sesuai jadwal', d: false }, { t: 'Catat tautan setelah tayang', d: false } ],
+      out: { t: 'Daftar unggahan (contoh)', items: ['Instagram Reels · Kamis 19.00', 'TikTok · Kamis 19.00', 'YouTube Shorts · Jumat 12.00'] },
+      terima: ['editor', 'caption', 'ceo'], kirim: ['story', 'analis'],
+      batas: 'Unggah otomatis butuh akses resmi dari tiap platform. Selama belum tersambung, agent menyiapkan file, judul, dan jadwal, lalu Anda yang menekan tayang.' },
+    { id: 'caption', zone: 'pub', nama: 'Caption', sub: 'Tim Pemegang Medsos', hue: 335, status: 'attention', sLabel: 'Menunggu persetujuan',
+      ringkas: 'Menulis caption, hashtag, dan ajakan bertindak untuk tiap platform.',
+      now: 'Caption Reels dan jadwal Kamis 19.00 menunggu persetujuan Anda.',
+      nowAfter: 'Menulis caption untuk konten berikutnya.',
+      unlock: 'upload',
+      tugas: [ { t: 'Tulis caption Reels', d: true }, { t: 'Pilih hashtag dan ajakan menyimpan', d: true }, { t: 'Sesuaikan versi TikTok dan YouTube', d: false } ],
+      out: { t: 'Caption Reels (contoh)', items: ['"Satu kebiasaan kecil yang diam-diam menghemat waktu kerja. Simpan untuk nanti."', 'Jadwal: Kamis 19.00 · Instagram Reels dan TikTok.'] },
+      terima: ['editor', 'perencana'], kirim: ['ceo', 'upload'] },
+    { id: 'carousel', zone: 'pub', nama: 'Carousel', sub: 'Tim Pemegang Medsos', hue: 355, status: 'working', sLabel: 'Bekerja',
+      ringkas: 'Merancang isi carousel slide demi slide, ukuran 1080 × 1350 (rasio 4:5).',
+      now: 'Menyusun 7 slide: satu langkah per slide.',
+      tugas: [ { t: 'Tentukan judul dan struktur 7 slide', d: true }, { t: 'Tulis teks tiap slide', d: false }, { t: 'Susun tata letak 1080 × 1350', d: false } ],
+      out: { t: 'Struktur carousel (contoh)', items: ['Slide 1: judul yang menjanjikan hasil.', 'Slide 2 sampai 6: satu langkah per slide.', 'Slide 7: ringkasan dan ajakan menyimpan.'] },
+      terima: ['ide', 'perencana'], kirim: ['ceo', 'upload'],
+      batas: 'AI menulis isi dan menata slide. Foto dan elemen visual memakai aset milik Anda.' },
+    { id: 'story', zone: 'pub', nama: 'Story', sub: 'Tim Pemegang Medsos', hue: 275, status: 'waiting', sLabel: 'Menunggu video tayang',
+      ringkas: 'Membuat story pendukung: cuplikan, ajakan menonton, dan polling.',
+      now: 'Menunggu video tayang untuk dibuatkan story.',
+      tugas: [ { t: 'Pilih cuplikan 10 detik dari video', d: false }, { t: 'Tambah stiker polling atau pertanyaan', d: false }, { t: 'Jadwalkan story setelah video tayang', d: false } ],
+      out: { t: 'Rancangan story (contoh)', items: ['Cuplikan 10 detik dengan teks "Baru tayang".', 'Stiker pertanyaan: "Mau bahas apa lagi?"'] },
+      terima: ['upload'], kirim: ['komentar'] },
+    { id: 'komentar', zone: 'pub', nama: 'Balas Komentar', sub: 'Tim Pemegang Medsos', hue: 85, status: 'working', sLabel: 'Bekerja',
+      ringkas: 'Memantau komentar dan menyiapkan draf balasan.',
+      now: 'Menyortir komentar baru: pertanyaan, pujian, dan keluhan.',
+      tugas: [ { t: 'Kumpulkan komentar baru', d: true }, { t: 'Kelompokkan: pertanyaan, pujian, keluhan', d: false }, { t: 'Tulis draf balasan', d: false } ],
+      out: { t: 'Draf balasan (contoh)', items: ['Pertanyaan: jawaban singkat, lalu arahkan ke video terkait.', 'Pujian: ucapan terima kasih yang tidak seragam.', 'Keluhan: minta maaf, lalu teruskan ke Anda.'] },
+      terima: ['upload', 'story'], kirim: ['dm', 'analis'],
+      batas: 'Semua balasan berupa draf sampai Anda setujui. Balasan otomatis yang berlebihan berisiko bagi akun.' },
+    { id: 'dm', zone: 'pub', nama: 'DM', sub: 'Tim Pemegang Medsos', hue: 245, status: 'attention', sLabel: 'Menunggu persetujuan',
+      ringkas: 'Menyiapkan draf balasan pesan langsung dari penonton dan calon klien.',
+      now: 'Draf balasan pertanyaan harga menunggu persetujuan Anda.',
+      nowAfter: 'Menyiapkan draf balasan untuk pesan berikutnya.',
+      tugas: [ { t: 'Tulis draf balasan pertanyaan harga', d: true }, { t: 'Susun jawaban untuk pertanyaan yang sering muncul', d: false }, { t: 'Tandai pesan yang harus Anda tangani sendiri', d: false } ],
+      out: { t: 'Draf DM (contoh)', items: ['"Terima kasih sudah bertanya. Daftar layanan lengkap ada di tautan profil kami."'] },
+      terima: ['komentar', 'ceo'], kirim: ['analis'],
+      batas: 'Semua balasan berupa draf sampai Anda setujui. Pesan yang sensitif diteruskan ke Anda.' }
+  ];
+  var byId = {};
+  agents.forEach(function (a) { byId[a.id] = a; });
+
+  var approvals = [
+    { id: 'a1', dari: 'naskah', judul: 'Naskah YouTube 8 menit, draf 2', ringkas: 'Pembuka 30 detik dan tiga bagian isi. Setelah disetujui, naskah masuk ke shot list.', state: 'pending' },
+    { id: 'a2', dari: 'caption', judul: 'Reels: caption dan jadwal Kamis 19.00', ringkas: 'Tayang di Instagram dan TikTok. Caption dua kalimat dengan ajakan menyimpan.', state: 'pending' },
+    { id: 'a3', dari: 'dm', judul: 'Draf balasan DM: pertanyaan harga', ringkas: 'Balasan sopan yang mengarahkan ke daftar layanan. Tidak terkirim sebelum Anda setuju.', state: 'pending' }
+  ];
+
+  var FLOW = ['auditor', 'analis', 'ide', 'perencana', 'naskah', 'kamera', 'editor', 'caption', 'carousel', 'GATE', 'upload', 'story', 'komentar', 'dm'];
+
+  var LR = [
+    { id: 'lunch', label: 'Ruang Lunch', cap: 5, cls: 'r-lunch' }, { id: 'ps', label: 'Ruang PlayStation', cap: 5, cls: 'r-ps' },
+    { id: 'pool', label: 'Kolam Renang', cap: 5, cls: 'r-pool' }, { id: 'dorm', label: 'Asrama', cap: 4, cls: 'r-dorm' }
+  ];
+  var LRB = {};
+  LR.forEach(function (r) { LRB[r.id] = r; });
+  function away(a) { return a.id !== 'ceo' && stat(a).k !== 'working'; }
+  function placeAgents() {
+    var occ = {}, list = agents.filter(function (a) { return a.id !== 'ceo'; });
+    LR.forEach(function (r) { occ[r.id] = []; });
+    list.forEach(function (a) {
+      if (!away(a)) { a.at = 'desk'; a.slot = 0; return; }
+      var keep = a.at && a.at !== 'desk' && (!a.rest || a.rest === 'auto' || a.rest === a.at);
+      if (keep) occ[a.at][a.slot] = a.id; else a.at = null;
+    });
+    list.forEach(function (a, i) {
+      if (!away(a) || a.at) return;
+      var order = a.rest && a.rest !== 'auto' ? [a.rest] : [];
+      for (var k = 0; k < 4; k++) order.push(LR[(i + k) % 4].id);
+      for (var j = 0; j < order.length && !a.at; j++) {
+        for (var sl = 0; sl < LRB[order[j]].cap; sl++) {
+          if (!occ[order[j]][sl]) { occ[order[j]][sl] = a.id; a.at = order[j]; a.slot = sl; break; }
+        }
+      }
+    });
+  }
+
+  var S3 = null;
+  var sel = 'ceo';
+  var live = '';
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function pending() { return approvals.filter(function (x) { return x.state === 'pending'; }); }
+  function stat(a) {
+    if (a.id === 'ceo') {
+      var n = pending().length;
+      return n ? { k: 'attention', l: n + ' menunggu Anda' } : { k: 'waiting', l: 'Antrean kosong' };
+    }
+    return { k: a.status, l: a.sLabel };
+  }
+  function pill(a) {
+    var s = stat(a);
+    return '<span class="pill"><span class="dot ' + s.k + '"></span>' + esc(s.l) + '</span>';
+  }
+  function av(h, big) {
+    return '<svg class="av' + (big ? ' lg' : '') + '" viewBox="0 0 48 48" aria-hidden="true" style="--h:' + h + '">' +
+      '<circle cx="24" cy="24" r="24" class="a1"/><ellipse cx="24" cy="47" rx="15" ry="12" class="a2"/><circle cx="24" cy="19" r="7.5" class="a3"/></svg>';
+  }
+
+  function renderTally() {
+    var ag = agents.filter(function (a) { return a.id !== 'ceo'; });
+    var c = function (k) { return ag.filter(function (a) { return a.status === k; }).length; };
+    $('#tally').innerHTML =
+      '<span><b>' + ag.length + '</b> agent</span><span><b>' + c('working') + '</b> bekerja</span>' +
+      '<span><b>' + c('waiting') + '</b> menunggu</span><span><b>' + c('attention') + '</b> perlu perhatian</span>' +
+      '<span><b>' + pending().length + '</b> persetujuan</span><span><b>' + ag.filter(function (a) { return a.at && a.at !== 'desk'; }).length + '</b> di ruang santai</span>';
+    $('#live').textContent = live;
+  }
+
+  function renderFlow() {
+    var n = 0;
+    $('#flow').innerHTML = FLOW.map(function (id) {
+      if (id === 'GATE') {
+        return '<li><button class="step gate' + (sel === 'ceo' ? ' sel' : '') + '" data-sel="ceo"><span class="n">CEO</span>Persetujuan</button></li>';
+      }
+      n += 1;
+      return '<li><button class="step' + (sel === id ? ' sel' : '') + '" data-sel="' + id + '"><span class="n">' + n + '</span>' + esc(byId[id].nama) + '</button></li>';
+    }).join('');
+  }
+
+  function renderPlan() {
+    $('#plan').innerHTML = ZONES.map(function (z) {
+      var desks = agents.filter(function (a) { return a.zone === z.id; }).map(function (a) {
+        return '<button class="desk" data-sel="' + a.id + '" aria-pressed="' + (sel === a.id) + '">' + av(a.hue) +
+          '<span class="nm">' + esc(a.id === 'ceo' ? 'Anda · CEO' : a.nama) + '</span>' + pill(a) + (a.at && a.at !== 'desk' ? '<span class="pill">→ ' + esc(LRB[a.at].label) + '</span>' : '') + '</button>';
+      }).join('');
+      return '<section class="room ' + z.cls + '" aria-label="' + esc(z.label) + '"><p class="label">' + esc(z.label) + '</p><div class="desks">' + desks + '</div></section>';
+    }).join('') + LR.map(function (r) {
+      var ppl = agents.filter(function (a) { return a.at === r.id; });
+      var d = ppl.length ? ppl.map(function (a) {
+        return '<button class="desk" data-sel="' + a.id + '" aria-pressed="' + (sel === a.id) + '">' + av(a.hue) + '<span class="nm">' + esc(a.nama) + '</span>' + pill(a) + '</button>';
+      }).join('') : '<p class="empty">Kosong</p>';
+      return '<section class="room ' + r.cls + '" aria-label="' + esc(r.label) + '"><p class="label">' + esc(r.label) + '</p><div class="desks">' + d + '</div></section>';
+    }).join('');
+  }
+
+  function chips(ids, key) {
+    return '<div class="chips"><span class="k">' + key + '</span>' + ids.map(function (i) {
+      return '<button class="chip" data-sel="' + i + '">' + esc(byId[i].nama) + '</button>';
+    }).join('') + '</div>';
+  }
+
+  function apprHTML() {
+    var items = approvals.map(function (it) {
+      var from = byId[it.dari];
+      var body = it.state === 'pending'
+        ? '<div class="ab"><button class="primary" data-appr="' + it.id + '" data-act="ok">Setujui</button><button class="ghost" data-appr="' + it.id + '" data-act="rev">Minta revisi</button></div>'
+        : '<span class="state">' + (it.state === 'ok' ? '✓ Disetujui' : 'Revisi diminta') + '</span>';
+      return '<li class="appr ' + it.state + '"><button class="chip" data-sel="' + from.id + '">' + esc(from.nama) + '</button><strong>' + esc(it.judul) + '</strong><p>' + esc(it.ringkas) + '</p>' + body + '</li>';
+    }).join('');
+    return '<section><p class="label">Antrean persetujuan · ' + pending().length + ' menunggu</p><ul class="apprs">' + items + '</ul></section>';
+  }
+
+  function renderPanel() {
+    var a = byId[sel];
+    var done = a.tugas.filter(function (t) { return t.d; }).length;
+    var h = '<button class="ghost back" data-back>↑ Kembali ke denah</button>';
+    h += '<div class="ph">' + av(a.hue, true) + '<div class="who"><h2 id="ph" tabindex="-1">' + esc(a.nama) + '</h2>' +
+      (a.sub ? '<span class="desc">' + esc(a.sub) + '</span>' : '') + pill(a) + '</div></div>';
+    h += '<p class="desc">' + esc(a.ringkas) + '</p>';
+    h += '<section><p class="label">Sedang dikerjakan</p><p>' + esc(a.now) + '</p>';
+    if (a.aksi && a.status === 'attention') {
+      h += '<div><button class="primary" data-aksi="' + a.aksi.run + '">' + esc(a.aksi.label) + '</button></div>';
+    }
+    h += '</section>';
+    if (a.id === 'ceo') h += apprHTML();
+    if (a.id !== 'ceo') {
+      h += '<section><p class="label">Lokasi</p><p>' + (a.at === 'desk' ? 'Di meja kerja. Saat menunggu revisi atau project, ia pergi ke tempat santai.' : 'Di ' + esc(LRB[a.at].label) + ', menunggu revisi atau project.') + '</p><div class="chips"><span class="k">Tempat santai:</span>' +
+        [['auto', 'Otomatis']].concat(LR.map(function (r) { return [r.id, r.label]; })).map(function (c) {
+          return '<button class="chip" data-rest="' + c[0] + '" aria-pressed="' + ((a.rest || 'auto') === c[0]) + '">' + esc(c[1]) + '</button>';
+        }).join('') + '</div></section>';
+    }
+    h += '<section><p class="label">Daftar tugas · ' + done + ' dari ' + a.tugas.length + ' selesai</p><ul class="tasks">' +
+      a.tugas.map(function (t, i) {
+        return '<li class="' + (t.d ? 'done' : '') + '"><label><input type="checkbox" data-task="' + i + '"' + (t.d ? ' checked' : '') + '><span>' + esc(t.t) + '</span></label></li>';
+      }).join('') + '</ul></section>';
+    if (a.out) {
+      h += '<section><p class="label">Hasil terbaru</p><div class="out"><strong>' + esc(a.out.t) + '</strong><ul>' +
+        a.out.items.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div></section>';
+    }
+    h += '<section><p class="label">Alur kerja</p>' + chips(a.terima, 'Menerima dari') + chips(a.kirim, 'Mengirim ke') + '</section>';
+    if (a.batas) h += '<div class="limit"><p class="label">Batas AI</p>' + esc(a.batas) + '</div>';
+    h += '<form class="assign" id="assign"><label class="label" for="assign-in" style="position:absolute;left:-9999px">Beri tugas</label>' +
+      '<input id="assign-in" type="text" autocomplete="off" placeholder="Beri tugas kepada ' + esc(a.nama) + '"><button class="primary" type="submit">Tambah</button></form>';
+    $('#panel').innerHTML = h;
+  }
+
+  function renderAll(focusSel) {
+    placeAgents();
+    renderTally(); renderFlow(); renderPlan(); renderPanel();
+    if (S3) S3.sync();
+    if (focusSel) {
+      var el = $(focusSel);
+      if (el) el.focus({ preventScroll: true });
+    }
+  }
+
+  function select(id, scroll, focusSel) {
+    if (!byId[id]) return;
+    sel = id;
+    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+    renderAll(focusSel);
+    if (S3) S3.focus(id);
+    if (scroll && !window.matchMedia('(min-width: 980px)').matches) {
+      $('#panel').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    }
+  }
+
+  function decide(id, act) {
+    var it = approvals.filter(function (x) { return x.id === id; })[0];
+    if (!it || it.state !== 'pending') return;
+    it.state = act === 'ok' ? 'ok' : 'rev';
+    var a = byId[it.dari];
+    var left = pending().filter(function (x) { return x.dari === a.id; }).length;
+    if (act === 'rev') {
+      a.status = 'working'; a.sLabel = 'Merevisi'; a.now = 'Merevisi: ' + it.judul + '.';
+      live = 'Revisi diminta untuk ' + it.judul + '.';
+    } else {
+      live = 'Disetujui: ' + it.judul + '.';
+      if (!left && a.status === 'attention') {
+        a.status = 'working'; a.sLabel = 'Bekerja'; a.now = a.nowAfter;
+        live += ' ' + a.nama + ' lanjut bekerja.';
+        var u = a.unlock && byId[a.unlock];
+        if (u && u.status === 'waiting') {
+          u.status = 'working'; u.sLabel = 'Bekerja'; u.now = u.nowAfter;
+          live += ' ' + u.nama + ' mulai bekerja.';
+        }
+      }
+    }
+    renderAll();
+    var next = $('[data-appr][data-act="ok"]');
+    var f = next || $('#ph');
+    if (f) f.focus({ preventScroll: true });
+  }
+
+  function aksi(run) {
+    if (run !== 'footage') return;
+    var k = byId.kamera, e = byId.editor;
+    k.status = 'waiting'; k.sLabel = 'Footage terkirim'; k.now = 'Footage sudah masuk dan diteruskan ke Editor.';
+    k.tugas.forEach(function (t) { if (/Rekam di lapangan/.test(t.t)) t.d = true; });
+    e.status = 'working'; e.sLabel = 'Bekerja'; e.now = 'Memotong footage yang baru masuk.';
+    live = 'Footage masuk. Editor mulai memotong.';
+    renderAll('#ph');
+  }
+
+  document.addEventListener('click', function (ev) {
+    var t = ev.target;
+    var b = t.closest && t.closest('[data-sel]');
+    if (b) {
+      var id = b.getAttribute('data-sel');
+      var f = b.classList.contains('desk') ? '.desk[data-sel="' + id + '"]'
+        : b.classList.contains('step') ? '.step[data-sel="' + id + '"]' : '#ph';
+      select(id, true, f);
+      return;
+    }
+    var rs = t.closest && t.closest('[data-rest]');
+    if (rs) { byId[sel].rest = rs.getAttribute('data-rest'); renderAll('[data-rest="' + byId[sel].rest + '"]'); return; }
+    var ap = t.closest && t.closest('[data-appr]');
+    if (ap) { decide(ap.getAttribute('data-appr'), ap.getAttribute('data-act')); return; }
+    var ak = t.closest && t.closest('[data-aksi]');
+    if (ak) { aksi(ak.getAttribute('data-aksi')); return; }
+    if (t.closest && t.closest('[data-back]')) {
+      $('#planwrap').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    }
+  });
+
+  document.addEventListener('change', function (ev) {
+    var t = ev.target;
+    if (t.matches && t.matches('[data-task]')) {
+      var i = +t.getAttribute('data-task');
+      byId[sel].tugas[i].d = t.checked;
+      renderPanel();
+      var el = $('[data-task="' + i + '"]');
+      if (el) el.focus({ preventScroll: true });
+    }
+  });
+
+  document.addEventListener('submit', function (ev) {
+    if (ev.target.id !== 'assign') return;
+    ev.preventDefault();
+    var inp = $('#assign-in');
+    var v = inp.value.trim();
+    if (!v) { inp.focus(); return; }
+    byId[sel].tugas.unshift({ t: v, d: false });
+    live = 'Tugas baru untuk ' + byId[sel].nama + ': ' + v;
+    renderAll('#assign-in');
+  });
+
+  window.addEventListener('hashchange', function () {
+    var id = location.hash.slice(1);
+    if (byId[id] && id !== sel) select(id, false);
+  });
+
+  var start = location.hash.slice(1);
+  if (byId[start]) sel = start;
+  renderAll();
+
+  /* ---------- Tampilan 3D ---------- */
+  var LAYOUT = {
+    ceo:   { cx: -10.5, cz: -7.5, w: 9,  d: 7 },
+    plan:  { cx: 5,     cz: -7.5, w: 20, d: 7 },
+    write: { cx: -10.5, cz: 0,    w: 9,  d: 6 },
+    prod:  { cx: 5,     cz: 0,    w: 20, d: 6 },
+    pub:   { cx: 0,     cz: 7.5,  w: 30, d: 7 }
+  };
+  var LBL = { ceo: 'Anda · CEO', kamera: 'Videographer' };
+
+  function cssv(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+  function setMode(m) {
+    var is3 = m === '3d';
+    $('#stage').hidden = !is3;
+    $('#plan').hidden = is3;
+    document.querySelectorAll('[data-mode]').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-mode') === m));
+    });
+  }
+
+  document.addEventListener('click', function (ev) {
+    var t = ev.target;
+    var b = t.closest && t.closest('[data-mode]');
+    if (b && !b.disabled) setMode(b.getAttribute('data-mode'));
+    if (t.closest && t.closest('#reset-cam') && S3) S3.reset();
+  });
+
+  function init3D() {
+    var stage = $('#stage'), cv = $('#cv');
+    function fail(msg) {
+      setMode('2d');
+      var b3 = document.querySelector('[data-mode="3d"]');
+      if (b3) b3.disabled = true;
+      live = msg + ' Memakai tampilan 2D.';
+      $('#live').textContent = live;
+    }
+    if (typeof THREE === 'undefined' || !THREE.OrbitControls) { fail('Tampilan 3D tidak bisa dimuat.'); return; }
+    var renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
+    } catch (err) { fail('Perangkat ini tidak mendukung WebGL.'); return; }
+    renderer.setClearColor(0x000000, 0);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(38, 1, 0.5, 300);
+    var controls = new THREE.OrbitControls(camera, cv);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.screenSpacePanning = false;
+    controls.minPolarAngle = 0.2;
+    controls.maxPolarAngle = 1.35;
+    controls.minDistance = 8;
+    controls.maxDistance = 85;
+
+    var hemi = new THREE.HemisphereLight(0xffffff, 0xaab4be, 0.55);
+    scene.add(hemi);
+    var sun = new THREE.DirectionalLight(0xffffff, 0.5);
+    sun.position.set(-14, 34, 22);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.bias = -0.0006;
+    var sc = sun.shadow.camera;
+    sc.left = -26; sc.right = 26; sc.top = 26; sc.bottom = -26; sc.near = 5; sc.far = 90;
+    sc.updateProjectionMatrix();
+    scene.add(sun);
+    scene.add(sun.target);
+    sun.target.position.set(0, 0, 4);
+
+    function lam(c) { return new THREE.MeshLambertMaterial(c === undefined ? {} : { color: c }); }
+    var M = {
+      slab: lam(), wood: lam(), chair: lam(), dark: lam(0x1b2630), key: lam(0x2b3640), pants: lam(0x2f3b48),
+      pot: lam(0x8a5a3c), leaf: lam(0x3e9a5e), board: lam(0xf4f6f8), metal: lam(0x8a96a3), light: new THREE.MeshBasicMaterial({ color: 0xfff6d8 }),
+      wall: new THREE.MeshLambertMaterial({ transparent: true, opacity: 0.7 })
+    };
+    var ZM = {};
+    ZONES.forEach(function (z) { ZM[z.id] = lam(); });
+
+    function mk(geo, mat, x, y, z, parent, noShadow) {
+      var m = new THREE.Mesh(geo, mat);
+      m.position.set(x, y, z);
+      if (!noShadow) m.castShadow = true;
+      m.receiveShadow = true;
+      (parent || scene).add(m);
+      return m;
+    }
+    function bxg(w, h, d) { return new THREE.BoxGeometry(w, h, d); }
+    function rr(x, px, py, w, h, r) {
+      x.beginPath();
+      x.moveTo(px + r, py); x.lineTo(px + w - r, py); x.quadraticCurveTo(px + w, py, px + w, py + r);
+      x.lineTo(px + w, py + h - r); x.quadraticCurveTo(px + w, py + h, px + w - r, py + h);
+      x.lineTo(px + r, py + h); x.quadraticCurveTo(px, py + h, px, py + h - r);
+      x.lineTo(px, py + r); x.quadraticCurveTo(px, py, px + r, py);
+      x.closePath();
+    }
+
+    var T = {};
+    var roomLabels = [];
+    var nodes = {};
+    var pickables = [];
+    var hoverId = null;
+
+    /* lantai dasar */
+    mk(bxg(34, 0.4, 34), M.slab, 0, -0.2, 5, scene, true);
+
+    /* ruang */
+    ZONES.forEach(function (z) {
+      var L = LAYOUT[z.id];
+      mk(bxg(L.w, 0.1, L.d), ZM[z.id], L.cx, 0.05, L.cz, scene, true);
+      mk(bxg(L.w, 1.8, 0.25), M.wall, L.cx, 0.9, L.cz - L.d / 2 + 0.125, scene, true);
+      mk(bxg(0.25, 1.8, L.d), M.wall, L.cx - L.w / 2 + 0.125, 0.9, L.cz, scene, true);
+      mk(bxg(0.25, 1.8, L.d), M.wall, L.cx + L.w / 2 - 0.125, 0.9, L.cz, scene, true);
+      var c = document.createElement('canvas');
+      c.width = 512; c.height = 64;
+      var tex = new THREE.CanvasTexture(c);
+      var pl = new THREE.Mesh(new THREE.PlaneGeometry(6, 0.75), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }));
+      pl.rotation.x = -Math.PI / 2;
+      pl.position.set(L.cx - L.w / 2 + 3.6, 0.12, L.cz + L.d / 2 - 0.6);
+      scene.add(pl);
+      roomLabels.push({ canvas: c, tex: tex, text: z.label });
+    });
+
+    /* properti */
+    function plant(x, z) {
+      mk(new THREE.CylinderGeometry(0.35, 0.28, 0.5, 10), M.pot, x, 0.35, z);
+      mk(new THREE.SphereGeometry(0.5, 10, 8), M.leaf, x, 1.05, z);
+      mk(new THREE.SphereGeometry(0.38, 10, 8), M.leaf, x + 0.18, 1.4, z + 0.05);
+      mk(new THREE.SphereGeometry(0.34, 10, 8), M.leaf, x - 0.15, 1.35, z - 0.1);
+    }
+    plant(-14, -10); plant(14.2, -10.2); plant(-14, 2.2); plant(14.2, 2.2); plant(14.3, 10.2); plant(-14.3, 10.2);
+
+    mk(bxg(8, 2.4, 0.1), M.board, 5, 2.4, -10.6);
+    mk(bxg(0.1, 1.2, 0.1), M.metal, 1.2, 0.6, -10.6);
+    mk(bxg(0.1, 1.2, 0.1), M.metal, 8.8, 0.6, -10.6);
+    var noteColors = [0xffd166, 0xef8354, 0x8ecae6, 0xb7e4c7];
+    for (var r = 0; r < 3; r++) {
+      for (var cI = 0; cI < 6; cI++) {
+        if ((r * 6 + cI) % 7 === 3) continue;
+        var note = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.8), new THREE.MeshBasicMaterial({ color: noteColors[(r + cI) % 4] }));
+        note.position.set(5 + (cI - 2.5) * 1.15, 3.0 - r * 0.7, -10.54);
+        scene.add(note);
+      }
+    }
+
+    function tripod(x, z) {
+      [0, 2.094, 4.188].forEach(function (ang) {
+        var dv = new THREE.Vector3(Math.sin(ang) * 0.7, -1.7, Math.cos(ang) * 0.7);
+        var leg = mk(new THREE.CylinderGeometry(0.04, 0.04, dv.length(), 6), M.metal, x + dv.x / 2, 1.7 + dv.y / 2, z + dv.z / 2);
+        leg.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dv.clone().normalize().negate());
+      });
+      mk(bxg(0.8, 0.5, 0.55), M.dark, x, 1.95, z);
+      var lens = mk(new THREE.CylinderGeometry(0.18, 0.2, 0.4, 12), M.dark, x, 1.95, z + 0.45);
+      lens.rotation.x = Math.PI / 2;
+      mk(bxg(1.4, 1.6, 0.15), M.light, x + 2.4, 1.6, z - 0.4, scene, true);
+      mk(bxg(0.08, 0.8, 0.08), M.metal, x + 2.4, 0.4, z - 0.4);
+    }
+    tripod(5, 0.2);
+
+    /* ruang santai: lunch, playstation, kolam renang, asrama */
+    var RC = { lunch: { cx: -11.75, w: 7.5, dx: -11.75 }, ps: { cx: -4, w: 7, dx: -5.9 }, pool: { cx: 4.25, w: 8.5, dx: 1.2 }, dorm: { cx: 12.5, w: 7, dx: 10.6 } };
+    var ROOM3 = {
+      lunch: { dx: -11.75, entry: [[-11.75, 12.8], [-11.75, 13.4]], spots: [
+        [-13.2, 15.1, 's', -13.2, 17, -0.05], [-11.75, 15.1, 's', -11.75, 17, -0.05], [-10.3, 15.1, 's', -10.3, 17, -0.05],
+        [-14.9, 16.6, 's', -12, 16.6, -0.05, [[-14.9, 14]]], [-8.6, 16.6, 's', -11.5, 16.6, -0.05, [[-8.6, 14]]]] },
+      ps: { dx: -5.9, entry: [[-5.9, 12.8], [-5.9, 16]], spots: [
+        [-4.9, 17.9, 's', -4.9, 12, -0.12], [-3.6, 17.9, 's', -3.6, 12, -0.12], [-2.3, 17.9, 's', -2.3, 12, -0.12],
+        [-6.4, 17.4, 's', -4, 12, -0.3], [-1.2, 16.4, 's', -3.5, 12, -0.3]] },
+      pool: { dx: 1.2, entry: [[1.2, 12.8], [1.2, 13.6], [2.1, 16.4], [3.4, 16.4]], spots: [
+        [4, 15.5, 'w', 4, 14, -0.5], [5.5, 16.4, 'w', 5.5, 14, -0.5], [7, 15.5, 'w', 7, 14, -0.5], [4.5, 17.4, 'w', 4.5, 14, -0.5], [6.5, 17.4, 'w', 6.5, 14, -0.5]] },
+      dorm: { dx: 10.6, entry: [[10.6, 12.8], [10.6, 13.9]], spots: [10.4, 11.8, 13.2, 14.6].map(function (x) { return [x, 14.9, 'l', x, 13.9, 0.9]; }) }
+    };
+    function B(w, h, d, col, x, y, z) { return mk(bxg(w, h, d), lam(col), x, y, z); }
+    LR.forEach(function (r) {
+      var c = RC[r.id], x0 = c.cx - c.w / 2, x1 = c.cx + c.w / 2;
+      ZM[r.id] = lam();
+      mk(bxg(c.w, 0.1, 7), ZM[r.id], c.cx, 0.05, 15.5, scene, true);
+      mk(bxg(0.25, 1.8, 7), M.wall, x0 + 0.125, 0.9, 15.5, scene, true);
+      mk(bxg(0.25, 1.8, 7), M.wall, x1 - 0.125, 0.9, 15.5, scene, true);
+      [[x0, c.dx - 1.2], [c.dx + 1.2, x1]].forEach(function (q) {
+        if (q[1] - q[0] > 0.1) mk(bxg(q[1] - q[0], 1.8, 0.25), M.wall, (q[0] + q[1]) / 2, 0.9, 12.125, scene, true);
+      });
+      var cn = document.createElement('canvas'); cn.width = 512; cn.height = 64;
+      var tx = new THREE.CanvasTexture(cn);
+      var pl2 = new THREE.Mesh(new THREE.PlaneGeometry(6, 0.75), new THREE.MeshBasicMaterial({ map: tx, transparent: true, depthWrite: false }));
+      pl2.rotation.x = -Math.PI / 2; pl2.position.set(x0 + 3.4, 0.12, 19.6);
+      scene.add(pl2);
+      roomLabels.push({ canvas: cn, tex: tx, text: r.label });
+    });
+    /* lunch */
+    B(2.2, 1, 0.7, 0xb08968, -14.2, 0.5, 12.7); B(0.5, 0.4, 0.4, 0x222a30, -14.6, 1.2, 12.7); B(1.6, 2, 0.8, 0xe5e9ee, -9.2, 1, 12.8);
+    mk(bxg(4.6, 0.08, 1.4), M.wood, -11.75, 1.05, 16.6);
+    B(0.2, 1.05, 1, 0x3a444e, -13.4, 0.5, 16.6); B(0.2, 1.05, 1, 0x3a444e, -10.1, 0.5, 16.6);
+    [-13.2, -11.75, -10.3].forEach(function (x) { B(0.5, 0.06, 0.5, 0xffffff, x, 1.12, 16.1); });
+    ROOM3.lunch.spots.forEach(function (q) { mk(new THREE.CylinderGeometry(0.32, 0.32, 0.62, 10), M.chair, q[0], 0.31, q[1]); });
+    /* playstation */
+    B(4.4, 0.5, 1.1, 0x4a5a88, -3.6, 0.25, 18); B(4.4, 1, 0.25, 0x3c4a73, -3.6, 0.75, 18.6);
+    B(2.2, 0.9, 0.9, 0x1f2430, -2.8, 0.45, 12.6); B(3, 1.7, 0.12, 0x0b0e14, -2.8, 2.3, 12.3); B(0.5, 0.12, 0.4, 0xf2f2f2, -2.8, 0.96, 12.6);
+    mk(new THREE.PlaneGeometry(2.8, 1.5), new THREE.MeshBasicMaterial({ color: 0x3a7bff }), -2.8, 2.3, 12.37, scene, true);
+    B(2.2, 0.5, 0.9, 0x6b4f3a, -3.6, 0.25, 15.15);
+    mk(new THREE.CylinderGeometry(0.5, 0.5, 0.55, 12), lam(0xe05d5d), -6.4, 0.27, 17.4); mk(new THREE.CylinderGeometry(0.5, 0.5, 0.55, 12), lam(0x5db0e0), -1.2, 0.27, 16.4);
+    /* kolam renang */
+    mk(bxg(5, 0.8, 3.6), new THREE.MeshLambertMaterial({ color: 0x4fb8e8, transparent: true, opacity: 0.6 }), 5.5, 0.4, 16.4, scene, true);
+    [[5.5, 14.5, 5.4, 0.2], [5.5, 18.3, 5.4, 0.2], [8.1, 16.4, 0.2, 3.8], [3, 14.95, 0.2, 0.9], [3, 17.85, 0.2, 0.9]].forEach(function (q) { B(q[2], 0.95, q[3], 0xd5dbe0, q[0], 0.475, q[1]); });
+    mk(new THREE.CylinderGeometry(0.05, 0.05, 2.6, 6), M.metal, 7.6, 1.3, 13.3); mk(new THREE.ConeGeometry(1.2, 0.5, 12), lam(0xe56b6f), 7.6, 2.7, 13.3);
+    B(1.8, 0.3, 0.8, 0xf3e9d2, 6.6, 0.2, 13.3); B(1.8, 0.3, 0.8, 0xf3e9d2, 4.6, 0.2, 13.3);
+    var ring = mk(new THREE.TorusGeometry(0.35, 0.12, 8, 16), lam(0xffd166), 7.3, 0.85, 16.4, scene, true); ring.rotation.x = Math.PI / 2;
+    /* asrama */
+    ROOM3.dorm.spots.forEach(function (q) { var x = q[0]; B(1.2, 0.3, 2.4, 0xcfd8e3, x, 0.4, 15.9); B(1.2, 1.1, 0.12, 0x7a5c3e, x, 0.65, 17.2); B(0.8, 0.14, 0.5, 0xffffff, x, 0.62, 16.85); });
+    B(5.6, 2.2, 0.7, 0x8a6a4a, 12.5, 1.1, 18.5);
+
+    /* tekstur layar */
+    var SCR = {};
+    function screenTex(kind) {
+      if (SCR[kind]) return SCR[kind];
+      var c = document.createElement('canvas');
+      c.width = 128; c.height = 80;
+      var x = c.getContext('2d');
+      var bg = { working: '#12342a', waiting: '#1c2833', attention: '#3a1d10' }[kind];
+      var fg = { working: '#5fd3a0', waiting: '#6b7885', attention: '#ff9a66' }[kind];
+      x.fillStyle = bg; x.fillRect(0, 0, 128, 80);
+      x.fillStyle = fg;
+      [[10, 12, 70], [10, 24, 98], [10, 36, 54], [10, 48, 86], [10, 60, 40]].forEach(function (q) { x.fillRect(q[0], q[1], q[2], 6); });
+      SCR[kind] = new THREE.CanvasTexture(c);
+      return SCR[kind];
+    }
+
+    function buildAgent(a, x, z, idx) {
+      var g = new THREE.Group();
+      g.position.set(x, 0, z);
+      scene.add(g);
+      var o = { id: a.id, x: x, z: z, ph: idx * 1.7 + 0.5, kind: null, text: null };
+      function reg(m) { m.userData.agentId = a.id; pickables.push(m); return m; }
+      function bx(w, h, d, mat, px, py, pz) { return reg(mk(bxg(w, h, d), mat, px, py, pz, g)); }
+
+      bx(2.8, 0.12, 1.4, M.wood, 0, 1.0, 0);
+      bx(0.12, 0.94, 1.3, M.wood, -1.3, 0.47, 0);
+      bx(0.12, 0.94, 1.3, M.wood, 1.3, 0.47, 0);
+      bx(2.5, 0.6, 0.08, M.wood, 0, 0.7, -0.6);
+      bx(0.12, 0.3, 0.12, M.dark, 0, 1.21, -0.25);
+      bx(1.3, 0.8, 0.08, M.dark, 0, 1.76, -0.25);
+      o.scr = new THREE.Mesh(new THREE.PlaneGeometry(1.18, 0.68), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+      o.scr.position.set(0, 1.76, -0.205);
+      g.add(o.scr); reg(o.scr);
+      bx(0.9, 0.04, 0.32, M.key, 0, 1.08, 0.3);
+
+      bx(1.0, 0.14, 1.0, M.chair, 0, 0.62, 1.45);
+      bx(1.0, 1.0, 0.14, M.chair, 0, 1.2, 2.0);
+      reg(mk(new THREE.CylinderGeometry(0.09, 0.09, 0.55, 8), M.dark, 0, 0.3, 1.45, g));
+      reg(mk(new THREE.CylinderGeometry(0.5, 0.5, 0.06, 12), M.dark, 0, 0.05, 1.45, g));
+
+      var hue = a.hue / 360;
+      var shirt = lam(new THREE.Color().setHSL(hue, 0.5, 0.45));
+      var skin = lam(new THREE.Color().setHSL(hue, 0.3, 0.78));
+      var hair = lam(new THREE.Color().setHSL(hue, 0.3, 0.22));
+      var pg = new THREE.Group();
+      pg.rotation.order = 'YXZ';
+      pg.position.set(x, 0, z + 1.4);
+      scene.add(pg);
+      o.pg = pg; o.sx = x; o.sz = z + 1.4; o.x = o.sx; o.z = o.sz; o.y = 0; o.rx = 0; o.ry = 0;
+      function pb(w, h, d, mat, px, py, pz, par) { return reg(mk(bxg(w, h, d), mat, px, py, pz, par || pg)); }
+      reg(mk(new THREE.CylinderGeometry(0.34, 0.38, 0.95, 12), shirt, 0, 1.3, 0, pg));
+      o.seat = new THREE.Group(); pg.add(o.seat);
+      pb(0.55, 0.22, 0.95, M.pants, 0, 0.88, -0.45, o.seat);
+      pb(0.4, 0.75, 0.22, M.pants, 0, 0.45, -0.9, o.seat);
+      o.stand = new THREE.Group(); o.stand.visible = false; pg.add(o.stand);
+      o.legs = [-0.14, 0.14].map(function (sx) {
+        var p = new THREE.Group(); p.position.set(sx, 0.82, 0); o.stand.add(p);
+        pb(0.22, 0.82, 0.24, M.pants, 0, -0.41, 0, p); return p;
+      });
+      o.headG = new THREE.Group(); o.headG.position.set(0, 2.05, 0); pg.add(o.headG);
+      reg(mk(new THREE.SphereGeometry(0.3, 16, 12), skin, 0, 0, 0, o.headG));
+      reg(mk(new THREE.SphereGeometry(0.33, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), hair, 0, 0.03, 0.04, o.headG));
+      function arm(sx) {
+        var p = new THREE.Group(); p.position.set(sx, 1.6, -0.15); pg.add(p);
+        reg(mk(bxg(0.17, 0.17, 0.8), shirt, 0, 0, -0.4, p));
+        reg(mk(new THREE.SphereGeometry(0.11, 8, 6), skin, 0, 0, -0.82, p));
+        return p;
+      }
+      o.armL = arm(-0.45);
+      o.armR = arm(0.45);
+      o.tag = new THREE.Group(); scene.add(o.tag);
+      o.mk = new THREE.Group(); o.mk.position.set(0, 3.2, 0); o.tag.add(o.mk);
+      o.mOk = reg(new THREE.Mesh(new THREE.SphereGeometry(0.22, 14, 10), new THREE.MeshBasicMaterial()));
+      o.mIdle = reg(new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.06, 8, 20), new THREE.MeshBasicMaterial()));
+      o.mSig = reg(new THREE.Mesh(new THREE.OctahedronGeometry(0.3), new THREE.MeshBasicMaterial()));
+      o.mk.add(o.mOk); o.mk.add(o.mIdle); o.mk.add(o.mSig);
+      o.lc = document.createElement('canvas');
+      o.lc.width = 400; o.lc.height = 88;
+      o.lt = new THREE.CanvasTexture(o.lc);
+      var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: o.lt, transparent: true, depthTest: false }));
+      sp.position.set(0, 4.1, 0);
+      sp.scale.set(5, 1.1, 1);
+      sp.renderOrder = 10;
+      o.tag.add(sp); reg(sp);
+      o.ring = new THREE.Mesh(new THREE.RingGeometry(2.0, 2.3, 48), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.95, side: THREE.DoubleSide, depthWrite: false }));
+      o.ring.rotation.x = -Math.PI / 2; o.ring.position.set(0, 0.14, 0); o.ring.visible = false;
+      o.tag.add(o.ring);
+      o.hov = new THREE.Mesh(new THREE.RingGeometry(2.0, 2.15, 48), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false }));
+      o.hov.rotation.x = -Math.PI / 2; o.hov.position.set(0, 0.14, 0); o.hov.visible = false;
+      o.tag.add(o.hov);
+      return o;
+    }
+
+    ZONES.forEach(function (z) {
+      var L = LAYOUT[z.id];
+      var list = agents.filter(function (a) { return a.zone === z.id; });
+      list.forEach(function (a, i) {
+        nodes[a.id] = buildAgent(a, L.cx - L.w / 2 + (L.w / list.length) * (i + 0.5), L.cz - 0.8, i);
+        nodes[a.id].zone = z.id; nodes[a.id].lane = L.cz + L.d / 2 + 0.5;
+      });
+    });
+
+    function drawLabel(o, a) {
+      var c = o.lc, x = c.getContext('2d'), W = c.width, H = c.height;
+      x.clearRect(0, 0, W, H);
+      rr(x, 4, 4, W - 8, H - 8, 24);
+      x.fillStyle = T.surface; x.fill();
+      x.lineWidth = 4;
+      x.strokeStyle = o.kind === 'attention' ? T.signal : T.line;
+      x.stroke();
+      var col = o.kind === 'working' ? T.ok : o.kind === 'attention' ? T.signal : T.idle;
+      x.fillStyle = col; x.strokeStyle = col;
+      if (o.kind === 'working') {
+        x.beginPath(); x.arc(40, H / 2, 12, 0, Math.PI * 2); x.fill();
+      } else if (o.kind === 'waiting') {
+        x.lineWidth = 6; x.beginPath(); x.arc(40, H / 2, 10, 0, Math.PI * 2); x.stroke();
+      } else {
+        x.beginPath(); x.moveTo(40, H / 2 - 14); x.lineTo(54, H / 2); x.lineTo(40, H / 2 + 14); x.lineTo(26, H / 2); x.closePath(); x.fill();
+      }
+      var title = LBL[a.id] || a.nama;
+      var fs = 38;
+      x.font = '700 ' + fs + 'px "Space Grotesk", Inter, system-ui, sans-serif';
+      while (x.measureText(title).width > W - 96 && fs > 20) {
+        fs -= 2;
+        x.font = '700 ' + fs + 'px "Space Grotesk", Inter, system-ui, sans-serif';
+      }
+      x.fillStyle = T.ink;
+      x.textBaseline = 'middle';
+      x.fillText(title, 70, H / 2 + 2);
+      o.lt.needsUpdate = true;
+    }
+
+    function paint(o, a) {
+      var s = stat(a);
+      if (o.kind === s.k && o.text === s.l) return;
+      o.kind = s.k; o.text = s.l;
+      o.scr.material.map = screenTex(s.k);
+      o.scr.material.needsUpdate = true;
+      o.mOk.visible = s.k === 'working';
+      o.mIdle.visible = s.k === 'waiting';
+      o.mSig.visible = s.k === 'attention';
+      drawLabel(o, a);
+    }
+
+    function drawRoomLabel(rl) {
+      var x = rl.canvas.getContext('2d');
+      x.clearRect(0, 0, 512, 64);
+      x.font = '500 30px "IBM Plex Mono", ui-monospace, monospace';
+      x.fillStyle = T.ink;
+      x.textBaseline = 'middle';
+      x.fillText(rl.text.toUpperCase(), 6, 32);
+      rl.tex.needsUpdate = true;
+    }
+
+    function applyTheme() {
+      ['bg', 'surface', 'ink', 'ink2', 'line', 'wall', 'accent', 'ok', 'signal', 'idle'].forEach(function (k) { T[k] = cssv('--' + k); });
+      var dark = new THREE.Color(T.bg).getHSL({}).l < 0.4;
+      M.slab.color.set(T.surface);
+      ZONES.concat(LR).forEach(function (z) { ZM[z.id].color.set(cssv('--z-' + z.id)); });
+      M.wall.color.set(T.wall);
+      M.wall.opacity = dark ? 0.55 : 0.7;
+      M.wood.color.set(dark ? '#6f5e49' : '#c8b494');
+      M.chair.color.set(dark ? '#3a4652' : '#55636f');
+      M.dark.color.set(dark ? '#0b1117' : '#1b2630');
+      hemi.color.set(dark ? '#9fb4d0' : '#ffffff');
+      hemi.groundColor.set(dark ? '#2a3440' : '#aab4be');
+      hemi.intensity = dark ? 0.5 : 0.55;
+      sun.intensity = dark ? 0.42 : 0.5;
+      agents.forEach(function (a) {
+        var o = nodes[a.id];
+        if (!o) return;
+        o.mOk.material.color.set(T.ok);
+        o.mIdle.material.color.set(T.idle);
+        o.mSig.material.color.set(T.signal);
+        o.ring.material.color.set(T.accent);
+        o.hov.material.color.set(T.ink2);
+        if (o.kind) drawLabel(o, a);
+      });
+      roomLabels.forEach(drawRoomLabel);
+    }
+
+    var WATER = [3, 8, 14.6, 18.2];
+    function wrap(a) { while (a > Math.PI) a -= 2 * Math.PI; while (a < -Math.PI) a += 2 * Math.PI; return a; }
+    function snap(o, at, sl, inst) {
+      var q = at === 'desk' ? null : ROOM3[at].spots[sl];
+      o.at = at; o.sl = sl; o.mode = q ? 'rest' : 'seat'; o.pose = q ? q[2] : 'd';
+      o.fy = q ? Math.atan2(-(q[3] - q[0]), -(q[4] - q[1])) : 0; o.ty = q ? q[5] : 0;
+      if (inst) { o.x = q ? q[0] : o.sx; o.z = q ? q[1] : o.sz; o.ry = o.fy; o.y = o.ty; o.rx = o.pose === 'l' ? 1.5708 : 0; }
+    }
+    function chain(o, at, sl) {
+      if (at === 'desk') {
+        var sx = o.sx + 1, c = [[o.sx, o.sz], [sx, o.sz], [sx, o.lane]];
+        if (o.zone !== 'pub') { var ax = o.sx < 0 ? -15.5 : 15.5; c.push([ax, o.lane], [ax, 11.5]); }
+        return c;
+      }
+      var r = ROOM3[at], q = r.spots[sl];
+      return [[r.dx, 11.5]].concat(r.entry, q[6] || [], [[q[0], q[1]]]);
+    }
+    function steer(o, a, dt) {
+      var at = a.at || 'desk', sl = a.slot || 0, k = at + ':' + sl, k1 = Math.min(1, dt * 7);
+      if (o.key === undefined) { o.key = k; snap(o, at, sl, true); }
+      if (o.mode !== 'walk' && o.key !== k && o.rx < 0.2) {
+        var A = chain(o, o.at, o.sl), Bc = chain(o, at, sl), path;
+        if (o.at !== 'desk' && o.at === at) path = ROOM3[at].entry.slice(-1).concat(ROOM3[at].spots[sl][6] || [], [Bc[Bc.length - 1]]);
+        else path = (o.at === 'desk' ? A : A.slice().reverse()).concat(at === 'desk' ? Bc.slice().reverse() : Bc);
+        o.path = path; o.mode = 'walk'; o.pose = 'x'; o.key = k; o.to = { at: at, sl: sl }; o.ty = 0; o.fy = o.ry;
+      }
+      if (o.mode === 'walk') {
+        var w = o.path[0];
+        if (!w) { snap(o, o.to.at, o.to.sl, false); }
+        else {
+          var dx = w[0] - o.x, dz = w[1] - o.z, dd = Math.sqrt(dx * dx + dz * dz), st = 5.5 * dt;
+          if (dd <= st) { o.x = w[0]; o.z = w[1]; o.path.shift(); }
+          else { o.x += dx / dd * st; o.z += dz / dd * st; o.ry += wrap(Math.atan2(-dx, -dz) - o.ry) * Math.min(1, dt * 10); }
+          o.ty = (o.x > WATER[0] && o.x < WATER[1] && o.z > WATER[2] && o.z < WATER[3]) ? -0.5 : 0;
+        }
+      } else { o.ry += wrap(o.fy - o.ry) * k1; }
+      o.y += (o.ty - o.y) * k1;
+      o.rx += ((o.mode === 'rest' && o.pose === 'l' ? 1.5708 : 0) - o.rx) * Math.min(1, dt * 5);
+      var sit = o.mode === 'seat' || (o.mode === 'rest' && o.pose === 's');
+      o.seat.visible = sit; o.stand.visible = !sit;
+      o.pg.position.set(o.x, o.y, o.z); o.pg.rotation.set(o.rx, o.ry, 0);
+      o.tag.position.set(o.x, 0, o.z + (o.pose === 'l' ? 1 : 0));
+      var off = o.mode !== 'seat';
+      o.ring.position.z = o.hov.position.z = off ? 0 : -0.7;
+      o.ring.scale.setScalar(off ? 0.5 : 1); o.hov.scale.setScalar(off ? 0.5 : 1);
+    }
+    var sized = false;
+    function resize() {
+      var w = stage.clientWidth, h = stage.clientHeight;
+      if (!w || !h) return false;
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      return true;
+    }
+    var glide = null;
+    function resetCamera() {
+      var t = Math.tan((camera.fov * Math.PI / 180) / 2);
+      var dist = Math.max(18.5 / (t * camera.aspect), 16 / t);
+      var dir = new THREE.Vector3(0, 0.8, 0.62).normalize();
+      controls.target.set(0, 0, 4);
+      camera.position.copy(controls.target).addScaledVector(dir, Math.min(dist, 80));
+      camera.lookAt(controls.target);
+      controls.update();
+      glide = null;
+    }
+    function onSize() {
+      if (!resize()) return;
+      if (!sized) { sized = true; resetCamera(); }
+    }
+    if ('ResizeObserver' in window) new ResizeObserver(onSize).observe(stage);
+    else window.addEventListener('resize', onSize);
+
+    function focusOn(id) {
+      var o = nodes[id];
+      if (!o) return;
+      var tgt = new THREE.Vector3(o.x, 1.2, o.z + (o.mode === 'seat' ? -0.5 : 0.3));
+      var off = camera.position.clone().sub(controls.target);
+      off.setLength(Math.min(off.length(), 26));
+      glide = { t: tgt, p: tgt.clone().add(off) };
+      if (reduce) {
+        controls.target.copy(glide.t);
+        camera.position.copy(glide.p);
+        glide = null;
+      }
+    }
+    controls.addEventListener('start', function () { glide = null; });
+
+    var ray = new THREE.Raycaster(), mv = new THREE.Vector2();
+    function pickAt(ev) {
+      var r = cv.getBoundingClientRect();
+      mv.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+      ray.setFromCamera(mv, camera);
+      var hits = ray.intersectObjects(pickables, false);
+      return hits.length ? hits[0].object.userData.agentId : null;
+    }
+    function setHover(id) {
+      hoverId = id;
+      agents.forEach(function (a) {
+        var o = nodes[a.id];
+        if (o) o.hov.visible = (id === a.id && sel !== a.id);
+      });
+    }
+    var down = null;
+    cv.addEventListener('pointerdown', function (e) { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+    cv.addEventListener('pointerup', function (e) {
+      if (!down) return;
+      var dx = e.clientX - down.x, dy = e.clientY - down.y, dt = performance.now() - down.t;
+      down = null;
+      if (dx * dx + dy * dy > 36 || dt > 700) return;
+      var id = pickAt(e);
+      if (id) select(id, true, '#ph');
+    });
+    cv.addEventListener('pointermove', function (e) {
+      if (e.buttons) return;
+      var id = pickAt(e);
+      setHover(id);
+      cv.style.cursor = id ? 'pointer' : 'grab';
+    });
+    cv.addEventListener('pointerleave', function () { setHover(null); });
+
+    var visible = true;
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (en) { visible = en[0].isIntersecting; }).observe(stage);
+    }
+    var t0 = performance.now(), last = 0;
+    function frame() {
+      requestAnimationFrame(frame);
+      if (!visible || document.hidden) return;
+      var time = (performance.now() - t0) / 1000;
+      var amp = reduce ? 0 : 1;
+      var dt = Math.min(0.1, time - last); last = time;
+      agents.forEach(function (a) {
+        var o = nodes[a.id];
+        if (!o) return;
+        steer(o, a, dt);
+        var p = o.ph, aL = -0.5, aR = -0.5, bob = 0.06, hr = 0, lg = 0;
+        if (o.mode === 'walk') {
+          lg = Math.sin(time * 9 + p) * 0.6 * amp; aL += lg * 0.8; aR -= lg * 0.8;
+        } else if (o.pose === 'l') { aL = aR = -1.35; }
+        else if (o.pose === 'w') {
+          aL += Math.sin(time * 3 + p) * 0.9 * amp; aR += Math.sin(time * 3 + p + 3) * 0.9 * amp; lg = Math.sin(time * 5 + p) * 0.4 * amp;
+        } else if (o.kind === 'working') {
+          aL += Math.sin(time * 11 + p) * 0.07 * amp;
+          aR += Math.sin(time * 11 + p + 2) * 0.07 * amp;
+          hr = Math.sin(time * 1.6 + p) * 0.05 * amp;
+        } else if (o.kind === 'attention') {
+          aR = 1.6 + Math.sin(time * 6 + p) * 0.35 * amp;
+          bob = 0.14;
+          hr = Math.sin(time * 2 + p) * 0.08 * amp;
+        } else {
+          hr = Math.sin(time * 0.8 + p) * 0.05 * amp;
+        }
+        o.armL.rotation.x = aL;
+        o.armR.rotation.x = aR;
+        o.legs[0].rotation.x = lg; o.legs[1].rotation.x = -lg;
+        o.headG.rotation.x = hr;
+        o.mk.position.y = 3.2 + Math.sin(time * 3 + p) * bob * amp;
+        o.mk.rotation.y = time * 1.4 * amp;
+      });
+      if (glide) {
+        controls.target.lerp(glide.t, 0.12);
+        camera.position.lerp(glide.p, 0.12);
+        if (controls.target.distanceTo(glide.t) < 0.02) glide = null;
+      }
+      controls.target.x = Math.max(-16, Math.min(16, controls.target.x));
+      controls.target.z = Math.max(-12, Math.min(20, controls.target.z));
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    function sync() {
+      agents.forEach(function (a) {
+        var o = nodes[a.id];
+        if (!o) return;
+        paint(o, a);
+        o.ring.visible = (a.id === sel);
+        o.hov.visible = (hoverId === a.id && sel !== a.id);
+      });
+    }
+
+    new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    if (window.matchMedia) {
+      var mq = window.matchMedia('(prefers-color-scheme: dark)');
+      if (mq.addEventListener) mq.addEventListener('change', applyTheme);
+      else if (mq.addListener) mq.addListener(applyTheme);
+    }
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function () { applyTheme(); });
+    }
+
+    applyTheme();
+    sync();
+    onSize();
+    S3 = { sync: sync, focus: focusOn, reset: resetCamera };
+    requestAnimationFrame(frame);
+  }
+
+  init3D();
+})();
+</script>
+
+</body></html>
