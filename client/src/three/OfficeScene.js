@@ -1,64 +1,65 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { ZONES, LOUNGE_ROOMS } from '../constants/roomsData';
 
+// Layout posisi zona kerja (koordinat meja utama)
 const LAYOUT = {
-  ceo:   { cx: -10.5, cz: -7.5, w: 9,  d: 7 },
-  plan:  { cx: 5,     cz: -7.5, w: 20, d: 7 },
-  write: { cx: -10.5, cz: 0,    w: 9,  d: 6 },
-  prod:  { cx: 5,     cz: 0,    w: 20, d: 6 },
-  pub:   { cx: 0,     cz: 7.5,  w: 30, d: 7 }
+  ceo:   { cx: -18, cz: -14, w: 10, d: 8, label: 'Ruang CEO' },
+  plan:  { cx: -2,  cz: -14, w: 18, d: 8, label: 'Ruang Strategi & Analis' },
+  write: { cx: -18, cz: -3,  w: 10, d: 8, label: 'Meja Naskah' },
+  prod:  { cx: 16,  cz: -10, w: 14, d: 10, label: 'Studio Produksi & Editor' },
+  pub:   { cx: -4,  cz: 12,  w: 22, d: 10, label: 'Meja Publikasi Medsos' }
 };
 
-const RC = {
-  lunch: { cx: -11.75, w: 7.5, dx: -11.75 },
-  ps:    { cx: -4,     w: 7,   dx: -5.9 },
-  pool:  { cx: 4.25,   w: 8.5, dx: 1.2 },
-  dorm:  { cx: 12.5,   w: 7,   dx: 10.6 }
-};
-
+// Ruang Santai & Fasilitas (Lunch Cafe, PS/Billiard, Pool, Musholla & Gym)
 const ROOM3 = {
   lunch: {
-    dx: -11.75,
-    entry: [[-11.75, 12.8], [-11.75, 13.4]],
+    dx: 6,
+    entry: [[6, -4], [6, -1]],
     spots: [
-      [-13.2, 15.1, 's', -13.2, 17, -0.05],
-      [-11.75, 15.1, 's', -11.75, 17, -0.05],
-      [-10.3, 15.1, 's', -10.3, 17, -0.05],
-      [-14.9, 16.6, 's', -12, 16.6, -0.05, [[-14.9, 14]]],
-      [-8.6, 16.6, 's', -11.5, 16.6, -0.05, [[-8.6, 14]]]
+      [8, -2, 's', 8, -4, 0],
+      [11, -2, 's', 11, -4, 0],
+      [14, -2, 's', 14, -4, 0],
+      [8, 2, 's', 8, 0, 0],
+      [11, 2, 's', 11, 0, 0]
     ]
   },
   ps: {
-    dx: -5.9,
-    entry: [[-5.9, 12.8], [-5.9, 16]],
+    dx: -16,
+    entry: [[-16, 5], [-16, 8]],
     spots: [
-      [-4.9, 17.9, 's', -4.9, 12, -0.12],
-      [-3.6, 17.9, 's', -3.6, 12, -0.12],
-      [-2.3, 17.9, 's', -2.3, 12, -0.12],
-      [-6.4, 17.4, 's', -4, 12, -0.3],
-      [-1.2, 16.4, 's', -3.5, 12, -0.3]
+      [-19, 9, 's', -16, 9, 0],
+      [-19, 12, 's', -16, 12, 0],
+      [-13, 9, 's', -16, 9, 0],
+      [-13, 14, 's', -16, 14, 0],
+      [-18, 15, 's', -18, 12, 0]
     ]
   },
   pool: {
-    dx: 1.2,
-    entry: [[1.2, 12.8], [1.2, 13.6], [2.1, 16.4], [3.4, 16.4]],
+    dx: 0,
+    entry: [[0, -4], [0, -2], [0, 0]],
+    // Berada di panggung terangkat (y = 1.2), perenang di y = 0.8
     spots: [
-      [4, 15.5, 'w', 4, 14, -0.5],
-      [5.5, 16.4, 'w', 5.5, 14, -0.5],
-      [7, 15.5, 'w', 7, 14, -0.5],
-      [4.5, 17.4, 'w', 4.5, 14, -0.5],
-      [6.5, 17.4, 'w', 6.5, 14, -0.5]
+      [-2, 1, 'w', 0, 1, 0.7],
+      [2, 1, 'w', 0, 1, 0.7],
+      [-2, 3, 'w', 0, 3, 0.7],
+      [2, 3, 'w', 0, 3, 0.7],
+      [0, 2, 'w', 0, 2, 0.7]
     ]
   },
   dorm: {
-    dx: 10.6,
-    entry: [[10.6, 12.8], [10.6, 13.9]],
-    spots: [10.4, 11.8, 13.2, 14.6].map(x => [x, 14.9, 'l', x, 13.9, 0.9])
+    // Area Istirahat / Musholla & Gym
+    dx: -18,
+    entry: [[-18, -4], [-18, -2]],
+    spots: [
+      [-20, 2, 'l', -20, 0, 0.3],
+      [-22, 2, 'l', -22, 0, 0.3],
+      [-20, 5, 'l', -20, 3, 0.3],
+      [-22, 5, 'l', -22, 3, 0.3]
+    ]
   }
 };
 
-const WATER = [3, 8, 14.6, 18.2];
+const POOL_BOUNDS = [-4.5, 4.5, -0.5, 4.5];
 
 function wrapAngle(a) {
   while (a > Math.PI) a -= 2 * Math.PI;
@@ -83,63 +84,89 @@ function roundRect(ctx, px, py, w, h, r) {
 export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getThemeTokens }) {
   let renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
   } catch (err) {
     console.warn('WebGLRenderer initialization failed:', err);
     return null;
   }
 
-  renderer.setClearColor(0x000000, 0);
+  renderer.setClearColor(0x0a0f16, 1);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(38, 1, 0.5, 300);
+
+  // Kamera Isometrik Presisi (Sudut ~45 derajat atas khas denah arsitektur)
+  const camera = new THREE.PerspectiveCamera(32, 1, 1, 500);
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
-  controls.screenSpacePanning = false;
-  controls.minPolarAngle = 0.2;
+  controls.screenSpacePanning = true;
+  controls.minPolarAngle = 0.3;
   controls.maxPolarAngle = 1.35;
-  controls.minDistance = 8;
-  controls.maxDistance = 85;
+  controls.minDistance = 15;
+  controls.maxDistance = 120;
 
-  const hemi = new THREE.HemisphereLight(0xffffff, 0xaab4be, 0.55);
+  // Pencahayaan Arsitektural Mewah
+  const hemi = new THREE.HemisphereLight(0xeef5fc, 0x1a2634, 0.65);
   scene.add(hemi);
 
-  const sun = new THREE.DirectionalLight(0xffffff, 0.5);
-  sun.position.set(-14, 34, 22);
+  const sun = new THREE.DirectionalLight(0xfff8ee, 0.85);
+  sun.position.set(-35, 60, 40);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
-  sun.shadow.bias = -0.0006;
+  sun.shadow.bias = -0.0004;
   const sc = sun.shadow.camera;
-  sc.left = -26; sc.right = 26; sc.top = 26; sc.bottom = -26; sc.near = 5; sc.far = 90;
+  sc.left = -40; sc.right = 40; sc.top = 40; sc.bottom = -40; sc.near = 10; sc.far = 140;
   sc.updateProjectionMatrix();
   scene.add(sun);
   scene.add(sun.target);
-  sun.target.position.set(0, 0, 4);
+  sun.target.position.set(0, 0, 0);
 
-  const lam = (color) => new THREE.MeshLambertMaterial(color === undefined ? {} : { color });
+  // Lampu Aksen Lembut Tambahan untuk suasana malam / kontras
+  const fillLight = new THREE.DirectionalLight(0x7aa2ff, 0.3);
+  fillLight.position.set(30, 40, -30);
+  scene.add(fillLight);
+
+  const lam = (color, opts = {}) => new THREE.MeshLambertMaterial({ color, ...opts });
   const bxg = (w, h, d) => new THREE.BoxGeometry(w, h, d);
 
+  // Material Library
   const M = {
-    slab: lam(),
-    wood: lam(),
-    chair: lam(),
-    dark: lam(0x1b2630),
-    key: lam(0x2b3640),
-    pants: lam(0x2f3b48),
-    pot: lam(0x8a5a3c),
-    leaf: lam(0x3e9a5e),
-    board: lam(0xf4f6f8),
-    metal: lam(0x8a96a3),
-    light: new THREE.MeshBasicMaterial({ color: 0xfff6d8 }),
-    wall: new THREE.MeshLambertMaterial({ transparent: true, opacity: 0.7 })
+    floorMarble: lam(0xf0ece1),
+    floorWood:   lam(0xb58b5e),
+    floorDeck:   lam(0x8c6239),
+    floorCarpet: lam(0x274c3d),
+    floorGym:    lam(0x36414c),
+    wallGlass:   new THREE.MeshPhysicalMaterial({
+      color: 0xcde7f5,
+      transparent: true,
+      opacity: 0.38,
+      roughness: 0.1,
+      transmission: 0.6,
+      thickness: 0.5
+    }),
+    wallHalf:    lam(0x2b3846),
+    woodDark:    lam(0x4a3424),
+    woodDesk:    lam(0xc79d6e),
+    metalChrome: new THREE.MeshStandardMaterial({ color: 0xdde3ea, roughness: 0.25, metalness: 0.75 }),
+    blackLeather: lam(0x181e24),
+    water:       new THREE.MeshPhysicalMaterial({
+      color: 0x1bb1e7,
+      transparent: true,
+      opacity: 0.75,
+      roughness: 0.1,
+      transmission: 0.5
+    }),
+    billiardFelt: lam(0x1b7340),
+    greenScreen: lam(0x00c853),
+    plantPot:    lam(0x8a5a3c),
+    plantLeaf:   lam(0x2e7d32),
+    cushionYellow: lam(0xffb300),
+    cushionOrange: lam(0xf4511e),
+    cushionBlue:   lam(0x1e88e5),
+    goldAccent:  lam(0xd4af37)
   };
-
-  const ZM = {};
-  ZONES.forEach(z => { ZM[z.id] = lam(); });
-  LOUNGE_ROOMS.forEach(r => { ZM[r.id] = lam(); });
 
   function mk(geo, mat, x, y, z, parent = scene, noShadow = false) {
     const m = new THREE.Mesh(geo, mat);
@@ -150,184 +177,267 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     return m;
   }
 
-  function B(w, h, d, col, x, y, z) {
-    return mk(bxg(w, h, d), lam(col), x, y, z);
+  function B(w, h, d, colOrMat, x, y, z, parent = scene, noShadow = false) {
+    const mat = typeof colOrMat === 'number' ? lam(colOrMat) : colOrMat;
+    return mk(bxg(w, h, d), mat, x, y, z, parent, noShadow);
   }
 
-  const roomLabels = [];
   const nodes = {};
   const pickables = [];
   let hoverId = null;
   let selectedId = 'ceo';
 
-  // 1. Base floor slab
-  mk(bxg(34, 0.4, 34), M.slab, 0, -0.2, 5, scene, true);
+  // =========================================================================
+  // 1. LANTAI DASAR DAN PEMBAGIAN ZONA (Base Floor Architecture)
+  // =========================================================================
+  // Lantai utama marmer luas
+  mk(bxg(56, 0.6, 44), M.floorMarble, 0, -0.3, 0, scene, true);
 
-  // 2. Work rooms
-  ZONES.forEach(z => {
-    const L = LAYOUT[z.id];
-    mk(bxg(L.w, 0.1, L.d), ZM[z.id], L.cx, 0.05, L.cz, scene, true);
-    mk(bxg(L.w, 1.8, 0.25), M.wall, L.cx, 0.9, L.cz - L.d / 2 + 0.125, scene, true);
-    mk(bxg(0.25, 1.8, L.d), M.wall, L.cx - L.w / 2 + 0.125, 0.9, L.cz, scene, true);
-    mk(bxg(0.25, 1.8, L.d), M.wall, L.cx + L.w / 2 - 0.125, 0.9, L.cz, scene, true);
+  // Lantai Kayu Eksekutif (Sayap Kiri Atas: Ruang CEO & Naskah)
+  mk(bxg(12, 0.1, 20), M.floorWood, -18, 0.05, -9, scene, true);
 
-    const c = document.createElement('canvas');
-    c.width = 512; c.height = 64;
-    const tex = new THREE.CanvasTexture(c);
-    const pl = new THREE.Mesh(
-      new THREE.PlaneGeometry(6, 0.75),
-      new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false })
-    );
-    pl.rotation.x = -Math.PI / 2;
-    pl.position.set(L.cx - L.w / 2 + 3.6, 0.12, L.cz + L.d / 2 - 0.6);
-    scene.add(pl);
-    roomLabels.push({ canvas: c, tex, text: z.label });
+  // Lantai Kayu Strategi & Meeting (Atas Tengah)
+  mk(bxg(20, 0.1, 12), M.floorWood, -2, 0.05, -13, scene, true);
+
+  // Lantai Studio (Kanan Atas)
+  mk(bxg(16, 0.1, 14), M.floorMarble, 16, 0.05, -9, scene, true);
+
+  // Lantai Cafe / Lounge (Kanan Tengah)
+  mk(bxg(16, 0.1, 12), M.floorWood, 11, 0.05, 0, scene, true);
+
+  // Lantai Game / Billiard (Kiri Bawah)
+  mk(bxg(12, 0.1, 14), M.floorWood, -18, 0.05, 11, scene, true);
+
+  // Lantai Karpet Musholla (Kiri Bawah Sayap)
+  mk(bxg(10, 0.1, 10), M.floorCarpet, -22, 0.05, 3, scene, true);
+  // Garis shaf sajadah hijau
+  for (let s = -1; s <= 3; s += 1.8) {
+    B(9.2, 0.02, 0.1, 0xd4af37, -22, 0.11, s);
+  }
+
+  // Lantai Gym (Kanan Bawah)
+  mk(bxg(14, 0.1, 10), M.floorGym, 14, 0.05, 12, scene, true);
+
+  // =========================================================================
+  // 2. PODIUM TENGAH & KOLAM RENANG BERTINGKAT (Elevated Central Pool)
+  // =========================================================================
+  // Podium kayu terangkat 1.2 unit di atas lantai utama
+  const poolDeck = mk(bxg(16, 1.2, 12), M.floorDeck, 0, 0.6, 2, scene, true);
+
+  // Tangga kayu naik ke podium kolam (depan dan belakang)
+  [-4.5, 4.5].forEach(tz => {
+    for (let st = 0; st < 3; st++) {
+      B(4, 0.25, 0.6, M.floorDeck, 0, 0.125 + st * 0.25, tz + (tz > 0 ? (st + 1) * 0.5 : -(st + 1) * 0.5));
+    }
   });
 
-  // 3. Props: Plants, Whiteboard, Studio Tripod
-  function createPlant(x, z) {
-    mk(new THREE.CylinderGeometry(0.35, 0.28, 0.5, 10), M.pot, x, 0.35, z);
-    mk(new THREE.SphereGeometry(0.5, 10, 8), M.leaf, x, 1.05, z);
-    mk(new THREE.SphereGeometry(0.38, 10, 8), M.leaf, x + 0.18, 1.4, z + 0.05);
-    mk(new THREE.SphereGeometry(0.34, 10, 8), M.leaf, x - 0.15, 1.35, z - 0.1);
-  }
-  createPlant(-14, -10);
-  createPlant(14.2, -10.2);
-  createPlant(-14, 2.2);
-  createPlant(14.2, 2.2);
-  createPlant(14.3, 10.2);
-  createPlant(-14.3, 10.2);
+  // Lubang kolam renang (air transparan biru berkilau)
+  const poolWater = mk(bxg(9, 0.8, 6), M.water, 0, 0.95, 2, scene, true);
 
-  // Whiteboard in Strategy Room
-  mk(bxg(8, 2.4, 0.1), M.board, 5, 2.4, -10.6);
-  mk(bxg(0.1, 1.2, 0.1), M.metal, 1.2, 0.6, -10.6);
-  mk(bxg(0.1, 1.2, 0.1), M.metal, 8.8, 0.6, -10.6);
-  const noteColors = [0xffd166, 0xef8354, 0x8ecae6, 0xb7e4c7];
+  // Tepian ubin putih kolam renang
+  B(10, 0.15, 0.6, 0xffffff, 0, 1.25, -1.2);
+  B(10, 0.15, 0.6, 0xffffff, 0, 1.25, 5.2);
+  B(0.6, 0.15, 7, 0xffffff, -4.8, 1.25, 2);
+  B(0.6, 0.15, 7, 0xffffff, 4.8, 1.25, 2);
+
+  // Pagar Kaca Pengaman di Sekeliling Podium Kolam
+  [-7.8, 7.8].forEach(px => {
+    B(0.1, 0.8, 11.6, M.wallGlass, px, 1.6, 2);
+    // Tiang pagar chrome
+    for (let pz = -3; pz <= 7; pz += 2.5) {
+      B(0.12, 0.8, 0.12, M.metalChrome, px, 1.6, pz);
+    }
+  });
+
+  // Kursi Santai Lounger di Tepi Kolam
+  [[-6.2, 0], [-6.2, 3], [6.2, 0], [6.2, 3]].forEach(([lx, lz]) => {
+    B(2.2, 0.25, 1.0, 0xffffff, lx, 1.35, lz);
+    B(0.8, 0.45, 0.95, 0xffffff, lx + (lx > 0 ? -0.7 : 0.7), 1.55, lz);
+    B(0.7, 0.1, 0.7, 0x3aa7ff, lx + (lx > 0 ? 0.7 : -0.7), 1.48, lz);
+  });
+
+  // =========================================================================
+  // 3. RUANG CEO & RUANG MEETING BERDINDING KACA (Executive Suites)
+  // =========================================================================
+  // Dinding kaca Ruang CEO
+  B(0.15, 3.2, 7.8, M.wallGlass, -13, 1.6, -14);
+  B(9.8, 3.2, 0.15, M.wallGlass, -18, 1.6, -10);
+
+  // Meja Eksekutif CEO
+  B(4.0, 0.16, 1.8, M.woodDark, -18, 1.0, -15);
+  B(0.2, 0.9, 1.6, M.metalChrome, -19.8, 0.45, -15);
+  B(0.2, 0.9, 1.6, M.metalChrome, -16.2, 0.45, -15);
+  // Kursi Direktur Kulit Hitam
+  B(1.2, 1.6, 1.0, M.blackLeather, -18, 1.2, -16.4);
+  // Rak buku mewah di belakang CEO
+  B(7.0, 3.0, 0.6, M.woodDark, -18, 1.5, -17.6);
+  // Tanaman pot hias eksekutif
+  createPlant(-14, -14);
+  createPlant(-22, -14);
+
+  // =========================================================================
+  // 4. RUANG STRATEGI & ANALIS (Open Trading / Strategy Desks)
+  // =========================================================================
+  // Whiteboard ide besar dengan sticky notes
+  B(9, 2.6, 0.15, lam(0xf8fafc), -2, 2.2, -17.8);
+  const noteColors = [0xffd166, 0xef8354, 0x8ecae6, 0xb7e4c7, 0xf72585];
   for (let r = 0; r < 3; r++) {
-    for (let cI = 0; cI < 6; cI++) {
-      if ((r * 6 + cI) % 7 === 3) continue;
-      const note = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.8, 0.8),
-        new THREE.MeshBasicMaterial({ color: noteColors[(r + cI) % 4] })
-      );
-      note.position.set(5 + (cI - 2.5) * 1.15, 3.0 - r * 0.7, -10.54);
-      scene.add(note);
+    for (let c = 0; c < 7; c++) {
+      const np = mk(new THREE.PlaneGeometry(0.8, 0.8), lam(noteColors[(r * 3 + c) % noteColors.length]));
+      np.position.set(-5 + c * 1.2, 2.7 - r * 0.7, -17.7);
+      scene.add(np);
     }
   }
 
-  // Camera Tripod & Lighting in Studio
-  function createTripod(x, z) {
-    [0, 2.094, 4.188].forEach(ang => {
-      const dv = new THREE.Vector3(Math.sin(ang) * 0.7, -1.7, Math.cos(ang) * 0.7);
-      const leg = mk(new THREE.CylinderGeometry(0.04, 0.04, dv.length(), 6), M.metal, x + dv.x / 2, 1.7 + dv.y / 2, z + dv.z / 2);
-      leg.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dv.clone().normalize().negate());
-    });
-    mk(bxg(0.8, 0.5, 0.55), M.dark, x, 1.95, z);
-    const lens = mk(new THREE.CylinderGeometry(0.18, 0.2, 0.4, 12), M.dark, x, 1.95, z + 0.45);
-    lens.rotation.x = Math.PI / 2;
-    mk(bxg(1.4, 1.6, 0.15), M.light, x + 2.4, 1.6, z - 0.4, scene, true);
-    mk(bxg(0.08, 0.8, 0.08), M.metal, x + 2.4, 0.4, z - 0.4);
+  // =========================================================================
+  // 5. STUDIO PRODUKSI (Green Screen & Studio Rig)
+  // =========================================================================
+  // Green Screen Dinding Lengkung & Lantai
+  const gsWall = B(8, 3.5, 0.15, M.greenScreen, 16, 1.75, -15.8);
+  B(8, 0.05, 4, M.greenScreen, 16, 0.08, -13.8);
+
+  // Lampu Softbox Studio
+  function createSoftbox(x, z) {
+    B(0.1, 2.6, 0.1, M.metalChrome, x, 1.3, z);
+    const box = B(1.6, 1.8, 0.4, lam(0x1a1a1a), x, 2.5, z);
+    box.rotation.y = 0.4;
+    B(1.4, 1.6, 0.05, lam(0xffffff), x - 0.1, 2.5, z + 0.15);
   }
-  createTripod(5, 0.2);
+  createSoftbox(12, -12);
+  createSoftbox(20, -12);
 
-  // 4. Lounge Rooms
-  LOUNGE_ROOMS.forEach(r => {
-    const c = RC[r.id];
-    const x0 = c.cx - c.w / 2;
-    const x1 = c.cx + c.w / 2;
-    mk(bxg(c.w, 0.1, 7), ZM[r.id], c.cx, 0.05, 15.5, scene, true);
-    mk(bxg(0.25, 1.8, 7), M.wall, x0 + 0.125, 0.9, 15.5, scene, true);
-    mk(bxg(0.25, 1.8, 7), M.wall, x1 - 0.125, 0.9, 15.5, scene, true);
-
-    [[x0, c.dx - 1.2], [c.dx + 1.2, x1]].forEach(q => {
-      if (q[1] - q[0] > 0.1) {
-        mk(bxg(q[1] - q[0], 1.8, 0.25), M.wall, (q[0] + q[1]) / 2, 0.9, 12.125, scene, true);
-      }
+  // Tripod Kamera Video Profesional
+  function createStudioCamera(x, z) {
+    [0, 2.09, 4.18].forEach(ang => {
+      const leg = B(0.06, 2.2, 0.06, M.metalChrome, x + Math.sin(ang) * 0.6, 1.1, z + Math.cos(ang) * 0.6);
+      leg.rotation.x = Math.cos(ang) * 0.2;
+      leg.rotation.z = Math.sin(ang) * 0.2;
     });
+    B(0.9, 0.6, 0.7, lam(0x111827), x, 2.1, z);
+    const lens = mk(new THREE.CylinderGeometry(0.2, 0.24, 0.6, 16), lam(0x111827), x, 2.1, z + 0.5);
+    lens.rotation.x = Math.PI / 2;
+    // Monitor layar kamera
+    B(0.5, 0.35, 0.05, lam(0x38bdf8), x + 0.35, 2.3, z);
+  }
+  createStudioCamera(16, -10.5);
 
-    const cn = document.createElement('canvas');
-    cn.width = 512; cn.height = 64;
-    const tx = new THREE.CanvasTexture(cn);
-    const pl2 = new THREE.Mesh(
-      new THREE.PlaneGeometry(6, 0.75),
-      new THREE.MeshBasicMaterial({ map: tx, transparent: true, depthWrite: false })
-    );
-    pl2.rotation.x = -Math.PI / 2;
-    pl2.position.set(x0 + 3.4, 0.12, 19.6);
-    scene.add(pl2);
-    roomLabels.push({ canvas: cn, tex: tx, text: r.label });
+  // =========================================================================
+  // 6. CAFE / COFFEE BAR / PANTRY (Dining & Coffee Lounge)
+  // =========================================================================
+  // Bar Counter Kayu Mewah
+  B(8.0, 1.1, 1.2, M.woodDark, 11, 0.55, -4);
+  B(8.2, 0.12, 1.4, M.woodDesk, 11, 1.12, -4);
+  // Mesin Kopi Espresso Modern & Rak Minuman
+  B(1.0, 0.7, 0.6, M.metalChrome, 8.5, 1.5, -4);
+  B(0.8, 1.8, 0.7, lam(0xe2e8f0), 14, 1.0, -4);
+  B(7.0, 2.4, 0.4, M.woodDark, 11, 1.8, -5.8);
+
+  // Kursi Bar Tinggi Stool
+  [8, 10, 12, 14].forEach(bx => {
+    B(0.1, 0.7, 0.1, M.metalChrome, bx, 0.35, -2.6);
+    B(0.6, 0.1, 0.6, M.woodDark, bx, 0.72, -2.6);
   });
 
-  // Furniture: Lunch Room
-  B(2.2, 1, 0.7, 0xb08968, -14.2, 0.5, 12.7);
-  B(0.5, 0.4, 0.4, 0x222a30, -14.6, 1.2, 12.7);
-  B(1.6, 2, 0.8, 0xe5e9ee, -9.2, 1, 12.8);
-  mk(bxg(4.6, 0.08, 1.4), M.wood, -11.75, 1.05, 16.6);
-  B(0.2, 1.05, 1, 0x3a444e, -13.4, 0.5, 16.6);
-  B(0.2, 1.05, 1, 0x3a444e, -10.1, 0.5, 16.6);
-  [-13.2, -11.75, -10.3].forEach(x => { B(0.5, 0.06, 0.5, 0xffffff, x, 1.12, 16.1); });
-  ROOM3.lunch.spots.forEach(q => {
-    mk(new THREE.CylinderGeometry(0.32, 0.32, 0.62, 10), M.chair, q[0], 0.31, q[1]);
+  // Meja Bulat Cafe Santai
+  function createCafeTable(x, z) {
+    mk(new THREE.CylinderGeometry(0.8, 0.8, 0.08, 16), M.woodDesk, x, 0.85, z);
+    mk(new THREE.CylinderGeometry(0.08, 0.08, 0.85, 8), M.metalChrome, x, 0.42, z);
+    [[-0.9, 0], [0.9, 0], [0, -0.9], [0, 0.9]].forEach(([cx, cz]) => {
+      mk(new THREE.CylinderGeometry(0.3, 0.3, 0.5, 12), lam(0x374151), x + cx, 0.25, z + cz);
+    });
+  }
+  createCafeTable(9, 2);
+  createCafeTable(13, 2);
+
+  // =========================================================================
+  // 7. RUANG GAME / BILLIARD & PLAYSTATION LOUNGE
+  // =========================================================================
+  // Meja Biliar Mewah (Green Felt & Wooden Body)
+  function createBilliardTable(x, z) {
+    B(4.8, 0.75, 2.8, M.woodDark, x, 0.4, z);
+    B(4.4, 0.08, 2.4, M.billiardFelt, x, 0.8, z);
+    // Bola biliar & stik
+    B(0.18, 0.18, 0.18, lam(0xffffff), x, 0.88, z);
+    B(0.18, 0.18, 0.18, lam(0xef4444), x + 0.4, 0.88, z + 0.2);
+    B(0.18, 0.18, 0.18, lam(0xf59e0b), x + 0.5, 0.88, z - 0.2);
+    // Lampu gantung meja biliar
+    B(3.0, 0.3, 0.8, lam(0x1e293b), x, 2.4, z);
+    B(0.04, 1.2, 0.04, M.metalChrome, x - 1.0, 3.0, z);
+    B(0.04, 1.2, 0.04, M.metalChrome, x + 1.0, 3.0, z);
+  }
+  createBilliardTable(-16, 9);
+
+  // Bean Bags Santai Warna-warni
+  function createBeanBag(x, z, col) {
+    const bb = mk(new THREE.SphereGeometry(0.55, 12, 10), lam(col), x, 0.35, z);
+    bb.scale.set(1.1, 0.75, 1.1);
+  }
+  createBeanBag(-13, 7, 0xffb300);
+  createBeanBag(-14.5, 6.5, 0xf4511e);
+  createBeanBag(-13.5, 13, 0x1e88e5);
+
+  // Sofa Game TV Besar
+  B(4.0, 0.6, 1.4, lam(0x2d3748), -19, 0.3, 15);
+  B(4.0, 1.0, 0.4, lam(0x1f2937), -19, 0.8, 15.6);
+  // Layar TV Gaming Menyala
+  B(3.4, 1.8, 0.1, lam(0x0f172a), -19, 1.8, 17.6);
+  B(3.2, 1.6, 0.05, lam(0x38bdf8), -19, 1.8, 17.52);
+
+  // =========================================================================
+  // 8. GYM FITNESS & SERVER TECH HUB (Kanan Bawah)
+  // =========================================================================
+  // Treadmill Olahraga
+  function createTreadmill(x, z) {
+    B(1.8, 0.25, 0.9, lam(0x1f2937), x, 0.125, z);
+    B(0.1, 1.1, 0.1, M.metalChrome, x - 0.7, 0.65, z - 0.38);
+    B(0.1, 1.1, 0.1, M.metalChrome, x - 0.7, 0.65, z + 0.38);
+    B(0.5, 0.3, 0.8, lam(0x374151), x - 0.7, 1.2, z);
+  }
+  createTreadmill(11, 14);
+  createTreadmill(13.5, 14);
+  createTreadmill(16, 14);
+
+  // Rak Server Data Center Berdinding Kaca
+  B(0.15, 3.0, 7.5, M.wallGlass, 18.5, 1.5, 9.5);
+  [7, 9.5, 12].forEach(sz => {
+    B(1.6, 2.5, 1.2, lam(0x0f172a), 20.5, 1.25, sz);
+    // Lampu indikator server berkedip
+    B(0.05, 0.1, 0.9, lam(0x22c55e), 19.68, 2.0, sz);
+    B(0.05, 0.1, 0.9, lam(0x38bdf8), 19.68, 1.5, sz);
   });
 
-  // Furniture: PlayStation Room
-  B(4.4, 0.5, 1.1, 0x4a5a88, -3.6, 0.25, 18);
-  B(4.4, 1, 0.25, 0x3c4a73, -3.6, 0.75, 18.6);
-  B(2.2, 0.9, 0.9, 0x1f2430, -2.8, 0.45, 12.6);
-  B(3, 1.7, 0.12, 0x0b0e14, -2.8, 2.3, 12.3);
-  B(0.5, 0.12, 0.4, 0xf2f2f2, -2.8, 0.96, 12.6);
-  mk(new THREE.PlaneGeometry(2.8, 1.5), new THREE.MeshBasicMaterial({ color: 0x3a7bff }), -2.8, 2.3, 12.37, scene, true);
-  B(2.2, 0.5, 0.9, 0x6b4f3a, -3.6, 0.25, 15.15);
-  mk(new THREE.CylinderGeometry(0.5, 0.5, 0.55, 12), lam(0xe05d5d), -6.4, 0.27, 17.4);
-  mk(new THREE.CylinderGeometry(0.5, 0.5, 0.55, 12), lam(0x5db0e0), -1.2, 0.27, 16.4);
+  // Tanaman Pot Dekoratif Selasar
+  function createPlant(x, z) {
+    mk(new THREE.CylinderGeometry(0.4, 0.3, 0.6, 10), M.plantPot, x, 0.3, z);
+    mk(new THREE.SphereGeometry(0.55, 10, 8), M.plantLeaf, x, 0.9, z);
+    mk(new THREE.SphereGeometry(0.42, 10, 8), M.plantLeaf, x + 0.2, 1.25, z + 0.1);
+    mk(new THREE.SphereGeometry(0.38, 10, 8), M.plantLeaf, x - 0.15, 1.2, z - 0.15);
+  }
+  createPlant(-9, -10);
+  createPlant(7, -10);
+  createPlant(-9, 6);
+  createPlant(7, 6);
+  createPlant(18, 5);
+  createPlant(-11, 16);
 
-  // Furniture: Pool
-  mk(bxg(5, 0.8, 3.6), new THREE.MeshLambertMaterial({ color: 0x4fb8e8, transparent: true, opacity: 0.6 }), 5.5, 0.4, 16.4, scene, true);
-  [
-    [5.5, 14.5, 5.4, 0.2],
-    [5.5, 18.3, 5.4, 0.2],
-    [8.1, 16.4, 0.2, 3.8],
-    [3, 14.95, 0.2, 0.9],
-    [3, 17.85, 0.2, 0.9]
-  ].forEach(q => {
-    B(q[2], 0.95, q[3], 0xd5dbe0, q[0], 0.475, q[1]);
-  });
-  mk(new THREE.CylinderGeometry(0.05, 0.05, 2.6, 6), M.metal, 7.6, 1.3, 13.3);
-  mk(new THREE.ConeGeometry(1.2, 0.5, 12), lam(0xe56b6f), 7.6, 2.7, 13.3);
-  B(1.8, 0.3, 0.8, 0xf3e9d2, 6.6, 0.2, 13.3);
-  B(1.8, 0.3, 0.8, 0xf3e9d2, 4.6, 0.2, 13.3);
-  const ring = mk(new THREE.TorusGeometry(0.35, 0.12, 8, 16), lam(0xffd166), 7.3, 0.85, 16.4, scene, true);
-  ring.rotation.x = Math.PI / 2;
-
-  // Furniture: Dormitory
-  ROOM3.dorm.spots.forEach(q => {
-    const x = q[0];
-    B(1.2, 0.3, 2.4, 0xcfd8e3, x, 0.4, 15.9);
-    B(1.2, 1.1, 0.12, 0x7a5c3e, x, 0.65, 17.2);
-    B(0.8, 0.14, 0.5, 0xffffff, x, 0.62, 16.85);
-  });
-  B(5.6, 2.2, 0.7, 0x8a6a4a, 12.5, 1.1, 18.5);
-
-  // Monitor Screens
-  const SCR = {};
+  // =========================================================================
+  // 9. MEJA & KARAKTER 3D KARYAWAN (14 Orang: CEO + 13 Agen AI)
+  // =========================================================================
   function getScreenTexture(kind) {
-    if (SCR[kind]) return SCR[kind];
     const c = document.createElement('canvas');
     c.width = 128; c.height = 80;
     const x = c.getContext('2d');
-    const bg = { working: '#12342a', waiting: '#1c2833', attention: '#3a1d10' }[kind] || '#1c2833';
-    const fg = { working: '#5fd3a0', waiting: '#6b7885', attention: '#ff9a66' }[kind] || '#6b7885';
+    const bg = { working: '#0d3829', waiting: '#1e293b', attention: '#451a03' }[kind] || '#1e293b';
+    const fg = { working: '#34d399', waiting: '#94a3b8', attention: '#fb923c' }[kind] || '#94a3b8';
     x.fillStyle = bg;
     x.fillRect(0, 0, 128, 80);
     x.fillStyle = fg;
     [[10, 12, 70], [10, 24, 98], [10, 36, 54], [10, 48, 86], [10, 60, 40]].forEach(q => {
       x.fillRect(q[0], q[1], q[2], 6);
     });
-    SCR[kind] = new THREE.CanvasTexture(c);
-    return SCR[kind];
+    return new THREE.CanvasTexture(c);
   }
 
-  // 5. Build Agent Mesh
   function buildAgent(a, x, z, idx) {
     const g = new THREE.Group();
     g.position.set(x, 0, z);
@@ -339,64 +449,60 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       pickables.push(mesh);
       return mesh;
     }
-    function bx(w, h, d, mat, px, py, pz) {
-      return reg(mk(bxg(w, h, d), mat, px, py, pz, g));
-    }
 
-    // Desk & Computer
-    bx(2.8, 0.12, 1.4, M.wood, 0, 1.0, 0);
-    bx(0.12, 0.94, 1.3, M.wood, -1.3, 0.47, 0);
-    bx(0.12, 0.94, 1.3, M.wood, 1.3, 0.47, 0);
-    bx(2.5, 0.6, 0.08, M.wood, 0, 0.7, -0.6);
-    bx(0.12, 0.3, 0.12, M.dark, 0, 1.21, -0.25);
-    bx(1.3, 0.8, 0.08, M.dark, 0, 1.76, -0.25);
+    // Meja Kerja Modern
+    reg(mk(bxg(2.6, 0.12, 1.4), M.woodDesk, 0, 1.0, 0, g));
+    reg(mk(bxg(0.12, 0.94, 1.3), M.metalChrome, -1.2, 0.47, 0, g));
+    reg(mk(bxg(0.12, 0.94, 1.3), M.metalChrome, 1.2, 0.47, 0, g));
 
-    o.scr = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.18, 0.68),
-      new THREE.MeshBasicMaterial({ color: 0xffffff })
-    );
-    o.scr.position.set(0, 1.76, -0.205);
-    g.add(o.scr);
-    reg(o.scr);
-    bx(0.9, 0.04, 0.32, M.key, 0, 1.08, 0.3);
+    // Monitor Ganda (Dual Screens)
+    [-0.55, 0.55].forEach(mx => {
+      reg(mk(bxg(0.08, 0.28, 0.08), M.metalChrome, mx, 1.2, -0.25, g));
+      reg(mk(bxg(1.0, 0.65, 0.06), M.blackLeather, mx, 1.65, -0.25, g));
+      const scr = new THREE.Mesh(new THREE.PlaneGeometry(0.92, 0.56), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+      scr.position.set(mx, 1.65, -0.215);
+      g.add(scr);
+      reg(scr);
+      if (mx < 0) o.scr = scr;
+    });
 
-    // Chair
-    bx(1.0, 0.14, 1.0, M.chair, 0, 0.62, 1.45);
-    bx(1.0, 1.0, 0.14, M.chair, 0, 1.2, 2.0);
-    reg(mk(new THREE.CylinderGeometry(0.09, 0.09, 0.55, 8), M.dark, 0, 0.3, 1.45, g));
-    reg(mk(new THREE.CylinderGeometry(0.5, 0.5, 0.06, 12), M.dark, 0, 0.05, 1.45, g));
+    // Keyboard & Mousepad
+    reg(mk(bxg(0.8, 0.03, 0.28), M.blackLeather, 0, 1.08, 0.25, g));
 
-    // Person
+    // Kursi Ergonomis
+    reg(mk(bxg(0.9, 0.12, 0.9), M.blackLeather, 0, 0.62, 1.35, g));
+    reg(mk(bxg(0.9, 0.9, 0.12), M.blackLeather, 0, 1.15, 1.85, g));
+    reg(mk(new THREE.CylinderGeometry(0.08, 0.08, 0.55, 8), M.metalChrome, 0, 0.3, 1.35, g));
+    reg(mk(new THREE.CylinderGeometry(0.45, 0.45, 0.05, 12), M.metalChrome, 0, 0.05, 1.35, g));
+
+    // Badan Karakter 3D
     const hue = a.hue / 360;
-    const shirt = lam(new THREE.Color().setHSL(hue, 0.5, 0.45));
-    const skin = lam(new THREE.Color().setHSL(hue, 0.3, 0.78));
-    const hair = lam(new THREE.Color().setHSL(hue, 0.3, 0.22));
+    const shirt = lam(new THREE.Color().setHSL(hue, 0.55, 0.48));
+    const skin = lam(new THREE.Color().setHSL(hue, 0.25, 0.78));
+    const hair = lam(new THREE.Color().setHSL(hue, 0.35, 0.2));
 
     const pg = new THREE.Group();
     pg.rotation.order = 'YXZ';
-    pg.position.set(x, 0, z + 1.4);
+    pg.position.set(x, 0, z + 1.3);
     scene.add(pg);
 
     o.pg = pg;
     o.sx = x;
-    o.sz = z + 1.4;
+    o.sz = z + 1.3;
     o.x = o.sx;
     o.z = o.sz;
     o.y = 0;
     o.rx = 0;
     o.ry = 0;
 
-    function pb(w, h, d, mat, px, py, pz, par) {
-      return reg(mk(bxg(w, h, d), mat, px, py, pz, par || pg));
-    }
+    // Tubuh Silinder
+    reg(mk(new THREE.CylinderGeometry(0.32, 0.36, 0.92, 12), shirt, 0, 1.3, 0, pg));
 
-    reg(mk(new THREE.CylinderGeometry(0.34, 0.38, 0.95, 12), shirt, 0, 1.3, 0, pg));
-
-    // Seat pose vs standing legs
+    // Kaki Duduk & Kaki Berdiri
     o.seat = new THREE.Group();
     pg.add(o.seat);
-    pb(0.55, 0.22, 0.95, M.pants, 0, 0.88, -0.45, o.seat);
-    pb(0.4, 0.75, 0.22, M.pants, 0, 0.45, -0.9, o.seat);
+    reg(mk(bxg(0.5, 0.2, 0.85), M.blackLeather, 0, 0.88, -0.4, o.seat));
+    reg(mk(bxg(0.38, 0.72, 0.2), M.blackLeather, 0, 0.45, -0.8, o.seat));
 
     o.stand = new THREE.Group();
     o.stand.visible = false;
@@ -405,30 +511,30 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       const p = new THREE.Group();
       p.position.set(sx, 0.82, 0);
       o.stand.add(p);
-      pb(0.22, 0.82, 0.24, M.pants, 0, -0.41, 0, p);
+      reg(mk(bxg(0.2, 0.82, 0.22), M.blackLeather, 0, -0.41, 0, p));
       return p;
     });
 
-    // Head
+    // Kepala & Rambut
     o.headG = new THREE.Group();
     o.headG.position.set(0, 2.05, 0);
     pg.add(o.headG);
     reg(mk(new THREE.SphereGeometry(0.3, 16, 12), skin, 0, 0, 0, o.headG));
     reg(mk(new THREE.SphereGeometry(0.33, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), hair, 0, 0.03, 0.04, o.headG));
 
-    // Arms
+    // Lengan Karakter
     function arm(sx) {
       const p = new THREE.Group();
       p.position.set(sx, 1.6, -0.15);
       pg.add(p);
-      reg(mk(bxg(0.17, 0.17, 0.8), shirt, 0, 0, -0.4, p));
-      reg(mk(new THREE.SphereGeometry(0.11, 8, 6), skin, 0, 0, -0.82, p));
+      reg(mk(bxg(0.16, 0.16, 0.75), shirt, 0, 0, -0.38, p));
+      reg(mk(new THREE.SphereGeometry(0.1, 8, 6), skin, 0, 0, -0.78, p));
       return p;
     }
-    o.armL = arm(-0.45);
-    o.armR = arm(0.45);
+    o.armL = arm(-0.42);
+    o.armR = arm(0.42);
 
-    // Overhead indicator and label
+    // Penanda Status & Label Melayang di Atas Kepala
     o.tag = new THREE.Group();
     scene.add(o.tag);
 
@@ -436,9 +542,9 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     o.mk.position.set(0, 3.2, 0);
     o.tag.add(o.mk);
 
-    o.mOk = reg(new THREE.Mesh(new THREE.SphereGeometry(0.22, 14, 10), new THREE.MeshBasicMaterial()));
-    o.mIdle = reg(new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.06, 8, 20), new THREE.MeshBasicMaterial()));
-    o.mSig = reg(new THREE.Mesh(new THREE.OctahedronGeometry(0.3), new THREE.MeshBasicMaterial()));
+    o.mOk = reg(new THREE.Mesh(new THREE.SphereGeometry(0.22, 14, 10), new THREE.MeshBasicMaterial({ color: 0x10b981 })));
+    o.mIdle = reg(new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.06, 8, 20), new THREE.MeshBasicMaterial({ color: 0x94a3b8 })));
+    o.mSig = reg(new THREE.Mesh(new THREE.OctahedronGeometry(0.28), new THREE.MeshBasicMaterial({ color: 0xf97316 })));
     o.mk.add(o.mOk);
     o.mk.add(o.mIdle);
     o.mk.add(o.mSig);
@@ -447,47 +553,46 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     o.lc.width = 400; o.lc.height = 88;
     o.lt = new THREE.CanvasTexture(o.lc);
     const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: o.lt, transparent: true, depthTest: false }));
-    sp.position.set(0, 4.1, 0);
-    sp.scale.set(5, 1.1, 1);
+    sp.position.set(0, 4.0, 0);
+    sp.scale.set(4.8, 1.05, 1);
     sp.renderOrder = 10;
     o.tag.add(sp);
     reg(sp);
 
-    // Selection ring & hover ring
+    // Cincin Seleksi & Hover di Lantai
     o.ring = new THREE.Mesh(
-      new THREE.RingGeometry(2.0, 2.3, 48),
-      new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.95, side: THREE.DoubleSide, depthWrite: false })
+      new THREE.RingGeometry(1.8, 2.1, 48),
+      new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.95, side: THREE.DoubleSide, depthWrite: false })
     );
     o.ring.rotation.x = -Math.PI / 2;
-    o.ring.position.set(0, 0.14, 0);
+    o.ring.position.set(0, 0.12, 0);
     o.ring.visible = false;
     o.tag.add(o.ring);
 
     o.hov = new THREE.Mesh(
-      new THREE.RingGeometry(2.0, 2.15, 48),
-      new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false })
+      new THREE.RingGeometry(1.8, 1.95, 48),
+      new THREE.MeshBasicMaterial({ color: 0x94a3b8, transparent: true, opacity: 0.6, side: THREE.DoubleSide, depthWrite: false })
     );
     o.hov.rotation.x = -Math.PI / 2;
-    o.hov.position.set(0, 0.14, 0);
+    o.hov.position.set(0, 0.12, 0);
     o.hov.visible = false;
     o.tag.add(o.hov);
 
     return o;
   }
 
-  // Populate agents into work zones
+  // Populate Agents ke Zona Masing-masing
   const initialAgents = getAgentsData();
-  ZONES.forEach(z => {
-    const L = LAYOUT[z.id];
-    const list = initialAgents.filter(a => a.zone === z.id);
+  Object.keys(LAYOUT).forEach(zId => {
+    const L = LAYOUT[zId];
+    const list = initialAgents.filter(a => a.zone === zId);
     list.forEach((a, i) => {
-      nodes[a.id] = buildAgent(a, L.cx - L.w / 2 + (L.w / list.length) * (i + 0.5), L.cz - 0.8, i);
-      nodes[a.id].zone = z.id;
-      nodes[a.id].lane = L.cz + L.d / 2 + 0.5;
+      nodes[a.id] = buildAgent(a, L.cx - L.w / 2 + (L.w / (list.length + 1)) * (i + 1), L.cz, i);
+      nodes[a.id].zone = zId;
+      nodes[a.id].lane = L.cz + 4.5;
     });
   });
 
-  // Canvas Label Drawer
   function drawAgentLabel(o, a, themeTokens) {
     const c = o.lc;
     const x = c.getContext('2d');
@@ -495,13 +600,13 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     const H = c.height;
     x.clearRect(0, 0, W, H);
     roundRect(x, 4, 4, W - 8, H - 8, 24);
-    x.fillStyle = themeTokens.surface || '#ffffff';
+    x.fillStyle = themeTokens.surface || '#18222c';
     x.fill();
     x.lineWidth = 4;
-    x.strokeStyle = o.kind === 'attention' ? themeTokens.signal : themeTokens.line;
+    x.strokeStyle = o.kind === 'attention' ? (themeTokens.signal || '#f97316') : (themeTokens.line || '#334155');
     x.stroke();
 
-    const col = o.kind === 'working' ? themeTokens.ok : o.kind === 'attention' ? themeTokens.signal : themeTokens.idle;
+    const col = o.kind === 'working' ? (themeTokens.ok || '#10b981') : (o.kind === 'attention' ? (themeTokens.signal || '#f97316') : (themeTokens.idle || '#94a3b8'));
     x.fillStyle = col;
     x.strokeStyle = col;
 
@@ -525,13 +630,13 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     }
 
     const title = a.id === 'ceo' ? 'Anda (CEO)' : (a.nama === 'Videographer / Fotografer' ? 'Videographer' : a.nama);
-    let fs = 38;
+    let fs = 36;
     x.font = `700 ${fs}px "Space Grotesk", Inter, system-ui, sans-serif`;
     while (x.measureText(title).width > W - 96 && fs > 20) {
       fs -= 2;
       x.font = `700 ${fs}px "Space Grotesk", Inter, system-ui, sans-serif`;
     }
-    x.fillStyle = themeTokens.ink || '#13202c';
+    x.fillStyle = themeTokens.ink || '#f8fafc';
     x.textBaseline = 'middle';
     x.fillText(title, 70, H / 2 + 2);
     o.lt.needsUpdate = true;
@@ -544,8 +649,10 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     if (o.kind !== sKind || o.text !== sLabel) {
       o.kind = sKind;
       o.text = sLabel;
-      o.scr.material.map = getScreenTexture(sKind);
-      o.scr.material.needsUpdate = true;
+      if (o.scr) {
+        o.scr.material.map = getScreenTexture(sKind);
+        o.scr.material.needsUpdate = true;
+      }
       o.mOk.visible = sKind === 'working';
       o.mIdle.visible = sKind === 'waiting';
       o.mSig.visible = sKind === 'attention';
@@ -553,55 +660,19 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     }
   }
 
-  function drawRoomLabel(rl, themeTokens) {
-    const x = rl.canvas.getContext('2d');
-    x.clearRect(0, 0, 512, 64);
-    x.font = '500 30px "IBM Plex Mono", ui-monospace, monospace';
-    x.fillStyle = themeTokens.ink || '#13202c';
-    x.textBaseline = 'middle';
-    x.fillText(rl.text.toUpperCase(), 6, 32);
-    rl.tex.needsUpdate = true;
-  }
-
   function applyTheme() {
     const T = getThemeTokens();
-    const dark = new THREE.Color(T.bg).getHSL({}).l < 0.4;
-
-    M.slab.color.set(T.surface);
-    ZONES.forEach(z => {
-      if (T[`z-${z.id}`]) ZM[z.id].color.set(T[`z-${z.id}`]);
-    });
-    LOUNGE_ROOMS.forEach(r => {
-      if (T[`z-${r.id}`]) ZM[r.id].color.set(T[`z-${r.id}`]);
-    });
-
-    M.wall.color.set(T.wall);
-    M.wall.opacity = dark ? 0.55 : 0.7;
-    M.wood.color.set(dark ? '#6f5e49' : '#c8b494');
-    M.chair.color.set(dark ? '#3a4652' : '#55636f');
-    M.dark.color.set(dark ? '#0b1117' : '#1b2630');
-
-    hemi.color.set(dark ? '#9fb4d0' : '#ffffff');
-    hemi.groundColor.set(dark ? '#2a3440' : '#aab4be');
-    hemi.intensity = dark ? 0.5 : 0.55;
-    sun.intensity = dark ? 0.42 : 0.5;
-
     const currentAgents = getAgentsData();
     currentAgents.forEach(a => {
       const o = nodes[a.id];
       if (!o) return;
-      o.mOk.material.color.set(T.ok);
-      o.mIdle.material.color.set(T.idle);
-      o.mSig.material.color.set(T.signal);
-      o.ring.material.color.set(T.accent);
-      o.hov.material.color.set(T.ink2);
       paintAgent(o, a, T);
     });
-
-    roomLabels.forEach(rl => drawRoomLabel(rl, T));
   }
 
-  // 6. Pathfinding & Movement (Anti-tembus dinding)
+  // =========================================================================
+  // 10. NAVIGASI LORONG ANTI-TEMBUS DINDING & PERPINDAHAN TEMPAT
+  // =========================================================================
   function snapAgent(o, at, sl, instant) {
     const q = at === 'desk' ? null : ROOM3[at].spots[sl];
     o.at = at;
@@ -624,14 +695,14 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       const sx = o.sx + 1;
       const c = [[o.sx, o.sz], [sx, o.sz], [sx, o.lane]];
       if (o.zone !== 'pub') {
-        const ax = o.sx < 0 ? -15.5 : 15.5;
-        c.push([ax, o.lane], [ax, 11.5]);
+        const ax = o.sx < 0 ? -12 : 12;
+        c.push([ax, o.lane], [ax, 0]);
       }
       return c;
     }
     const r = ROOM3[at];
     const q = r.spots[sl];
-    return [[r.dx, 11.5], ...r.entry, ...(q[6] || []), [q[0], q[1]]];
+    return [[r.dx, 0], ...r.entry, [q[0], q[1]]];
   }
 
   function steerAgent(o, a, dt) {
@@ -650,7 +721,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       const Bc = getWaypoints(o, at, sl);
       let path;
       if (o.at !== 'desk' && o.at === at) {
-        path = [...ROOM3[at].entry.slice(-1), ...(ROOM3[at].spots[sl][6] || []), Bc[Bc.length - 1]];
+        path = [...ROOM3[at].entry.slice(-1), Bc[Bc.length - 1]];
       } else {
         path = (o.at === 'desk' ? A : A.slice().reverse()).concat(at === 'desk' ? Bc.slice().reverse() : Bc);
       }
@@ -671,7 +742,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
         const dx = w[0] - o.x;
         const dz = w[1] - o.z;
         const dd = Math.sqrt(dx * dx + dz * dz);
-        const st = 5.5 * dt;
+        const st = 6.0 * dt;
         if (dd <= st) {
           o.x = w[0];
           o.z = w[1];
@@ -681,7 +752,9 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
           o.z += (dz / dd) * st;
           o.ry += wrapAngle(Math.atan2(-dx, -dz) - o.ry) * Math.min(1, dt * 10);
         }
-        o.ty = (o.x > WATER[0] && o.x < WATER[1] && o.z > WATER[2] && o.z < WATER[3]) ? -0.5 : 0;
+        // Naik ke podium jika melewati kolam renang
+        const inPoolArea = (o.x > POOL_BOUNDS[0] && o.x < POOL_BOUNDS[1] && o.z > POOL_BOUNDS[2] && o.z < POOL_BOUNDS[3]);
+        o.ty = inPoolArea ? 0.7 : 0;
       }
     } else {
       o.ry += wrapAngle(o.fy - o.ry) * k1;
@@ -696,7 +769,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
 
     o.pg.position.set(o.x, o.y, o.z);
     o.pg.rotation.set(o.rx, o.ry, 0);
-    o.tag.position.set(o.x, 0, o.z + (o.pose === 'l' ? 1 : 0));
+    o.tag.position.set(o.x, o.y, o.z + (o.pose === 'l' ? 1 : 0));
 
     const off = o.mode !== 'seat';
     o.ring.position.z = o.hov.position.z = off ? 0 : -0.7;
@@ -704,15 +777,15 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     o.hov.scale.setScalar(off ? 0.5 : 1);
   }
 
-  // 7. Camera glide & reset
+  // =========================================================================
+  // 11. KONTROL KAMERA ISOMETRIK
+  // =========================================================================
   let glide = null;
 
   function resetCamera() {
-    const t = Math.tan((camera.fov * Math.PI / 180) / 2);
-    const dist = Math.max(18.5 / (t * camera.aspect), 16 / t);
-    const dir = new THREE.Vector3(0, 0.8, 0.62).normalize();
-    controls.target.set(0, 0, 4);
-    camera.position.copy(controls.target).addScaledVector(dir, Math.min(dist, 80));
+    controls.target.set(0, 0, 0);
+    // Posisi isometrik diagonal dari sudut bawah-kanan/depan
+    camera.position.set(38, 48, 52);
     camera.lookAt(controls.target);
     controls.update();
     glide = null;
@@ -723,13 +796,13 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     if (!o) return;
     const tgt = new THREE.Vector3(o.x, 1.2, o.z + (o.mode === 'seat' ? -0.5 : 0.3));
     const off = camera.position.clone().sub(controls.target);
-    off.setLength(Math.min(off.length(), 26));
+    off.setLength(Math.min(off.length(), 32));
     glide = { t: tgt, p: tgt.clone().add(off) };
   }
 
   controls.addEventListener('start', () => { glide = null; });
 
-  // 8. Raycasting & User Interaction
+  // Raycasting (Pilih Meja / Karakter)
   const ray = new THREE.Raycaster();
   const mv = new THREE.Vector2();
 
@@ -786,7 +859,6 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
   canvas.addEventListener('pointermove', onPointerMove);
   canvas.addEventListener('pointerleave', onPointerLeave);
 
-  // 9. Resize Handling
   function resize() {
     const w = canvas.parentElement ? canvas.parentElement.clientWidth : canvas.clientWidth;
     const h = canvas.parentElement ? canvas.parentElement.clientHeight : canvas.clientHeight;
@@ -798,7 +870,6 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     return true;
   }
 
-  // 10. Animation Loop
   let isRunning = true;
   let t0 = performance.now();
   let last = 0;
@@ -860,14 +931,13 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       if (controls.target.distanceTo(glide.t) < 0.02) glide = null;
     }
 
-    controls.target.x = Math.max(-16, Math.min(16, controls.target.x));
-    controls.target.z = Math.max(-12, Math.min(20, controls.target.z));
+    controls.target.x = Math.max(-28, Math.min(28, controls.target.x));
+    controls.target.z = Math.max(-24, Math.min(24, controls.target.z));
     controls.update();
 
     renderer.render(scene, camera);
   }
 
-  // Sync state method
   function sync(currentAgents, selId) {
     selectedId = selId;
     const T = getThemeTokens();
@@ -880,7 +950,6 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     });
   }
 
-  // Initial setup
   applyTheme();
   resize();
   resetCamera();
