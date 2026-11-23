@@ -122,6 +122,9 @@ function roundRect(ctx, px, py, w, h, r) {
   ctx.closePath();
 }
 
+// Set persisten untuk melacak serah terima materi yang sudah dieksekusi hari ini agar tidak looping
+const executedRealtimeHandoverSlots = new Set();
+
 export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getThemeTokens, onPipelineEvent, getOfficeContext }) {
   let renderer;
   try {
@@ -1938,10 +1941,8 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
             sender.tag.position.set(sender.sx, 0, sender.sz);
 
             isAgencyStepRunning = false;
-            currentAgencyStepIdx = (idx + 1) % AGENCY_PIPELINE_STEPS.length;
-            agencyStepTimer = 16.0;
             if (onPipelineEvent) {
-              onPipelineEvent({ type: 'complete', stepIndex: currentAgencyStepIdx, nextStep: AGENCY_PIPELINE_STEPS[currentAgencyStepIdx] });
+              onPipelineEvent({ type: 'complete', stepIndex: idx, step });
             }
           };
         }, 3600);
@@ -1953,7 +1954,6 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
   // 15. SIMULASI OTOMATIS: KARYAWAN JALAN & OBROLAN INTERAKTIF
   // =========================================================================
   let wanderCountdown = 9.0;
-  let lastPublishHandoverSlot = null;
   let publishCheckCountdown = 1.0;
   const roamingAgentKeys = ['editor', 'kamera', 'carousel', 'ide', 'analis', 'caption'];
 
@@ -1984,8 +1984,8 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       return;
     }
 
-    // 1. Eksekusi Estafet Mandiri REALTIME Sesuai Jam Operasional Kantor (Bukan Looping 16 Detik)
-    // Karakter berjalan serah terima materi HANYA saat waktu operasional tiba di dunia nyata:
+    // 1. Eksekusi Estafet Mandiri REALTIME Sesuai Jam Operasional Kantor (Satu Kali, Tanpa Looping)
+    // Karakter berjalan serah terima materi HANYA saat waktu operasional baru tiba di dunia nyata:
     publishCheckCountdown -= dt;
     if (publishCheckCountdown <= 0 && !isAgencyStepRunning) {
       publishCheckCountdown = 5.0;
@@ -1998,11 +1998,11 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
         const dayIdx = clockTime.dayIndex;
         const title = (routine.title || '').toLowerCase();
 
-        // A. Serah terima video saat jadwal tayang (Slot 1 jam 11:00 atau Slot 2 jam 19:00 WIB)
-        const isPublishSlot = routine.linkedSlotTime || (h === 11) || (h === 19);
+        // A. Serah terima video saat jadwal tayang tiba (Slot 1 jam 11:00 atau Slot 2 jam 19:00 WIB)
+        const isPublishSlot = routine.linkedSlotTime || (h === 11 && m < 10) || (h === 19 && m < 10);
         const pubKey = `pub-${dayIdx}-${h}`;
-        if (isPublishSlot && lastPublishHandoverSlot !== pubKey) {
-          lastPublishHandoverSlot = pubKey;
+        if (isPublishSlot && !executedRealtimeHandoverSlots.has(pubKey)) {
+          executedRealtimeHandoverSlots.add(pubKey);
           const uploadStepIdx = AGENCY_PIPELINE_STEPS.findIndex(s => s.senderId === 'editor' && s.targetId === 'upload');
           if (uploadStepIdx !== -1) {
             runAgencyStep(uploadStepIdx);
@@ -2010,11 +2010,11 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
           }
         }
 
-        // B. Penyerahan Naskah ke Studio saat jam produksi studio dimulai (misal 13:00 WIB)
-        const isStudioStart = (title.includes('produksi') || title.includes('studio')) && h === 13;
+        // B. Penyerahan Naskah ke Studio saat jam produksi studio dimulai (13:00 - 13:10 WIB)
+        const isStudioStart = (title.includes('produksi') || title.includes('studio')) && h === 13 && m < 10;
         const studioKey = `studio-${dayIdx}-${h}`;
-        if (isStudioStart && lastPublishHandoverSlot !== studioKey) {
-          lastPublishHandoverSlot = studioKey;
+        if (isStudioStart && !executedRealtimeHandoverSlots.has(studioKey)) {
+          executedRealtimeHandoverSlots.add(studioKey);
           const naskahStepIdx = AGENCY_PIPELINE_STEPS.findIndex(s => s.senderId === 'naskah' && s.targetId === 'kamera');
           if (naskahStepIdx !== -1) {
             runAgencyStep(naskahStepIdx);
@@ -2022,11 +2022,11 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
           }
         }
 
-        // C. Penyerahan paket draf ke CEO sebelum rapat evaluasi sore (16:30 WIB)
-        const isReviewStart = title.includes('review') || (h === 16 && m >= 25);
+        // C. Penyerahan paket draf ke CEO sebelum rapat evaluasi sore (16:25 - 16:35 WIB)
+        const isReviewStart = (title.includes('review') || h === 16) && m >= 25 && m < 35;
         const reviewKey = `review-${dayIdx}-${h}`;
-        if (isReviewStart && lastPublishHandoverSlot !== reviewKey) {
-          lastPublishHandoverSlot = reviewKey;
+        if (isReviewStart && !executedRealtimeHandoverSlots.has(reviewKey)) {
+          executedRealtimeHandoverSlots.add(reviewKey);
           const reviewStepIdx = AGENCY_PIPELINE_STEPS.findIndex(s => s.senderId === 'carousel' && s.targetId === 'ceo');
           if (reviewStepIdx !== -1) {
             runAgencyStep(reviewStepIdx);

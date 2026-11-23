@@ -25,8 +25,8 @@ export function App() {
     } else if (ev.type === 'dialogue') {
       setAgencyDialogue({ sender: ev.step.senderId, target: ev.step.targetId, text: `"${ev.step.dialogueSender}"` });
     } else if (ev.type === 'complete') {
-      setActiveAgencyMission(ev.nextStep);
-      setTimeout(() => setAgencyDialogue(null), 3000);
+      setActiveAgencyMission(null);
+      setAgencyDialogue(null);
     }
   }, []);
 

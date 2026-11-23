@@ -289,10 +289,10 @@ export function useOfficeState() {
 
   // Actions
   const selectAgent = useCallback((id) => {
-    if (agentsMap[id]) {
+    if (id) {
       setSelectedAgentId(id);
     }
-  }, [agentsMap]);
+  }, []);
 
   const toggleTask = useCallback((agentId, taskIndex) => {
     setAgents(prev => prev.map(a => {

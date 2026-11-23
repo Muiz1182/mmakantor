@@ -19,6 +19,15 @@ export function Stage3D({
   const agentsRef = useRef(agents);
   agentsRef.current = agents;
 
+  const onSelectAgentRef = useRef(onSelectAgent);
+  onSelectAgentRef.current = onSelectAgent;
+
+  const onPipelineEventRef = useRef(onPipelineEvent);
+  onPipelineEventRef.current = onPipelineEvent;
+
+  const onWebGLFallbackRef = useRef(onWebGLFallback);
+  onWebGLFallbackRef.current = onWebGLFallback;
+
   const contextRef = useRef({ clockTime, todayTheme, currentRoutine });
   contextRef.current = { clockTime, todayTheme, currentRoutine };
 
@@ -43,10 +52,10 @@ export function Stage3D({
     let sceneInstance = null;
     try {
       sceneInstance = initOfficeScene(canvas, {
-        onSelectAgent,
+        onSelectAgent: (id) => onSelectAgentRef.current?.(id),
         getAgentsData: () => agentsRef.current,
         getThemeTokens,
-        onPipelineEvent,
+        onPipelineEvent: (ev) => onPipelineEventRef.current?.(ev),
         getOfficeContext: () => contextRef.current
       });
     } catch (err) {
@@ -54,8 +63,8 @@ export function Stage3D({
     }
 
     if (!sceneInstance) {
-      if (onWebGLFallback) {
-        setTimeout(() => onWebGLFallback(), 0);
+      if (onWebGLFallbackRef.current) {
+        setTimeout(() => onWebGLFallbackRef.current(), 0);
       }
       return;
     }
@@ -82,7 +91,7 @@ export function Stage3D({
         sceneRef.current = null;
       }
     };
-  }, [onSelectAgent, onWebGLFallback]);
+  }, []); // Hanya inisialisasi satu kali saat mount (tidak unmount/destroy saat callback/state berubah)
 
   // Sync state changes with 3D scene
   useEffect(() => {
