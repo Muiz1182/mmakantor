@@ -5,6 +5,7 @@ import { Plan2D } from './components/Plan2D';
 import { AgentPanel } from './components/AgentPanel';
 import { ScheduleModal } from './components/ScheduleModal';
 import { VideoReviewModal } from './components/VideoReviewModal';
+import { SocialIntegrationModal } from './components/SocialIntegrationModal';
 import { FLOW_STEPS } from './constants/flowData';
 import { WEEKLY_SCHEDULE, getPipelineStepForRoutine } from './constants/scheduleData';
 import './App.css';
@@ -14,6 +15,7 @@ export function App() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const [isVideoReviewOpen, setIsVideoReviewOpen] = useState(false);
+  const [isSocialModalOpen, setIsSocialModalOpen] = useState(false);
   const [videoReviewItem, setVideoReviewItem] = useState(null);
   const [ideaText, setIdeaText] = useState('');
   const [selectedPilar, setSelectedPilar] = useState('Multimedia'); // 'Multimedia', 'Design', 'Web Development'
@@ -175,6 +177,16 @@ export function App() {
           >
             🎬 <b>Review Video</b>
             <span className="review-badge-count">{pendingApprovals.length}</span>
+          </button>
+
+          {/* Tombol Integrasi Medsos Resmi (Tahap 5: TikTok, Instagram, YouTube) */}
+          <button
+            type="button"
+            className="status-pill social-integration-pill"
+            onClick={() => setIsSocialModalOpen(true)}
+            title="Buka Pengaturan Integrasi Medsos & Mode Cadangan (TikTok, Instagram, YouTube)"
+          >
+            📡 <b>Medsos: 3 Akun</b>
           </button>
 
           {/* Toggle Auto-Review AI */}
@@ -539,6 +551,13 @@ export function App() {
         approvalItem={videoReviewItem}
         onVerifyApproval={handleVerifyApproval}
         activePilar={WEEKLY_SCHEDULE.find(d => d.dayIndex === clockTime?.dayIndex)?.theme?.split(' ')[0] || 'Multimedia'}
+      />
+
+      {/* Modal Integrasi Media Sosial & Mode Cadangan (Tahap 5) */}
+      <SocialIntegrationModal
+        isOpen={isSocialModalOpen}
+        onClose={() => setIsSocialModalOpen(false)}
+        onManualPublishTrigger={(slot) => triggerPublishSlot(slot)}
       />
     </div>
   );

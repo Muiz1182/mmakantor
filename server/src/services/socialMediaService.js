@@ -30,6 +30,36 @@ export const OFFICIAL_ACCOUNTS = {
 };
 
 /**
+ * Cek status konfigurasi token dan mode operasional media sosial
+ */
+export function getSocialTokenStatus() {
+  const igToken = process.env.INSTAGRAM_ACCESS_TOKEN;
+  const ttToken = process.env.TIKTOK_ACCESS_TOKEN;
+  const ytKey = process.env.YOUTUBE_API_KEY;
+
+  return {
+    accounts: {
+      tiktok: {
+        ...OFFICIAL_ACCOUNTS.tiktok,
+        isConfigured: Boolean(ttToken && ttToken.trim().length > 5),
+        uploadUrl: 'https://www.tiktok.com/creator-center/upload'
+      },
+      instagram: {
+        ...OFFICIAL_ACCOUNTS.instagram,
+        isConfigured: Boolean(igToken && igToken.trim().length > 5),
+        uploadUrl: 'https://www.instagram.com/'
+      },
+      youtube: {
+        ...OFFICIAL_ACCOUNTS.youtube,
+        isConfigured: Boolean(ytKey && ytKey.trim().length > 5),
+        uploadUrl: 'https://studio.youtube.com/'
+      }
+    },
+    activeMode: (igToken || ttToken || ytKey) ? 'live_api' : 'fallback_mode'
+  };
+}
+
+/**
  * Publikasikan video ke Instagram Reels melalui Instagram Graph API
  */
 async function publishToInstagramReels({ title, caption, videoUrl }) {

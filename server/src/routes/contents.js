@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getAllContents, createContent } from '../services/officeStore.js';
-import { publishToAllOfficialSocials, OFFICIAL_ACCOUNTS } from '../services/socialMediaService.js';
+import { publishToAllOfficialSocials, OFFICIAL_ACCOUNTS, getSocialTokenStatus } from '../services/socialMediaService.js';
 
 const router = Router();
 
@@ -9,6 +9,14 @@ router.get('/social-accounts', (req, res) => {
   res.json({
     success: true,
     data: OFFICIAL_ACCOUNTS
+  });
+});
+
+// GET /api/contents/social-status - Cek status token dan mode aktif (Live API vs Fallback Mode)
+router.get('/social-status', (req, res) => {
+  res.json({
+    success: true,
+    data: getSocialTokenStatus()
   });
 });
 

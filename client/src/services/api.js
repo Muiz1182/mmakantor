@@ -143,6 +143,17 @@ export const api = {
     }
   },
 
+  // Cek status integrasi token medsos & mode aktif
+  async getSocialStatus() {
+    try {
+      const res = await fetch(`${API_BASE}/contents/social-status`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      return null;
+    }
+  },
+
   // Publikasikan video ke akun medsos resmi (TikTok, Instagram, YouTube)
   async publishSocials({ title, caption, videoUrl, scheduledTime }) {
     try {
