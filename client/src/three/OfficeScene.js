@@ -1305,6 +1305,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     o.y = 0;
     o.rx = 0;
     o.ry = 0;
+    o.rz = 0;
 
     reg(mk(new THREE.CylinderGeometry(0.32, 0.36, 0.92, 12), shirt, 0, 1.3, 0, pg));
 
@@ -1835,7 +1836,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     return buildCollisionFreePath(fromZone, fromPos, toZone, toPos);
   }
 
-  function steerAgent(o, a, dt) {
+  function steerAgent(o, a, dt, time = 0) {
     // Jika karakter sedang dalam misi berjalan mandiri (Estafet Alur Agensi)
     if (o.isMissionWalk) {
       if (o.mode === 'walk') {
@@ -1904,6 +1905,11 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       o.seat.visible = false;
     }
 
+    const isLying = o.mode === 'rest' && o.pose === 'l';
+    const isSwimming = o.mode === 'rest' && o.pose === 'swim';
+    const isBilliard = o.mode === 'rest' && o.pose === 'billiard';
+    const isPraying = o.mode === 'rest' && o.pose === 'pray';
+
     if (o.mode === 'walk') {
       const w = o.path[0];
       if (!w) {
@@ -1923,16 +1929,36 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
           o.ry += wrapAngle(Math.atan2(-dx, -dz) - o.ry) * Math.min(1, dt * 10);
         }
       }
+    } else if (isSwimming) {
+      // KARAKTER BERENANG KELILING KOLAM RENANG (Lap Circuit Memutar Mulus)
+      const lapRadiusX = 3.2 - (o.sl % 3) * 0.7; // Radius aman dari tepi & sun loungers
+      const lapRadiusZ = 2.1 - (o.sl % 3) * 0.4; // Radius aman kedalaman Z kolam
+      const swimSpeed = 0.55; // Kecepatan renang elips yang santai dan natural
+      const swimTheta = (time * swimSpeed) + (o.sl * 2.094) + ((o.ph || 0) * 0.4);
+
+      // Posisi di lintasan elips kolam berpusat di cx=0, cz=1.5
+      const targetSwimX = lapRadiusX * Math.sin(swimTheta);
+      const targetSwimZ = 1.5 - lapRadiusZ * Math.cos(swimTheta);
+
+      // Hitung vektor arah gerak (tangen) untuk arah hadap tubuh perenang
+      const swimDx = lapRadiusX * Math.cos(swimTheta);
+      const swimDz = lapRadiusZ * Math.sin(swimTheta);
+      const targetSwimRy = Math.atan2(-swimDx, -swimDz);
+
+      // Interpolasi mulus posisi dan arah hadap
+      o.x += (targetSwimX - o.x) * Math.min(1, dt * 5.5);
+      o.z += (targetSwimZ - o.z) * Math.min(1, dt * 5.5);
+      o.ry += wrapAngle(targetSwimRy - o.ry) * Math.min(1, dt * 6.0);
+
+      // Efek kedalaman air dan riak naik-turun tubuh saat bernapas/mengayuh
+      o.ty = -0.32 + Math.sin(time * 3.8 + (o.ph || 0)) * 0.05;
+      o.rz = Math.sin(swimTheta) * 0.12; // Kemiringan tubuh alami saat berbelok di air
     } else {
+      o.rz = 0;
       o.ry += wrapAngle(o.fy - o.ry) * k1;
     }
 
     o.y += (o.ty - o.y) * k1;
-    const isLying = o.mode === 'rest' && o.pose === 'l';
-    const isSwimming = o.mode === 'rest' && o.pose === 'swim';
-    const isBilliard = o.mode === 'rest' && o.pose === 'billiard';
-    const isPraying = o.mode === 'rest' && o.pose === 'pray';
-
     let targetRx = 0;
     if (isLying) targetRx = Math.PI / 2;
     else if (isSwimming) targetRx = 1.35;
@@ -1944,7 +1970,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     o.stand.visible = !sit;
 
     o.pg.position.set(o.x, o.y, o.z);
-    o.pg.rotation.set(o.rx, o.ry, 0);
+    o.pg.rotation.set(o.rx, o.ry, o.rz || 0);
 
     if (isLying || isSwimming) {
       o.tag.position.set(o.x, o.y + 0.6, o.z);
@@ -2474,7 +2500,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     currentAgents.forEach(a => {
       const o = nodes[a.id];
       if (!o) return;
-      steerAgent(o, a, dt);
+      steerAgent(o, a, dt, time);
 
       const p = o.ph;
       let aL = -0.5, aR = -0.5, bob = 0.06, hr = 0, lg = 0;
