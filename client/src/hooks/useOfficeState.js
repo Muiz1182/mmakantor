@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { INITIAL_AGENTS, INITIAL_APPROVALS } from '../constants/agentsData';
 import { LOUNGE_ROOMS, ALL_ROOMS, LOUNGE_MAP, MEETING_ROOM } from '../constants/roomsData';
+import { getCurrentRoutine } from '../constants/scheduleData';
 import { api } from '../services/api';
 
 export function useOfficeState() {
@@ -103,7 +104,7 @@ export function useOfficeState() {
               ...localA,
               status: dbA.status || localA.status,
               sLabel: dbA.status === 'working' ? 'Bekerja' : (dbA.status === 'waiting' ? 'Menunggu' : 'Perlu tindakan'),
-              rest: dbA.ruangSantai || localA.rest || 'auto',
+              rest: 'auto',
               now: dbA.sedangKerja || localA.now,
               tugas: dbA.tasks && dbA.tasks.length > 0 
                 ? dbA.tasks.map(t => ({ id: t.id, t: t.judul, d: t.selesai }))
@@ -141,14 +142,18 @@ export function useOfficeState() {
     return approvals.filter(item => item.state === 'pending');
   }, [approvals]);
 
-  // Compute placed agents
+  // Compute placed agents - Terikat Otomatis 100% pada Jadwal Operasional Kantor
   const placedAgents = useMemo(() => {
     const list = agents.map(a => ({ ...a }));
     const occ = {};
     ALL_ROOMS.forEach(r => { occ[r.id] = []; });
 
-    // Step 1: Agen yang sedang rapat resmi tetap di Ruang Meeting
-    list.forEach(a => {
+    const isSleep = clockTime.h >= 23 || clockTime.h < 7 || activeTimePhase === 'sleep';
+    const routine = getCurrentRoutine(clockTime.h, clockTime.m);
+    const isBreak = !isSleep && routine && routine.category === 'break';
+
+    list.forEach((a, i) => {
+      // 1. Agen yang sedang rapat resmi tetap di Ruang Meeting (jika sesi rapat CEO aktif)
       if (a.at === 'meeting') {
         const sl = a.slot !== undefined ? a.slot : (a.id === 'ceo' ? 5 : 0);
         if (occ['meeting'] && !occ['meeting'][sl]) {
@@ -158,9 +163,9 @@ export function useOfficeState() {
         }
       }
 
-      // Step 2: Agen yang secara spesifik dipilih untuk santai di ruang santai tertentu (bukan 'auto' dan bukan 'desk')
-      if (a.rest && a.rest !== 'auto' && a.rest !== 'desk' && a.rest !== 'meeting') {
-        const rId = a.rest;
+      // 2. Di luar jam kerja (23.00 - 07.00 WIB) atau mode sleep: Semua istirahat tidur di Asrama (dorm)
+      if (isSleep) {
+        const rId = 'dorm';
         const cap = LOUNGE_MAP[rId]?.cap || 4;
         for (let sl = 0; sl < cap; sl++) {
           if (!occ[rId][sl]) {
@@ -172,14 +177,35 @@ export function useOfficeState() {
         }
       }
 
-      // Step 3: Default jam kerja kantor (07.00 - 23.00 WIB): Semua agen berada di MEJA KERJA MASING-MASING!
-      // Baik status 'working', 'waiting', maupun 'attention', mereka standby di meja kerja agensi.
+      // 3. Jam istirahat resmi sesuai jadwal kantor (misal: 12.00 - 13.00 Makan Siang, 17.30 - 18.00 Rehat Sore)
+      if (isBreak) {
+        const rId = (a.rest && a.rest !== 'auto' && a.rest !== 'desk' && a.rest !== 'meeting')
+          ? a.rest
+          : LOUNGE_ROOMS[i % LOUNGE_ROOMS.length].id;
+        const cap = LOUNGE_MAP[rId]?.cap || 4;
+        for (let sl = 0; sl < cap; sl++) {
+          if (!occ[rId][sl]) {
+            occ[rId][sl] = a.id;
+            a.at = rId;
+            a.slot = sl;
+            return;
+          }
+        }
+      }
+
+      // 4. JAM KERJA KANTOR OPERASIONAL (07.00 - 23.00 WIB):
+      // SELURUH KARYAWAN AI SECARA OTOMATIS BEKERJA DI MEJA MASING-MASING!
+      // Tidak boleh ada santai di kolam renang atau asrama di luar jam istirahat. Langsung kerja 100% otomatis.
       a.at = 'desk';
       a.slot = 0;
+      if (a.id !== 'ceo') {
+        a.status = 'working';
+        a.sLabel = 'Bekerja';
+      }
     });
 
     return list;
-  }, [agents]);
+  }, [agents, clockTime.h, clockTime.m, clockTime.isOfficeHours, activeTimePhase]);
 
   const agentsMap = useMemo(() => {
     return placedAgents.reduce((acc, a) => {
