@@ -8,7 +8,8 @@ export function Stage3D({
   theme,
   timePhase = 'morning',
   chatActive = true,
-  onWebGLFallback
+  onWebGLFallback,
+  onPipelineEvent
 }) {
   const canvasRef = useRef(null);
   const sceneRef = useRef(null);
@@ -38,7 +39,8 @@ export function Stage3D({
       sceneInstance = initOfficeScene(canvas, {
         onSelectAgent,
         getAgentsData: () => agentsRef.current,
-        getThemeTokens
+        getThemeTokens,
+        onPipelineEvent
       });
     } catch (err) {
       console.warn('Gagal menginisialisasi Three.js 3D:', err);
@@ -52,6 +54,9 @@ export function Stage3D({
     }
 
     sceneRef.current = sceneInstance;
+    window.__triggerAgencyStep = () => {
+      sceneRef.current?.triggerNextAgencyStep();
+    };
 
     const resizeObserver = new ResizeObserver(() => {
       if (sceneRef.current) {

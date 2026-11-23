@@ -175,7 +175,7 @@ function roundRect(ctx, px, py, w, h, r) {
   ctx.closePath();
 }
 
-export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getThemeTokens }) {
+export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getThemeTokens, onPipelineEvent }) {
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
@@ -1126,6 +1126,37 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     }
   }
 
+  // Generator lintasan jalan antar-ruangan menghindari dinding
+  function generateAgentWalkPath(fromX, fromZ, toX, toZ, fromZone, toZone) {
+    const path = [];
+    path.push([fromX, fromZ > 0 ? fromZ - 1.5 : fromZ + 1.5]);
+
+    if (fromZone !== toZone) {
+      if (fromZone === 'plan') {
+        path.push([7.5, -10], [7.5, -6]);
+      } else if (fromZone === 'prod') {
+        path.push([15, -15], [12, -15], [12, -6]);
+      } else if (fromZone === 'pub') {
+        path.push([0, 12], [0, 8]);
+      } else if (fromZone === 'ceo') {
+        path.push([-14, -15], [-11, -15], [-11, -6]);
+      }
+
+      if (toZone === 'plan') {
+        path.push([7.5, -6], [7.5, -10]);
+      } else if (toZone === 'prod') {
+        path.push([12, -6], [12, -15], [15, -15]);
+      } else if (toZone === 'pub') {
+        path.push([0, 8], [0, 12]);
+      } else if (toZone === 'ceo') {
+        path.push([-11, -6], [-11, -15], [-14, -15]);
+      }
+    }
+
+    path.push([toX, toZ]);
+    return path;
+  }
+
   function getWaypoints(o, at, sl) {
     if (at === 'desk') {
       const sx = o.sx + 1;
@@ -1143,6 +1174,41 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
   }
 
   function steerAgent(o, a, dt) {
+    // Jika karakter sedang dalam misi berjalan mandiri (Estafet Alur Agensi)
+    if (o.isMissionWalk) {
+      if (o.mode === 'walk') {
+        const w = o.path[0];
+        if (!w) {
+          o.mode = 'stand';
+          o.stand.visible = true;
+          o.seat.visible = false;
+          if (o.onMissionArrive) {
+            const cb = o.onMissionArrive;
+            o.onMissionArrive = null;
+            cb();
+          }
+        } else {
+          const dx = w[0] - o.x;
+          const dz = w[1] - o.z;
+          const dd = Math.sqrt(dx * dx + dz * dz);
+          const st = 5.5 * dt;
+          if (dd <= st) {
+            o.x = w[0];
+            o.z = w[1];
+            o.path.shift();
+          } else {
+            o.x += (dx / dd) * st;
+            o.z += (dz / dd) * st;
+            o.ry += wrapAngle(Math.atan2(-dx, -dz) - o.ry) * Math.min(1, dt * 10);
+          }
+        }
+      }
+      o.pg.position.set(o.x, o.y, o.z);
+      o.pg.rotation.set(o.rx, o.ry, 0);
+      o.tag.position.set(o.x, o.y, o.z);
+      return;
+    }
+
     const at = a.at || 'desk';
     const sl = a.slot || 0;
     const k = `${at}:${sl}`;
@@ -1225,6 +1291,163 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
   }
 
   // =========================================================================
+  // 14B. ESTAFET ALUR AGENSI KREATIF MANDIRI (Autonomous Creative Agency)
+  // Alur estafet kerja berjalan mandiri antar meja/ruangan: Analis -> Ide -> Naskah -> Kamera -> Editor -> Carousel -> CEO -> Upload
+  // =========================================================================
+  const AGENCY_PIPELINE_STEPS = [
+    {
+      step: 1,
+      title: 'Analisa Data & Retensi Viral',
+      senderId: 'analis',
+      targetId: 'ide',
+      pilar: 'Multimedia & Web Dev',
+      dialogueSender: 'Pola retensi hook 3 detik video edukasi naik 45%, ini data tren terbarunya!',
+      dialogueTarget: 'Siap! Saya olah jadi 3 konsep ide konten edukasi viral hari ini!',
+      summary: 'Content Analyst menyerahkan insight retensi penonton ke Brainstorming'
+    },
+    {
+      step: 2,
+      title: 'Penyusunan Naskah & Hook Viral',
+      senderId: 'ide',
+      targetId: 'naskah',
+      pilar: 'Design & Multimedia',
+      dialogueSender: 'Ini 3 ide terpilih: lighting studio hemat, hierarki visual UI, & Three.js 60 FPS!',
+      dialogueTarget: 'Keren! Langsung saya tulis script 30 detik + shot list adegan!',
+      summary: 'Brainstorming menyerahkan konsep ide ke Penulis Naskah'
+    },
+    {
+      step: 3,
+      title: 'Eksekusi Studio & Shot List',
+      senderId: 'naskah',
+      targetId: 'kamera',
+      pilar: 'Multimedia',
+      dialogueSender: 'Naskah edukasi & shot list 3 adegan siap dieksekusi di studio!',
+      dialogueTarget: 'Studio green screen & lighting 3-point sudah ready, langsung take!',
+      summary: 'Penulis Naskah menyerahkan naskah ke Videographer di Studio'
+    },
+    {
+      step: 4,
+      title: 'Editing & Motion Subtitle',
+      senderId: 'kamera',
+      targetId: 'editor',
+      pilar: 'Multimedia',
+      dialogueSender: 'Footage 4K 60fps & audio studio siap dipotong dan di-grade!',
+      dialogueTarget: 'Sip! Saya pasang sound effect ritmis, LUT sinematik, & kinetic subtitle!',
+      summary: 'Videographer menyerahkan footage ke Video Editor'
+    },
+    {
+      step: 5,
+      title: 'Desain Carousel & Thumbnail',
+      senderId: 'editor',
+      targetId: 'carousel',
+      pilar: 'Design',
+      dialogueSender: 'Render video final selesai! Tolong buatkan thumbnail CTR tinggi & carousel 7 slide!',
+      dialogueTarget: 'Siap! Saya buatkan slide estetis 1080x1350 dengan hierarki visual rapi!',
+      summary: 'Video Editor menyerahkan materi ke Desainer Carousel'
+    },
+    {
+      step: 6,
+      title: 'Review Final & Approval CEO',
+      senderId: 'carousel',
+      targetId: 'ceo',
+      pilar: 'Semua Pilar',
+      dialogueSender: 'Pak CEO, seluruh materi paket konten edukasi viral siap di antrean persetujuan!',
+      dialogueTarget: 'Bagus sekali! Skor potensi FYP 96%, saya setujui untuk jadwal prime time!',
+      summary: 'Desainer menyerahkan paket konten ke Ruang CEO untuk persetujuan'
+    },
+    {
+      step: 7,
+      title: 'Publikasi Otomatis Medsos',
+      senderId: 'ceo',
+      targetId: 'upload',
+      pilar: 'Web Dev & Sosmed',
+      dialogueSender: 'Konten sudah disetujui! Tim Medsos, jadwalkan tayang otomatis jam 19.00 WIB!',
+      dialogueTarget: 'Siap Pak CEO! Metadata, thumbnail, & jadwal tayang sudah terprogram otomatis!',
+      summary: 'CEO memberikan mandat ke Tim Medsos untuk publikasi otomatis'
+    }
+  ];
+
+  let currentAgencyStepIdx = 0;
+  let isAgencyStepRunning = false;
+  let agencyStepTimer = 8.0;
+
+  function runAgencyStep(stepIdx) {
+    if (isAgencyStepRunning) return;
+    const meetingAgents = Object.values(nodes).filter(o => o.at === 'meeting');
+    if (meetingAgents.length > 0) return;
+
+    const idx = stepIdx !== undefined ? stepIdx : currentAgencyStepIdx;
+    const step = AGENCY_PIPELINE_STEPS[idx % AGENCY_PIPELINE_STEPS.length];
+    const sender = nodes[step.senderId];
+    const target = nodes[step.targetId];
+
+    if (!sender || !target) {
+      currentAgencyStepIdx = (idx + 1) % AGENCY_PIPELINE_STEPS.length;
+      return;
+    }
+
+    isAgencyStepRunning = true;
+    if (onPipelineEvent) {
+      onPipelineEvent({ type: 'start', stepIndex: idx, step });
+    }
+
+    const targetSpot = [target.sx, target.sz + 1.2];
+    const walkPath = generateAgentWalkPath(sender.sx, sender.sz, targetSpot[0], targetSpot[1], sender.zone, target.zone);
+
+    sender.isMissionWalk = true;
+    sender.mode = 'walk';
+    sender.stand.visible = true;
+    sender.seat.visible = false;
+    sender.path = walkPath;
+
+    sender.onMissionArrive = () => {
+      const dx = target.sx - sender.x;
+      const dz = target.sz - sender.z;
+      sender.ry = Math.atan2(-dx, -dz);
+      target.ry = Math.atan2(dx, dz);
+
+      sender.say(step.dialogueSender, 5.0);
+      if (onPipelineEvent) {
+        onPipelineEvent({ type: 'dialogue', stepIndex: idx, step });
+      }
+
+      setTimeout(() => {
+        if (!isRunning) return;
+        target.say(step.dialogueTarget, 4.5);
+
+        setTimeout(() => {
+          if (!isRunning) return;
+          const returnPath = generateAgentWalkPath(sender.x, sender.z, sender.sx, sender.sz, target.zone, sender.zone);
+          sender.path = returnPath;
+          sender.mode = 'walk';
+          sender.stand.visible = true;
+          sender.seat.visible = false;
+
+          sender.onMissionArrive = () => {
+            sender.isMissionWalk = false;
+            sender.mode = 'seat';
+            sender.seat.visible = true;
+            sender.stand.visible = false;
+            sender.x = sender.sx;
+            sender.z = sender.sz;
+            sender.ry = 0;
+            sender.pg.position.set(sender.sx, 0, sender.sz);
+            sender.pg.rotation.set(0, 0, 0);
+            sender.tag.position.set(sender.sx, 0, sender.sz);
+
+            isAgencyStepRunning = false;
+            currentAgencyStepIdx = (idx + 1) % AGENCY_PIPELINE_STEPS.length;
+            agencyStepTimer = 16.0;
+            if (onPipelineEvent) {
+              onPipelineEvent({ type: 'complete', stepIndex: currentAgencyStepIdx, nextStep: AGENCY_PIPELINE_STEPS[currentAgencyStepIdx] });
+            }
+          };
+        }, 3600);
+      }, 2200);
+    };
+  }
+
+  // =========================================================================
   // 15. SIMULASI OTOMATIS: KARYAWAN JALAN & OBROLAN INTERAKTIF
   // =========================================================================
   let wanderCountdown = 9.0;
@@ -1265,6 +1488,15 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
         }
       }
       return;
+    }
+
+    // Estafet Alur Agensi Mandiri (Autonomous Creative Agency Pipeline)
+    // Agen berdiri, berjalan antar ruangan, serah terima materi naskah, video, desain & persetujuan CEO
+    if (!isAgencyStepRunning) {
+      agencyStepTimer -= dt;
+      if (agencyStepTimer <= 0) {
+        runAgencyStep(currentAgencyStepIdx);
+      }
     }
 
     // Jika di luar jam rapat: Ruang meeting formal tertutup, bukan tempat santai!
@@ -1514,6 +1746,12 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     setTimePhase,
     resize,
     setChatActive: (val) => { chatActive = val; },
+    triggerNextAgencyStep: () => {
+      if (!isAgencyStepRunning) {
+        runAgencyStep(currentAgencyStepIdx);
+      }
+    },
+    getCurrentAgencyStep: () => AGENCY_PIPELINE_STEPS[currentAgencyStepIdx],
     triggerAgentChat: (id, text) => {
       if (nodes[id]) {
         nodes[id].say(text || getRandomDialogue(id), 6.5);

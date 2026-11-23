@@ -16,6 +16,20 @@ export function App() {
   const [ideaText, setIdeaText] = useState('');
   const [selectedPilar, setSelectedPilar] = useState('Multimedia'); // 'Multimedia', 'Design', 'Web Development'
   const [chatActive, setChatActive] = useState(true);
+  const [activeAgencyMission, setActiveAgencyMission] = useState(null);
+  const [agencyDialogue, setAgencyDialogue] = useState(null);
+
+  const handlePipelineEvent = useCallback((ev) => {
+    if (ev.type === 'start') {
+      setActiveAgencyMission(ev.step);
+      setAgencyDialogue({ sender: ev.step.senderId, target: ev.step.targetId, text: `${ev.step.summary}...` });
+    } else if (ev.type === 'dialogue') {
+      setAgencyDialogue({ sender: ev.step.senderId, target: ev.step.targetId, text: `"${ev.step.dialogueSender}"` });
+    } else if (ev.type === 'complete') {
+      setActiveAgencyMission(ev.nextStep);
+      setTimeout(() => setAgencyDialogue(null), 3000);
+    }
+  }, []);
 
   const {
     agents,
@@ -162,6 +176,16 @@ export function App() {
             💼 Rapat CEO: <b>{isMeetingActive ? 'BERLANGSUNG' : 'MULAI'}</b>
           </button>
 
+          {/* Tombol Estafet Alur Agensi Mandiri (TikTok Agency Concept) */}
+          <button
+            type="button"
+            className={`status-pill agency-pipeline-pill ${activeAgencyMission ? 'active' : ''}`}
+            onClick={() => window.__triggerAgencyStep && window.__triggerAgencyStep()}
+            title="Klik untuk memicu langkah estafet berikutnya secara langsung (karyawan berdiri dan berjalan antar meja)"
+          >
+            ⚡ Estafet Agensi: <b>{activeAgencyMission ? activeAgencyMission.title : 'Berjalan Mandiri'}</b>
+          </button>
+
           {/* Tombol Konsep Viral TikTok : Starter Kit 1-Command */}
           <button
             type="button"
@@ -268,6 +292,17 @@ export function App() {
         </div>
       )}
 
+      {/* Floating Pipeline Notification Banner (Estafet Alur Agensi) */}
+      {agencyDialogue && (
+        <aside className="agency-floating-banner" aria-live="polite">
+          <span className="agency-icon">⚡</span>
+          <div className="agency-banner-body">
+            <span className="agency-title">ESTAFET AGENSI: {activeAgencyMission?.title || 'Kolaborasi Tim'}</span>
+            <p className="agency-desc">{agencyDialogue.text}</p>
+          </div>
+        </aside>
+      )}
+
       {/* 2. AREA UTAMA KANTOR (100% Layar) */}
       <main className="stage-fullscreen-container">
         {viewMode === '3d' ? (
@@ -279,6 +314,7 @@ export function App() {
             timePhase={activeTimePhase}
             chatActive={chatActive}
             onWebGLFallback={handleWebGLFallback}
+            onPipelineEvent={handlePipelineEvent}
           />
         ) : (
           <div className="plan2d-fullscreen-wrapper">
@@ -302,11 +338,12 @@ export function App() {
           {FLOW_STEPS.map((id) => {
             if (id === 'GATE') {
               const isSelected = selectedAgentId === 'ceo';
+              const isAgencyActive = activeAgencyMission && (activeAgencyMission.senderId === 'ceo' || activeAgencyMission.targetId === 'ceo');
               return (
                 <li key="gate-ceo">
                   <button
                     type="button"
-                    className={`step-bubble gate ${isSelected ? 'active' : ''}`}
+                    className={`step-bubble gate ${isSelected ? 'active' : ''} ${isAgencyActive ? 'agency-active-step' : ''}`}
                     onClick={() => handleSelectAgent('ceo')}
                     title="Titik Persetujuan CEO"
                   >
@@ -320,13 +357,14 @@ export function App() {
             stepNumber += 1;
             const agent = agentsMap[id];
             const isSelected = selectedAgentId === id;
+            const isAgencyActive = activeAgencyMission && (activeAgencyMission.senderId === id || activeAgencyMission.targetId === id);
             const curStep = stepNumber;
 
             return (
               <li key={id}>
                 <button
                   type="button"
-                  className={`step-bubble ${isSelected ? 'active' : ''}`}
+                  className={`step-bubble ${isSelected ? 'active' : ''} ${isAgencyActive ? 'agency-active-step' : ''}`}
                   onClick={() => handleSelectAgent(id)}
                   title={`Buka ${agent ? agent.nama : id}`}
                 >

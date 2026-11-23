@@ -7,7 +7,7 @@ export function useOfficeState() {
   const [agents, setAgents] = useState(() => {
     return INITIAL_AGENTS.map(a => ({
       ...a,
-      at: a.id === 'ceo' || a.status === 'working' ? 'desk' : null,
+      at: 'desk',
       slot: 0,
       rest: 'auto'
     }));
@@ -147,9 +147,8 @@ export function useOfficeState() {
     const occ = {};
     ALL_ROOMS.forEach(r => { occ[r.id] = []; });
 
-    // Step 1: keep working agents at desk (kecuali sedang rapat aktif dengan CEO), pertahankan posisi valid
+    // Step 1: Agen yang sedang rapat resmi tetap di Ruang Meeting
     list.forEach(a => {
-      // Jika agen sedang dalam agenda rapat di Ruang Meeting
       if (a.at === 'meeting') {
         const sl = a.slot !== undefined ? a.slot : (a.id === 'ceo' ? 5 : 0);
         if (occ['meeting'] && !occ['meeting'][sl]) {
@@ -159,38 +158,24 @@ export function useOfficeState() {
         }
       }
 
-      if (a.id === 'ceo' || a.status === 'working') {
-        a.at = 'desk';
-        a.slot = 0;
-        return;
-      }
-      const keep = a.at && a.at !== 'desk' && a.at !== 'meeting' && (!a.rest || a.rest === 'auto' || a.rest === a.at);
-      if (keep && occ[a.at] && !occ[a.at][a.slot]) {
-        occ[a.at][a.slot] = a.id;
-      } else {
-        a.at = null;
-      }
-    });
-
-    // Step 2: assign any waiting/attention agent who has no spot HANYA ke LOUNGE_ROOMS (ruang santai, BUKAN ruang meeting!)
-    list.forEach((a, i) => {
-      if (a.id === 'ceo' || a.status === 'working' || a.at) return;
-      const order = a.rest && a.rest !== 'auto' && a.rest !== 'meeting' ? [a.rest] : [];
-      for (let k = 0; k < LOUNGE_ROOMS.length; k++) {
-        order.push(LOUNGE_ROOMS[(i + k) % LOUNGE_ROOMS.length].id);
-      }
-      for (let j = 0; j < order.length && !a.at; j++) {
-        const rId = order[j];
+      // Step 2: Agen yang secara spesifik dipilih untuk santai di ruang santai tertentu (bukan 'auto' dan bukan 'desk')
+      if (a.rest && a.rest !== 'auto' && a.rest !== 'desk' && a.rest !== 'meeting') {
+        const rId = a.rest;
         const cap = LOUNGE_MAP[rId]?.cap || 4;
         for (let sl = 0; sl < cap; sl++) {
           if (!occ[rId][sl]) {
             occ[rId][sl] = a.id;
             a.at = rId;
             a.slot = sl;
-            break;
+            return;
           }
         }
       }
+
+      // Step 3: Default jam kerja kantor (07.00 - 23.00 WIB): Semua agen berada di MEJA KERJA MASING-MASING!
+      // Baik status 'working', 'waiting', maupun 'attention', mereka standby di meja kerja agensi.
+      a.at = 'desk';
+      a.slot = 0;
     });
 
     return list;
