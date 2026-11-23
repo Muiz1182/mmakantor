@@ -94,13 +94,21 @@ export function App() {
     setIsVideoReviewOpen(true);
   }, [approvals]);
 
-  const handleVerifyApproval = useCallback((id, decision, notes) => {
+  const handleVerifyApproval = useCallback((id, decision, notes, videoData, publishMode = 'now') => {
     decideApproval(id, decision, notes);
     if (decision === 'ok') {
       window.__triggerAgencyStep && window.__triggerAgencyStep('upload');
-      // Update pesan live
+
+      const title = videoData?.judul || '3 Trik Lighting Studio Modal 100 Ribuan';
+      const caption = videoData?.socialStats?.caption || `Video edukasi viral "${title}" persembahan MMA Production.`;
+
+      triggerPublishSlot({
+        title,
+        caption,
+        time: publishMode === 'now' ? 'Realtime' : 'Jadwal Operasional'
+      });
     }
-  }, [decideApproval]);
+  }, [decideApproval, triggerPublishSlot]);
 
   const handleIdeaSubmit = (e) => {
     e.preventDefault();

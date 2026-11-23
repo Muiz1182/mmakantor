@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { VIDEO_REVIEW_PRESETS, getVideoReviewPreset, buildDynamicVideoReviewData, OFFICIAL_SOCIAL_ACCOUNTS } from '../constants/videoReviewData';
 import { VideoPlayer3DCanvas } from './VideoPlayer3DCanvas';
 import { TopicNarrativeOverlays } from './TopicNarrativeOverlays';
+import { api } from '../services/api';
 
 // ============================================================================
 // AUDIO REVIEW ENGINE (WEB AUDIO API SOUND SYNTHESIZER + SPEECH SYNTHESIS TTS)
@@ -215,6 +216,9 @@ export function VideoReviewModal({
   const [activeSpeed, setActiveSpeed] = useState(1.0);
   const [copiedNotification, setCopiedNotification] = useState(null);
   const [viewMode3D, setViewMode3D] = useState(true);
+  const [publishMode, setPublishMode] = useState('now'); // 'now' | 'schedule'
+  const [isApprovedSuccess, setIsApprovedSuccess] = useState(false);
+  const [socialStatus, setSocialStatus] = useState(null);
 
   // Sound Engine Instance
   const soundEngineRef = useRef(null);
@@ -265,6 +269,7 @@ export function VideoReviewModal({
   // Sinkronisasi saat approvalItem berubah atau saat modal dibuka
   useEffect(() => {
     if (isOpen) {
+      setIsApprovedSuccess(false);
       if (approvalItem?.id) {
         setSelectedPresetId(approvalItem.id);
       } else if (combinedVideoList.length > 0) {
@@ -278,6 +283,7 @@ export function VideoReviewModal({
     setCurrentTime(0);
     setIsPlaying(false);
     setIsRevisionMode(false);
+    setIsApprovedSuccess(false);
     setRevisionNote('');
     soundEngineRef.current.stopBgm();
     soundEngineRef.current.stopNarration();
@@ -384,9 +390,17 @@ export function VideoReviewModal({
     soundEngineRef.current.stopBgm();
     soundEngineRef.current.stopNarration();
     if (onVerifyApproval) {
-      onVerifyApproval(videoData.id, 'ok');
+      onVerifyApproval(videoData.id, 'ok', '', videoData, publishMode);
     }
-    onClose();
+    // Salin otomatis naskah dan caption untuk memudahkan CEO
+    handleCopyBundle();
+    // Ambil status token teranyar dari backend
+    api.getSocialStatus().then(res => {
+      if (res && res.success) {
+        setSocialStatus(res.data);
+      }
+    });
+    setIsApprovedSuccess(true);
   };
 
   const handleSendRevision = () => {
@@ -477,8 +491,154 @@ export function VideoReviewModal({
           </div>
         </header>
 
-        {/* BODY DUA KOLOM: PEMUTAR VIDEO 9:16 + PANEL QC & KEPUTUSAN */}
-        <div className="video-review-grid">
+        {/* BODY UTAMA: TAMPILAN STATUS DISTRIBUSI ATAU DUA KOLOM REVIEW */}
+        {isApprovedSuccess ? (
+          <div className="review-distribution-screen">
+            {/* BANNER STATUS BERHASIL */}
+            <div className="dist-status-banner">
+              <span className="dist-banner-icon">🚀</span>
+              <div className="dist-banner-text">
+                <h3 className="dist-banner-title">Video Resmi Diverifikasi & Diteruskan ke Tim Medsos!</h3>
+                <p className="dist-banner-desc">
+                  Materi video <b>"{videoData.judul}"</b> ({videoData.pilar}) telah disetujui CEO dan diteruskan ke antrean publikasi <b>{publishMode === 'now' ? 'Realtime (Sekarang)' : 'Jadwal Operasional Kantor'}</b>.
+                </p>
+              </div>
+              <span className="dist-mode-pill">
+                {publishMode === 'now' ? '⚡ Realtime Publish' : '🗓️ Antrean Tayang'}
+              </span>
+            </div>
+
+            {/* STATUS 3 AKUN MEDSOS RESMI */}
+            <div className="dist-platforms-section">
+              <h4 className="dist-section-title">🎯 Status Distribusi 3 Platform Resmi MMA Production</h4>
+              <div className="dist-platforms-grid">
+                {/* 1. TIKTOK */}
+                <div className="dist-platform-card tiktok">
+                  <div className="dist-card-head">
+                    <span className="dist-card-icon">🎵</span>
+                    <div className="dist-card-meta">
+                      <strong>TikTok Official</strong>
+                      <span className="dist-handle">{OFFICIAL_SOCIAL_ACCOUNTS.tiktok.handle}</span>
+                    </div>
+                    <span className={`dist-status-tag ${socialStatus?.accounts?.tiktok?.isConfigured ? 'live' : 'hub'}`}>
+                      {socialStatus?.accounts?.tiktok?.isConfigured ? '✓ Live API' : '🟡 Creator Hub'}
+                    </span>
+                  </div>
+                  <div className="dist-card-body">
+                    <span className="dist-spec-info">Format: 9:16 Video Vertikal • Rec.709 Sinematik</span>
+                    <p className="dist-detail-p">
+                      {socialStatus?.accounts?.tiktok?.isConfigured
+                        ? 'Payload video berhasil diteruskan ke endpoint TikTok Content Posting API.'
+                        : 'Format vertikal 9:16, audio -14 LUFS, dan naskah sudah siap. Buka Creator Center untuk unggah.'}
+                    </p>
+                  </div>
+                  <a
+                    href="https://www.tiktok.com/creator-center/upload"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="dist-link-btn"
+                  >
+                    Buka TikTok Creator Center ↗
+                  </a>
+                </div>
+
+                {/* 2. INSTAGRAM */}
+                <div className="dist-platform-card instagram">
+                  <div className="dist-card-head">
+                    <span className="dist-card-icon">📸</span>
+                    <div className="dist-card-meta">
+                      <strong>Instagram Reels</strong>
+                      <span className="dist-handle">{OFFICIAL_SOCIAL_ACCOUNTS.instagram.handle}</span>
+                    </div>
+                    <span className={`dist-status-tag ${socialStatus?.accounts?.instagram?.isConfigured ? 'live' : 'hub'}`}>
+                      {socialStatus?.accounts?.instagram?.isConfigured ? '✓ Live API' : '🟡 Creator Hub'}
+                    </span>
+                  </div>
+                  <div className="dist-card-body">
+                    <span className="dist-spec-info">Format: Reels 4K 60fps • Lo-Fi Tempo Cepat</span>
+                    <p className="dist-detail-p">
+                      {socialStatus?.accounts?.instagram?.isConfigured
+                        ? 'Container media Reels dibuat dan diproses via Instagram Graph API.'
+                        : 'Hook visual 3 detik dan caption SEO telah disalin otomatis ke clipboard Anda.'}
+                    </p>
+                  </div>
+                  <a
+                    href="https://www.instagram.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="dist-link-btn"
+                  >
+                    Buka Instagram Reels ↗
+                  </a>
+                </div>
+
+                {/* 3. YOUTUBE */}
+                <div className="dist-platform-card youtube">
+                  <div className="dist-card-head">
+                    <span className="dist-card-icon">🔴</span>
+                    <div className="dist-card-meta">
+                      <strong>YouTube Shorts</strong>
+                      <span className="dist-handle">{OFFICIAL_SOCIAL_ACCOUNTS.youtube.handle}</span>
+                    </div>
+                    <span className={`dist-status-tag ${socialStatus?.accounts?.youtube?.isConfigured ? 'live' : 'hub'}`}>
+                      {socialStatus?.accounts?.youtube?.isConfigured ? '✓ Live API' : '🟡 Creator Hub'}
+                    </span>
+                  </div>
+                  <div className="dist-card-body">
+                    <span className="dist-spec-info">Format: YouTube #Shorts • Durasi 30 Detik</span>
+                    <p className="dist-detail-p">
+                      {socialStatus?.accounts?.youtube?.isConfigured
+                        ? 'Video snippet telah didaftarkan ke YouTube Data API v3.'
+                        : 'Naskah cerita bertutur dan tagar #Shorts siap dipublikasikan ke channel @Muiz1182.'}
+                    </p>
+                  </div>
+                  <a
+                    href="https://studio.youtube.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="dist-link-btn"
+                  >
+                    Buka YouTube Studio ↗
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* PENJELASAN TRANSPARAN TOKEN & API (.ENV) */}
+            <div className="dist-token-guide-box">
+              <span className="guide-bulb">💡</span>
+              <div className="guide-copy">
+                <h5>Mengapa video tidak langsung muncul di akun jika token .env belum diisi?</h5>
+                <p>
+                  Agar server bisa mengunggah file video biner secara otomatis langsung ke akun medsos tanpa membuka browser, platform (TikTok, Instagram Meta, Google YouTube) mewajibkan otorisasi akun melalui <b>Token Akses API</b> di file <code>.env</code> (<code>TIKTOK_ACCESS_TOKEN</code>, <code>INSTAGRAM_ACCESS_TOKEN</code>, <code>YOUTUBE_API_KEY</code>).
+                </p>
+                <p>
+                  Karena saat ini token di <code>.env</code> belum diisi, sistem beroperasi dalam <b>Mode Kreator Hub</b>: Karyawan AI di kantor 3D (Upload Video & Story) langsung aktif memproses unggahan, materi caption telah disalin otomatis ke clipboard, dan tombol 1-klik di atas membuka dashboard unggah resmi masing-masing platform.
+                </p>
+              </div>
+            </div>
+
+            {/* AKSI BAWAH */}
+            <div className="dist-footer-actions">
+              <button
+                type="button"
+                className="btn-copy-again"
+                onClick={handleCopyBundle}
+              >
+                📋 Salin Ulang Naskah & Caption
+              </button>
+              <button
+                type="button"
+                className="btn-finish-review"
+                onClick={onClose}
+              >
+                ✓ Selesai & Kembali ke Kantor 3D
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* BODY DUA KOLOM: PEMUTAR VIDEO 9:16 + PANEL QC & KEPUTUSAN */
+          <div className="video-review-grid">
           {/* KOLOM 1: SIMULATOR PEMUTAR SMARTPHONE 9:16 DINAMIS */}
           <section className="phone-mockup-section" aria-label="Simulator Pemutar Video 9:16">
             <div className="phone-frame">
@@ -950,6 +1110,42 @@ export function VideoReviewModal({
               </div>
             )}
 
+        {/* OPSI MODE PUBLIKASI */}
+            {!isRevisionMode && (
+              <div className="publish-mode-selector-box">
+                <span className="mode-selector-title">⚡ Opsi Distribusi Publikasi:</span>
+                <div className="mode-chips-grid">
+                  <label className={`mode-choice-chip ${publishMode === 'now' ? 'active' : ''}`}>
+                    <input
+                      type="radio"
+                      name="publishChoice"
+                      value="now"
+                      checked={publishMode === 'now'}
+                      onChange={() => setPublishMode('now')}
+                    />
+                    <div className="mode-chip-content">
+                      <strong className="chip-headline">🚀 Terbitkan Sekarang</strong>
+                      <span className="chip-subline">Langsung eksekusi ke 3 platform resmi</span>
+                    </div>
+                  </label>
+
+                  <label className={`mode-choice-chip ${publishMode === 'schedule' ? 'active' : ''}`}>
+                    <input
+                      type="radio"
+                      name="publishChoice"
+                      value="schedule"
+                      checked={publishMode === 'schedule'}
+                      onChange={() => setPublishMode('schedule')}
+                    />
+                    <div className="mode-chip-content">
+                      <strong className="chip-headline">🗓️ Antrekan Jadwal Tayang</strong>
+                      <span className="chip-subline">Sesuai jam operasional prime time kantor</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            )}
+
             {/* TOMBOL KEPUTUSAN UTAMA CEO */}
             {!isRevisionMode && (
               <div className="review-decision-actions">
@@ -980,6 +1176,7 @@ export function VideoReviewModal({
             )}
           </section>
         </div>
+        )}
       </div>
     </div>
   );
