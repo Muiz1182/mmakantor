@@ -195,3 +195,165 @@ export const WEEKLY_SCHEDULE = [
 export function getTodaySchedule(dayIndex) {
   return WEEKLY_SCHEDULE.find(d => d.dayIndex === dayIndex) || WEEKLY_SCHEDULE[0];
 }
+
+// ============================================================================
+// RUTINITAS HARIAN KANTOR MMA PRODUCTION (07.00 - 23.00 WIB)
+// ============================================================================
+export const DAILY_ROUTINES = [
+  {
+    id: 'r-morning-prep',
+    timeStart: '07:00',
+    timeEnd: '08:30',
+    title: 'Morning Coffee & Analytics Check',
+    locationId: 'lunch',
+    locationLabel: 'Ruang Lunch / Cafe',
+    category: 'break',
+    icon: '☕',
+    desc: 'Karyawan tiba di kantor, cek analitik konten semalam sambil ngopi pagi santai.'
+  },
+  {
+    id: 'r-standup',
+    timeStart: '08:30',
+    timeEnd: '09:30',
+    title: 'Daily Morning Standup Meeting',
+    locationId: 'meeting',
+    locationLabel: 'Ruang Meeting',
+    category: 'meeting',
+    icon: '💼',
+    desc: 'Rapat koordinasi harian tim Multimedia, Design, dan Web Dev. Sinkronisasi target konten hari ini.'
+  },
+  {
+    id: 'r-focus-1',
+    timeStart: '09:30',
+    timeEnd: '12:00',
+    title: 'Deep Work 1: Naskah & Ide Edukasi',
+    locationId: 'desk',
+    locationLabel: 'Meja Kerja Masing-masing',
+    category: 'work',
+    icon: '💻',
+    desc: 'Penulisan hook naskah 3 detik, riset topik trending, dan penyusunan slide visual carousel.'
+  },
+  {
+    id: 'r-lunch',
+    timeStart: '12:00',
+    timeEnd: '13:30',
+    title: 'Istirahat Siang & Lunch Break',
+    locationId: 'lunch',
+    locationLabel: 'Ruang Lunch & Kolam Renang',
+    category: 'break',
+    icon: '🍱',
+    desc: 'Jam makan siang bersama karyawan, santai di cafe, atau relaksasi di tepi kolam renang.'
+  },
+  {
+    id: 'r-focus-2',
+    timeStart: '13:30',
+    timeEnd: '16:00',
+    title: 'Deep Work 2: Syuting Studio & Video Editing',
+    locationId: 'desk',
+    locationLabel: 'Studio & Meja Editor',
+    category: 'work',
+    icon: '🎬',
+    desc: 'Perekaman di green screen studio, pemotongan video ritme cepat, dan color grading.'
+  },
+  {
+    id: 'r-coffee-ps',
+    timeStart: '16:00',
+    timeEnd: '16:45',
+    title: 'Coffee Break & Gaming Session',
+    locationId: 'ps',
+    locationLabel: 'Ruang PlayStation & Biliard',
+    category: 'break',
+    icon: '🎮',
+    desc: 'Istirahat sore santai, main biliard atau PS, refresh pikiran agar ide tetap segar.'
+  },
+  {
+    id: 'r-review',
+    timeStart: '16:45',
+    timeEnd: '18:30',
+    title: 'Review Draf & Auto-Approval FYP',
+    locationId: 'desk',
+    locationLabel: 'Meja Publikasi & CEO',
+    category: 'work',
+    icon: '🔥',
+    desc: 'Evaluasi skor potensi FYP oleh AI Chief Editor dan persiapan rilis konten malam.'
+  },
+  {
+    id: 'r-dinner',
+    timeStart: '18:30',
+    timeEnd: '19:30',
+    title: 'Istirahat Malam & Dinner Break',
+    locationId: 'lunch',
+    locationLabel: 'Ruang Cafe',
+    category: 'break',
+    icon: '🌙',
+    desc: 'Istirahat makan malam dan waktu sholat Maghrib/Isya bagi tim.'
+  },
+  {
+    id: 'r-eval-meeting',
+    timeStart: '19:30',
+    timeEnd: '20:30',
+    title: 'Evening Meeting: Evaluasi Konten Tayang',
+    locationId: 'meeting',
+    locationLabel: 'Ruang Meeting',
+    category: 'meeting',
+    icon: '📊',
+    desc: 'Rapat evaluasi performa konten yang baru rilis, membaca retensi penonton dan respon komentar.'
+  },
+  {
+    id: 'r-engagement',
+    timeStart: '20:30',
+    timeEnd: '22:30',
+    title: 'Live Engagement: Balas Komentar & DM',
+    locationId: 'desk',
+    locationLabel: 'Meja Publikasi',
+    category: 'work',
+    icon: '💬',
+    desc: 'Tim Publikasi aktif membalas komentar masuk dan menyusun draf balasan DM calon klien.'
+  },
+  {
+    id: 'r-wrapup',
+    timeStart: '22:30',
+    timeEnd: '23:00',
+    title: 'Daily Wrap-up & Closing',
+    locationId: 'desk',
+    locationLabel: 'Meja Kerja',
+    category: 'work',
+    icon: '📁',
+    desc: 'Menyimpan progres harian, backup data kerja ke PostgreSQL, persiapan jam istirahat.'
+  },
+  {
+    id: 'r-sleep',
+    timeStart: '23:00',
+    timeEnd: '07:00',
+    title: 'Kantor Tutup & Night Sleep',
+    locationId: 'dorm',
+    locationLabel: 'Asrama Karyawan',
+    category: 'sleep',
+    icon: '🛏️',
+    desc: 'Di luar jam kerja kantor (07.00 - 23.00 WIB). Lampu dipadamkan dan karyawan tidur di asrama.'
+  }
+];
+
+export function getCurrentRoutine(hour, minute) {
+  const currentTotalMins = hour * 60 + minute;
+
+  for (const r of DAILY_ROUTINES) {
+    const [startH, startM] = r.timeStart.split(':').map(Number);
+    const [endH, endM] = r.timeEnd.split(':').map(Number);
+    const startMins = startH * 60 + startM;
+    let endMins = endH * 60 + endM;
+
+    // Khusus rutinitas malam yang melewati tengah malam (23:00 - 07:00)
+    if (endMins < startMins) {
+      if (currentTotalMins >= startMins || currentTotalMins < endMins) {
+        return r;
+      }
+    } else {
+      if (currentTotalMins >= startMins && currentTotalMins < endMins) {
+        return r;
+      }
+    }
+  }
+
+  return DAILY_ROUTINES[0];
+}

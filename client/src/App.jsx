@@ -41,7 +41,8 @@ export function App() {
     autoApproval,
     toggleAutoApproval,
     submitCeoIdea,
-    triggerPublishSlot
+    triggerPublishSlot,
+    triggerOfficeRoutine
   } = useOfficeState();
 
   const handleWebGLFallback = useCallback(() => {
@@ -348,7 +349,7 @@ export function App() {
           📋 Panel Karyawan: <b>{selectedAgent?.id === 'ceo' ? 'CEO' : selectedAgent?.nama}</b>
         </button>
       )}
-      {/* Modal Kalender Jadwal Publikasi Harian */}
+      {/* Modal Kalender Jadwal Publikasi Harian & Rutinitas Kantor */}
       <ScheduleModal
         isOpen={isScheduleOpen}
         onClose={() => setIsScheduleOpen(false)}
@@ -356,6 +357,7 @@ export function App() {
         currentHour={clockTime?.h}
         currentMinute={clockTime?.m}
         onTriggerPublish={triggerPublishSlot}
+        onTriggerRoutine={triggerOfficeRoutine}
       />
     </div>
   );

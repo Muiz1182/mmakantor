@@ -508,6 +508,37 @@ export function useOfficeState() {
     setLiveMessage(`🚀 KONTEN TAYANG OTOMATIS: "${slot.title}" berhasil dipublikasikan ke ${slot.platform}!`);
   }, []);
 
+  // Mengarahkan Karyawan ke Lokasi Rutinitas (Meeting, Lunch, Gaming, Tidur, dll.)
+  const triggerOfficeRoutine = useCallback((routine) => {
+    const loc = routine.locationId; // 'meeting', 'lunch', 'ps', 'dorm', 'desk'
+
+    setAgents(prev => prev.map(a => {
+      if (a.id === 'ceo') return a;
+
+      if (loc === 'desk') {
+        return {
+          ...a,
+          status: 'working',
+          sLabel: 'Bekerja',
+          at: 'desk',
+          rest: 'auto',
+          now: `Fokus bekerja pada target edukasi hari ini: ${routine.title}.`
+        };
+      } else {
+        return {
+          ...a,
+          status: routine.category === 'meeting' ? 'working' : 'waiting',
+          sLabel: routine.category === 'meeting' ? 'Rapat' : 'Istirahat',
+          rest: loc,
+          at: null,
+          now: `Sedang mengikuti ${routine.title} di ${routine.locationLabel}.`
+        };
+      }
+    }));
+
+    setLiveMessage(`🏢 [${routine.timeStart} WIB] ${routine.title} dimulai di ${routine.locationLabel}.`);
+  }, []);
+
   // Tally counts
   const tally = useMemo(() => {
     const nonCeo = placedAgents.filter(a => a.id !== 'ceo');
@@ -548,6 +579,7 @@ export function useOfficeState() {
     autoApproval,
     toggleAutoApproval,
     submitCeoIdea,
-    triggerPublishSlot
+    triggerPublishSlot,
+    triggerOfficeRoutine
   };
 }
