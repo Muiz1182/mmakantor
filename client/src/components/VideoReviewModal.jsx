@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { VIDEO_REVIEW_PRESETS, getVideoReviewPreset } from '../constants/videoReviewData';
+import { VIDEO_REVIEW_PRESETS, getVideoReviewPreset, OFFICIAL_SOCIAL_ACCOUNTS } from '../constants/videoReviewData';
 
 export function VideoReviewModal({
   isOpen,
@@ -273,7 +273,7 @@ export function VideoReviewModal({
 
                       {/* Deskripsi & Audio Bawah TikTok */}
                       <div className="tiktok-bottom-meta">
-                        <div className="tiktok-username">@mmaproduction • <b>Ikuti</b></div>
+                        <div className="tiktok-username">{OFFICIAL_SOCIAL_ACCOUNTS.tiktok.handle} • <b>Ikuti</b></div>
                         <p className="tiktok-caption">{videoData.socialStats.caption}</p>
                         <div className="tiktok-audio-row">
                           <span className="audio-music-icon">🎵</span>
@@ -429,6 +429,66 @@ export function VideoReviewModal({
                   </li>
                 ))}
               </ul>
+            </div>
+
+            {/* TARGET DISTRIBUSI MEDSOS RESMI */}
+            <div className="qc-target-accounts-card">
+              <div className="target-accounts-header">
+                <h3 className="qc-section-title">🎯 Akun Target Distribusi Otomatis</h3>
+                <span className="auto-sync-pill">⚡ Terhubung Jadwal Jam Kantor</span>
+              </div>
+              <p className="qc-accounts-sub">
+                Saat disetujui, video ini otomatis masuk antrean tayang dan langsung diterbitkan ke 3 platform resmi MMA Production saat waktu jadwal rilis tiba:
+              </p>
+              <div className="social-accounts-grid">
+                <a
+                  href={OFFICIAL_SOCIAL_ACCOUNTS.tiktok.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-account-badge tiktok"
+                  title="Buka profil TikTok MMA Production"
+                >
+                  <span className="platform-icon">🎵</span>
+                  <div className="platform-info">
+                    <span className="platform-name">TikTok Official</span>
+                    <strong className="platform-handle">{OFFICIAL_SOCIAL_ACCOUNTS.tiktok.handle}</strong>
+                    <span className="platform-meta">{OFFICIAL_SOCIAL_ACCOUNTS.tiktok.format}</span>
+                  </div>
+                  <span className="platform-link-icon">↗</span>
+                </a>
+
+                <a
+                  href={OFFICIAL_SOCIAL_ACCOUNTS.instagram.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-account-badge instagram"
+                  title="Buka profil Instagram MMA Desain"
+                >
+                  <span className="platform-icon">📸</span>
+                  <div className="platform-info">
+                    <span className="platform-name">Instagram Reels</span>
+                    <strong className="platform-handle">{OFFICIAL_SOCIAL_ACCOUNTS.instagram.handle}</strong>
+                    <span className="platform-meta">{OFFICIAL_SOCIAL_ACCOUNTS.instagram.format}</span>
+                  </div>
+                  <span className="platform-link-icon">↗</span>
+                </a>
+
+                <a
+                  href={OFFICIAL_SOCIAL_ACCOUNTS.youtube.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-account-badge youtube"
+                  title="Buka channel YouTube Muiz"
+                >
+                  <span className="platform-icon">🔴</span>
+                  <div className="platform-info">
+                    <span className="platform-name">YouTube Shorts</span>
+                    <strong className="platform-handle">{OFFICIAL_SOCIAL_ACCOUNTS.youtube.handle}</strong>
+                    <span className="platform-meta">{OFFICIAL_SOCIAL_ACCOUNTS.youtube.format}</span>
+                  </div>
+                  <span className="platform-link-icon">↗</span>
+                </a>
+              </div>
             </div>
 
             {/* FORMULIR CATATAN REVISI JIKA MINTA REVISI */}

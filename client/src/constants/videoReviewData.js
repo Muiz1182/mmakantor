@@ -5,6 +5,27 @@
 // sebelum diteruskan ke Tim Medsos (Upload Video, Caption, Story).
 // ============================================================================
 
+export const OFFICIAL_SOCIAL_ACCOUNTS = {
+  tiktok: {
+    handle: '@mma.production7',
+    url: 'https://www.tiktok.com/@mma.production7',
+    label: 'TikTok',
+    format: '9:16 Video Vertikal'
+  },
+  instagram: {
+    handle: '@mmadesain',
+    url: 'https://www.instagram.com/mmadesain/',
+    label: 'Instagram Reels',
+    format: 'Reels 4K 60fps'
+  },
+  youtube: {
+    handle: '@Muiz1182',
+    url: 'https://www.youtube.com/@Muiz1182',
+    label: 'YouTube Shorts',
+    format: 'Shorts #Shorts'
+  }
+};
+
 export const VIDEO_REVIEW_PRESETS = [
   {
     id: 'a1',

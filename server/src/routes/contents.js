@@ -1,7 +1,42 @@
 import { Router } from 'express';
 import { getAllContents, createContent } from '../services/officeStore.js';
+import { publishToAllOfficialSocials, OFFICIAL_ACCOUNTS } from '../services/socialMediaService.js';
 
 const router = Router();
+
+// GET /api/contents/social-accounts - Informasi akun medsos resmi yang terhubung
+router.get('/social-accounts', (req, res) => {
+  res.json({
+    success: true,
+    data: OFFICIAL_ACCOUNTS
+  });
+});
+
+// POST /api/contents/publish-socials - Eksekusi pengunggahan langsung ke TikTok, IG Reels, dan YT Shorts
+router.post('/publish-socials', async (req, res) => {
+  try {
+    const { title, caption, videoUrl, scheduledTime } = req.body;
+    const result = await publishToAllOfficialSocials({
+      title: title || 'Video Edukasi MMA Production',
+      caption: caption || '',
+      videoUrl: videoUrl || '',
+      scheduledTime
+    });
+
+    // Catat ke log konten lokal/database
+    await createContent({
+      judul: title || 'Video Edukasi Multi-Platform',
+      format: 'Reels / TikTok (9:16)',
+      platform: 'TikTok, Instagram, YouTube',
+      status: 'published',
+      jadwalTayang: scheduledTime || 'Realtime'
+    });
+
+    res.json({ success: true, data: result });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 // GET /api/contents - Ambil semua konten
 router.get('/', async (req, res) => {

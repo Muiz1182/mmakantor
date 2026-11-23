@@ -3348,3 +3348,121 @@ button:focus-visible, input:focus-visible {
   font: 400 10.5px var(--f-body);
   opacity: 0.85;
 }
+
+/* ==========================================================================
+   TARGET AKUN MEDSOS RESMI DISTRIBUSI (TIKTOK, INSTAGRAM, YOUTUBE)
+   ========================================================================== */
+.qc-target-accounts-card {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.target-accounts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.auto-sync-pill {
+  font: 700 10px var(--f-mono);
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+
+.qc-accounts-sub {
+  font: 400 11px var(--f-body);
+  color: var(--muted);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.social-accounts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.social-account-badge {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.social-account-badge:hover {
+  transform: translateY(-2px);
+  border-color: #38bdf8;
+  background: rgba(15, 23, 42, 0.85);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.social-account-badge.tiktok:hover {
+  border-color: #ff0050;
+}
+
+.social-account-badge.instagram:hover {
+  border-color: #e1306c;
+}
+
+.social-account-badge.youtube:hover {
+  border-color: #ff0000;
+}
+
+.social-account-badge .platform-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.social-account-badge .platform-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.social-account-badge .platform-name {
+  font: 600 10px var(--f-mono);
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.social-account-badge .platform-handle {
+  font: 700 12px var(--f-display);
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.social-account-badge .platform-meta {
+  font: 400 9.5px var(--f-body);
+  color: #38bdf8;
+  margin-top: 1px;
+}
+
+.social-account-badge .platform-link-icon {
+  font: 700 12px var(--f-mono);
+  color: var(--muted);
+  opacity: 0.6;
+  margin-left: auto;
+}
+
+.social-account-badge:hover .platform-link-icon {
+  color: #38bdf8;
+  opacity: 1;
+}

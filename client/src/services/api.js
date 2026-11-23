@@ -125,5 +125,37 @@ export const api = {
     } catch (err) {
       return null;
     }
+  },
+
+  // Simpan konten baru ke database
+  async createContent(data) {
+    try {
+      const res = await fetch(`${API_BASE}/contents`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn('Gagal simpan konten ke backend:', err.message);
+      return null;
+    }
+  },
+
+  // Publikasikan video ke akun medsos resmi (TikTok, Instagram, YouTube)
+  async publishSocials({ title, caption, videoUrl, scheduledTime }) {
+    try {
+      const res = await fetch(`${API_BASE}/contents/publish-socials`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, caption, videoUrl, scheduledTime }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn('Gagal eksekusi publish socials ke backend:', err.message);
+      return null;
+    }
   }
 };

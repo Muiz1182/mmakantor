@@ -474,9 +474,9 @@ export function useOfficeState() {
       });
 
       if (action === 'rev') {
-        setLiveMessage(`Revisi diminta untuk: ${target.judul}`);
+        setLiveMessage(`⚠️ REVISI DIMINTA: "${target.judul}" dikembalikan ke tim editor untuk perbaikan.`);
       } else {
-        setLiveMessage(`Persetujuan diberikan untuk: ${target.judul}`);
+        setLiveMessage(`✅ DIVERIFIKASI & DISETUJUI CEO: "${target.judul}" siap tayang ke TikTok (@mma.production7), Instagram (@mmadesain), dan YouTube (@Muiz1182) sesuai jadwal rilis.`);
       }
 
       return updated;
@@ -630,7 +630,7 @@ export function useOfficeState() {
           ...a,
           status: 'working',
           sLabel: 'Mengunggah',
-          now: `Mengunggah konten jadwal ${slot.time}: "${slot.title}" ke ${slot.platform}.`,
+          now: `Mengunggah video jadwal ${slot.time}: "${slot.title}" ke TikTok (@mma.production7), IG Reels (@mmadesain), dan YT Shorts (@Muiz1182).`,
           tugas: a.tugas.map((t, idx) => (idx === 0 ? { ...t, d: true } : t))
         };
       }
@@ -639,7 +639,7 @@ export function useOfficeState() {
           ...a,
           status: 'working',
           sLabel: 'Bekerja',
-          now: `Menyiapkan story teaser & tautan untuk: "${slot.title}".`
+          now: `Menyiapkan teaser IG Story & link bio untuk: "${slot.title}".`
         };
       }
       if (a.id === 'komentar') {
@@ -647,22 +647,20 @@ export function useOfficeState() {
           ...a,
           status: 'working',
           sLabel: 'Memantau',
-          now: `Memantau komentar masuk pada konten baru: "${slot.title}".`
+          now: `Memantau komentar masuk di TikTok & Instagram pada: "${slot.title}".`
         };
       }
       return a;
     }));
 
-    // 2. Simpan status published ke backend jika API aktif
-    api.createContent({
-      judul: slot.title,
-      format: slot.format,
-      platform: slot.platform,
-      status: 'published',
-      jadwalTayang: new Date().toISOString()
+    // 2. Eksekusi pengiriman ke backend multi-platform API
+    api.publishSocials({
+      title: slot.title,
+      caption: slot.caption || `Video edukasi viral "${slot.title}" persembahan MMA Production.`,
+      scheduledTime: slot.time
     });
 
-    setLiveMessage(`🚀 KONTEN TAYANG OTOMATIS: "${slot.title}" berhasil dipublikasikan ke ${slot.platform}!`);
+    setLiveMessage(`🚀 KONTEN TERBIT (${slot.time} WIB): "${slot.title}" berhasil diunggah ke TikTok (@mma.production7), Instagram (@mmadesain), dan YouTube (@Muiz1182)!`);
   }, []);
 
   // Otomasi Publikasi Medsos Selaras Jadwal Operasional Harian
