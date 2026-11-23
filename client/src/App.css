@@ -2559,6 +2559,33 @@ button:focus-visible, input:focus-visible {
   background: radial-gradient(circle at 50% 40%, #1e293b 0%, #06090e 100%);
 }
 
+.video-visual-stage.mode-3d {
+  background: transparent;
+}
+
+.video-after-layer.canvas-3d-overlay {
+  background: transparent;
+  pointer-events: none;
+}
+
+.badge-3d-tag {
+  font: 700 9px var(--f-mono);
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  padding: 3px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.mode-3d-toggle {
+  color: #38bdf8 !important;
+  font-weight: 700;
+}
+
 .video-after-layer,
 .video-before-layer {
   position: absolute;

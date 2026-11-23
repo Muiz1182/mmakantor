@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { VIDEO_REVIEW_PRESETS, getVideoReviewPreset, buildDynamicVideoReviewData, OFFICIAL_SOCIAL_ACCOUNTS } from '../constants/videoReviewData';
+import { VideoPlayer3DCanvas } from './VideoPlayer3DCanvas';
 
 // ============================================================================
 // AUDIO REVIEW ENGINE (WEB AUDIO API SOUND SYNTHESIZER + SPEECH SYNTHESIS TTS)
@@ -212,6 +213,7 @@ export function VideoReviewModal({
   const [revisionNote, setRevisionNote] = useState('');
   const [activeSpeed, setActiveSpeed] = useState(1.0);
   const [copiedNotification, setCopiedNotification] = useState(null);
+  const [viewMode3D, setViewMode3D] = useState(true);
 
   // Sound Engine Instance
   const soundEngineRef = useRef(null);
@@ -434,6 +436,7 @@ export function VideoReviewModal({
               <span className="badge-format-tag">9:16 VERTICAL (REELS & TIKTOK)</span>
               <span className="badge-pilar-tag">{videoData.pilar}</span>
               <span className="badge-audio-live">{isPlaying ? '🔊 AUDIO BEAT & VOKAL AKTIF' : '⏸ SIAP DIPUTAR'}</span>
+              <span className="badge-3d-tag">{viewMode3D ? '🧊 THREE.JS 3D ENGINE' : '2D STYLIZED'}</span>
             </div>
             <h2 id="video-review-modal-title" className="review-modal-title">
               Review Hasil Video: {videoData.judul}
@@ -492,10 +495,24 @@ export function VideoReviewModal({
 
               {/* LAYAR VIDEO VERTIKAL DINAMIS BERGERAK */}
               <div className="phone-screen" onClick={togglePlay} title="Klik layar untuk Play / Pause">
-                <div className={`video-visual-stage scene-${currentSceneIndex} ${isPlaying ? 'is-playing' : ''}`}>
+                <div className={`video-visual-stage scene-${currentSceneIndex} ${isPlaying ? 'is-playing' : ''} ${viewMode3D ? 'mode-3d' : 'mode-2d'}`}>
+                  {/* KANVAS ANIMASI 3D REALTIME (THREE.JS) */}
+                  {viewMode3D && (
+                    <VideoPlayer3DCanvas
+                      isPlaying={isPlaying}
+                      currentTime={currentTime}
+                      currentSceneIndex={currentSceneIndex}
+                      sliderPos={sliderPos}
+                      videoData={videoData}
+                      pilar={videoData.pilar}
+                    />
+                  )}
+
                   {/* Sisi After (Cinematic Grading DaVinci) */}
-                  <div className="video-after-layer">
-                    <div className={`studio-light-beam ${isPlaying ? 'light-sweep' : ''}`} />
+                  <div className={`video-after-layer ${viewMode3D ? 'canvas-3d-overlay' : ''}`}>
+                    {!viewMode3D && (
+                      <div className={`studio-light-beam ${isPlaying ? 'light-sweep' : ''}`} />
+                    )}
                     
                     {/* Elemen Visual Sesuai Adegan (Multi-Scene Graphics Dinamis) */}
                     {currentSceneIndex === 0 && (
@@ -531,41 +548,45 @@ export function VideoReviewModal({
                       </div>
                     )}
 
-                    {/* Presenter Karakter Dinamis dengan Lip-Sync & Gerak Berbicara */}
-                    <div className={`presenter-avatar-box ${isPlaying ? 'avatar-talking' : ''}`}>
-                      <div className="avatar-siluet after-glow">
-                        <div className="avatar-head">
-                          <span className="avatar-eyes">{isPlaying && currentTime % 3 < 0.2 ? '— —' : '● ●'}</span>
-                          <span className={`avatar-mouth ${isPlaying ? 'mouth-talk' : ''}`}></span>
+                    {/* Presenter Karakter 2D Fallback jika Mode 3D dimatikan */}
+                    {!viewMode3D && (
+                      <div className={`presenter-avatar-box ${isPlaying ? 'avatar-talking' : ''}`}>
+                        <div className="avatar-siluet after-glow">
+                          <div className="avatar-head">
+                            <span className="avatar-eyes">{isPlaying && currentTime % 3 < 0.2 ? '— —' : '● ●'}</span>
+                            <span className={`avatar-mouth ${isPlaying ? 'mouth-talk' : ''}`}></span>
+                          </div>
+                          <div className="avatar-torso" />
+                          <div className="cinematic-fill-light" />
                         </div>
-                        <div className="avatar-torso" />
-                        <div className="cinematic-fill-light" />
                       </div>
-                    </div>
+                    )}
 
                     <span className="stage-side-label after-label">
-                      {videoData.beforeAfter.afterLabel}
+                      {viewMode3D ? `SESUDAH (${sliderPos}%)` : videoData.beforeAfter.afterLabel}
                     </span>
                   </div>
 
-                  {/* Sisi Before (Dipotong oleh slider Before/After) */}
-                  <div
-                    className="video-before-layer"
-                    style={{ clipPath: `inset(0 ${100 - sliderPos}% 0 0)` }}
-                  >
-                    <div className="presenter-avatar-box">
-                      <div className="avatar-siluet before-shadow">
-                        <div className="avatar-head">
-                          <span className="avatar-eyes">● ●</span>
-                          <span className="avatar-mouth flat"></span>
+                  {/* Sisi Before (Dipotong oleh slider Before/After) - Mode 2D Fallback */}
+                  {!viewMode3D && (
+                    <div
+                      className="video-before-layer"
+                      style={{ clipPath: `inset(0 ${100 - sliderPos}% 0 0)` }}
+                    >
+                      <div className="presenter-avatar-box">
+                        <div className="avatar-siluet before-shadow">
+                          <div className="avatar-head">
+                            <span className="avatar-eyes">● ●</span>
+                            <span className="avatar-mouth flat"></span>
+                          </div>
+                          <div className="avatar-torso flat" />
                         </div>
-                        <div className="avatar-torso flat" />
                       </div>
+                      <span className="stage-side-label before-label">
+                        {videoData.beforeAfter.beforeLabel}
+                      </span>
                     </div>
-                    <span className="stage-side-label before-label">
-                      {videoData.beforeAfter.beforeLabel}
-                    </span>
-                  </div>
+                  )}
 
                   {/* Garis Pembagi Slider Before/After */}
                   <div
@@ -573,7 +594,7 @@ export function VideoReviewModal({
                     style={{ left: `${sliderPos}%` }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div className="slider-handle" title="Tarik untuk membandingkan Sebelum & Sesudah">
+                    <div className="slider-handle" title="Tarik untuk mengatur intensitas pencahayaan 3D studio">
                       ◀ ▶
                     </div>
                   </div>
@@ -747,6 +768,15 @@ export function VideoReviewModal({
 
             {/* TOGGLE OPTIONS DI BAWAH PHONE */}
             <div className="phone-toggles-row">
+              <label className="toggle-label mode-3d-toggle" title="Nyalakan/matikan animasi 3D realtime Three.js">
+                <input
+                  type="checkbox"
+                  checked={viewMode3D}
+                  onChange={(e) => setViewMode3D(e.target.checked)}
+                />
+                <span>🧊 Animasi 3D</span>
+              </label>
+
               <label className="toggle-label">
                 <input
                   type="checkbox"
