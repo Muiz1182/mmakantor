@@ -28,7 +28,8 @@ export function App() {
     viewMode,
     setViewMode,
     theme,
-    toggleTheme
+    toggleTheme,
+    dbStatus
   } = useOfficeState();
 
   const handleWebGLFallback = useCallback(() => {
@@ -54,6 +55,18 @@ export function App() {
 
         {/* Tally Status Ringkas */}
         <div className="status-pills">
+          {dbStatus?.dbConnected ? (
+            <span className="status-pill db-pill" title="Terhubung langsung ke database PostgreSQL lokal (kantor_mma)">
+              <span className="dot working"></span>
+              <b>PostgreSQL</b> Live
+            </span>
+          ) : (
+            <span className="status-pill db-pill" title="Menggunakan memori cache mandiri">
+              <span className="dot waiting"></span>
+              <b>API</b> {dbStatus?.connected ? 'Online' : 'Offline'}
+            </span>
+          )}
+
           <span className="status-pill working" title="Karyawan sedang bekerja">
             <span className="dot working"></span>
             <b>{tally.working}</b> Bekerja

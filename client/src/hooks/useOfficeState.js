@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { INITIAL_AGENTS, INITIAL_APPROVALS } from '../constants/agentsData';
 import { LOUNGE_ROOMS, LOUNGE_MAP } from '../constants/roomsData';
+import { api } from '../services/api';
 
 export function useOfficeState() {
   const [agents, setAgents] = useState(() => {
@@ -16,6 +17,7 @@ export function useOfficeState() {
   const [selectedAgentId, setSelectedAgentId] = useState('ceo');
   const [liveMessage, setLiveMessage] = useState('Selamat datang di Kantor MMA Production. Anda berperan sebagai CEO.');
   const [viewMode, setViewMode] = useState('3d');
+  const [dbStatus, setDbStatus] = useState({ connected: false, source: 'offline' });
   
   // Theme state
   const [theme, setTheme] = useState(() => {
@@ -28,6 +30,57 @@ export function useOfficeState() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  // Sinkronisasi data awal dari backend PostgreSQL
+  useEffect(() => {
+    async function loadData() {
+      const stats = await api.getStats();
+      if (stats && stats.success) {
+        setDbStatus({
+          connected: true,
+          source: stats.source,
+          dbConnected: stats.database?.connected || false,
+        });
+      }
+
+      const resAgents = await api.getAgents();
+      if (resAgents && resAgents.success && Array.isArray(resAgents.data)) {
+        setAgents(prev => {
+          return prev.map(localA => {
+            const dbA = resAgents.data.find(x => x.id === localA.id);
+            if (!dbA) return localA;
+            return {
+              ...localA,
+              status: dbA.status || localA.status,
+              sLabel: dbA.status === 'working' ? 'Bekerja' : (dbA.status === 'waiting' ? 'Menunggu' : 'Perlu tindakan'),
+              rest: dbA.ruangSantai || localA.rest || 'auto',
+              now: dbA.sedangKerja || localA.now,
+              tugas: dbA.tasks && dbA.tasks.length > 0 
+                ? dbA.tasks.map(t => ({ id: t.id, t: t.judul, d: t.selesai }))
+                : localA.tugas,
+              out: dbA.outputs && dbA.outputs.length > 0
+                ? { t: dbA.outputs[0].judul, items: [dbA.outputs[0].isi] }
+                : localA.out
+            };
+          });
+        });
+      }
+
+      const resApps = await api.getApprovals();
+      if (resApps && resApps.success && Array.isArray(resApps.data)) {
+        setApprovals(resApps.data.map(item => ({
+          id: String(item.id),
+          dari: item.agentId,
+          judul: item.judul,
+          ringkas: item.ringkasan,
+          detail: item.detail,
+          state: item.status === 'approved' ? 'ok' : (item.status === 'rejected' ? 'rev' : 'pending'),
+        })));
+      }
+    }
+
+    loadData();
+  }, []);
 
   const toggleTheme = useCallback(() => {
     setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
@@ -102,29 +155,51 @@ export function useOfficeState() {
   const toggleTask = useCallback((agentId, taskIndex) => {
     setAgents(prev => prev.map(a => {
       if (a.id !== agentId) return a;
+      let targetId = null;
+      let nextDone = false;
       const nextTugas = a.tugas.map((t, idx) => {
         if (idx !== taskIndex) return t;
-        return { ...t, d: !t.d };
+        targetId = t.id;
+        nextDone = !t.d;
+        return { ...t, d: nextDone };
       });
+
+      if (targetId) {
+        api.toggleTask(targetId, nextDone);
+      }
       return { ...a, tugas: nextTugas };
     }));
   }, []);
 
-  const addTask = useCallback((agentId, taskTitle) => {
+  const addTask = useCallback(async (agentId, taskTitle) => {
     const trimmed = taskTitle.trim();
     if (!trimmed) return;
 
+    // Optimistic local state update
+    const tempId = Date.now();
     setAgents(prev => prev.map(a => {
       if (a.id !== agentId) return a;
       return {
         ...a,
-        tugas: [{ t: trimmed, d: false }, ...a.tugas]
+        tugas: [{ id: tempId, t: trimmed, d: false }, ...a.tugas]
       };
     }));
 
     const agent = agentsMap[agentId];
     const name = agent ? agent.nama : agentId;
     setLiveMessage(`Tugas baru ditambahkan untuk ${name}: "${trimmed}"`);
+
+    // Sync to PostgreSQL backend
+    const res = await api.addTask(agentId, trimmed);
+    if (res && res.success && res.data?.id) {
+      setAgents(prev => prev.map(a => {
+        if (a.id !== agentId) return a;
+        return {
+          ...a,
+          tugas: a.tugas.map(t => (t.id === tempId ? { ...t, id: res.data.id } : t))
+        };
+      }));
+    }
   }, [agentsMap]);
 
   const setAgentRest = useCallback((agentId, restPlace) => {
@@ -132,9 +207,15 @@ export function useOfficeState() {
       if (a.id !== agentId) return a;
       return { ...a, rest: restPlace, at: null };
     }));
+    // Sync ke PostgreSQL backend
+    api.updateAgent(agentId, { ruangSantai: restPlace });
   }, []);
 
-  const decideApproval = useCallback((approvalId, action) => {
+  const decideApproval = useCallback((approvalId, action, notes) => {
+    // Sync ke PostgreSQL backend
+    const decision = action === 'ok' ? 'approve' : 'revise';
+    api.decideApproval(approvalId, decision, notes);
+
     setApprovals(prevApprovals => {
       const target = prevApprovals.find(x => x.id === approvalId);
       if (!target || target.state !== 'pending') return prevApprovals;
@@ -250,6 +331,7 @@ export function useOfficeState() {
     viewMode,
     setViewMode,
     theme,
-    toggleTheme
+    toggleTheme,
+    dbStatus
   };
 }

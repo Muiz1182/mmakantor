@@ -228,6 +228,11 @@ button:focus-visible, input:focus-visible {
   white-space: nowrap;
 }
 
+.status-pill.db-pill {
+  background: color-mix(in srgb, var(--accent) 15%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line-hud));
+}
+
 .status-pill b {
   color: var(--ink);
 }
