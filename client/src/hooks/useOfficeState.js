@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { INITIAL_AGENTS, INITIAL_APPROVALS } from '../constants/agentsData';
 import { LOUNGE_ROOMS, ALL_ROOMS, LOUNGE_MAP, MEETING_ROOM } from '../constants/roomsData';
 import { getCurrentRoutine, getTodaySchedule, getRoleTaskForRoutine, getRoutinesForDay } from '../constants/scheduleData';
+import { generateStoryScript } from '../constants/videoReviewData';
 import { api } from '../services/api';
 
 export function useOfficeState() {
@@ -551,42 +552,58 @@ export function useOfficeState() {
       status: 'draft'
     });
 
-    // 2. Suntikkan ke agen Brainstorming ('ide') & Perencana ('perencana')
-    const conceptsByPilar = {
-      Multimedia: [
-        `Reels 30s: Hook perbandingan visual sebelum vs sesudah tentang "${text}".`,
-        `Carousel 7 Slide: Panduan peralatan & setting kamera/editing untuk "${text}".`,
-        `Shorts/Story: Trik cepat 15 detik yang belum banyak diketahui orang.`
-      ],
-      Design: [
-        `Carousel 7 Slide: Kesalahan visual fatal & solusinya seputar "${text}".`,
-        `Reels 20s: Bedah layout desain brand terkenal dengan topik "${text}".`,
-        `Story: Polling "Mana desain yang lebih menjual? A atau B?"`
-      ],
-      'Web Development': [
-        `Reels 30s: Efek interaktif website yang bikin user terkesima ("${text}").`,
-        `Carousel 7 Slide: Trik CSS & JavaScript modern untuk implementasi "${text}".`,
-        `Story: Kuis coding interaktif "Tebak output dari kode ini!"`
-      ]
-    };
+    // 2. Hasilkan Story Writing Naskah Bertutur Nyata (Bukan Meta-Konsep)
+    const story = generateStoryScript(text, pilar);
 
-    const concepts = conceptsByPilar[pilar] || conceptsByPilar.Multimedia;
-
+    // Suntikkan ke agen Brainstorming ('ide'), Penulis Naskah ('naskah'), Editor ('editor'), & Perencana ('perencana')
     setAgents(prev => prev.map(a => {
       if (a.id === 'ide') {
         return {
           ...a,
           status: 'working',
           sLabel: 'Bekerja',
-          now: `Mengembangkan ide edukasi [${pilar}] dari CEO: "${text}" menjadi konten viral.`,
+          now: `Mengembangkan sudut pandang ide viral [${pilar}] dari CEO: "${text}".`,
           tugas: [
-            { id: Date.now(), t: `Brainstorming ide edukasi viral [${pilar}]: "${text}"`, d: false },
+            { id: Date.now(), t: `Brainstorming ide viral [${pilar}]: "${text}"`, d: true },
             ...a.tugas
           ],
           out: {
-            t: `Konsep Edukasi Viral [${pilar}]: "${text}"`,
-            items: concepts
+            t: `Sudut Pandang Ide Viral [${pilar}]: "${text}"`,
+            items: [
+              `Hook Emosional: "${story.hook}"`,
+              `Empati Masalah: "${story.problem}"`,
+              `Solusi Bertutur: "${story.solution}"`
+            ]
           }
+        };
+      }
+      if (a.id === 'naskah') {
+        return {
+          ...a,
+          status: 'working',
+          sLabel: 'Menulis Story',
+          now: `Menulis naskah story writing narasi video 30 detik untuk: "${text}".`,
+          tugas: [
+            { id: Date.now() + 1, t: `Tulis naskah bertutur narasi 4 adegan: "${text}"`, d: false },
+            ...a.tugas
+          ],
+          out: {
+            t: `Naskah Story Writing 30s: "${text}"`,
+            items: [
+              `[00:00 - 00:03] Hook: "${story.hook}"`,
+              `[00:04 - 00:11] Masalah: "${story.problem}"`,
+              `[00:11 - 00:22] Solusi: "${story.solution}"`,
+              `[00:22 - 00:30] CTA: "${story.cta}"`
+            ]
+          }
+        };
+      }
+      if (a.id === 'editor') {
+        return {
+          ...a,
+          status: 'working',
+          sLabel: 'Editing Timeline',
+          now: `Menyiapkan potongan ritmis & subtitle karaoke untuk naskah: "${text}".`
         };
       }
       if (a.id === 'perencana') {
@@ -600,25 +617,28 @@ export function useOfficeState() {
       return a;
     }));
 
-    // 3. Masukkan ke antrean persetujuan dengan skor FYP tinggi (berasal langsung dari arahan CEO)
+    // 3. Masukkan ke antrean persetujuan dengan format Story Writing riil
     const newApprovalId = String(Date.now());
+    const detailStoryText = `[00:00 - 00:03] Hook: "${story.hook}"\n[00:04 - 00:11] Masalah: "${story.problem}"\n[00:11 - 00:22] Solusi Cerita: "${story.solution}"\n[00:22 - 00:30] CTA: "${story.cta}"`;
+
     setApprovals(prev => [
       {
         id: newApprovalId,
-        dari: 'ide',
+        dari: 'naskah',
         kategori: pilar,
-        judul: `[${pilar}] Ide CEO: ${text.slice(0, 42)}...`,
-        ringkas: `Konsep edukasi viral ${pilar} telah disiapkan Brainstorming dari arahan Anda: "${text}".`,
-        detail: concepts.join('\n'),
-        fypScore: 92,
-        alasanFyp: `Peluang FYP Sangat Tinggi: Ide edukasi spesifik ${pilar} dengan hook rasa penasaran dan nilai bookmark tinggi.`,
+        judul: `[${pilar}] Naskah Video: ${text.slice(0, 42)}...`,
+        ringkas: `Naskah story writing edukasi viral ${pilar} telah rampung ditulis Dimas dari arahan Anda.`,
+        detail: detailStoryText,
+        naskahStory: story,
+        fypScore: 94,
+        alasanFyp: `Peluang FYP Sangat Tinggi: Naskah bertutur emosional tajam, mengangkat masalah nyata kreator, dan memicu share tinggi.`,
         state: 'pending'
       },
       ...prev
     ]);
 
-    setSelectedAgentId('ide');
-    setLiveMessage(`💡 Ide edukasi [${pilar}] diterima! Tim Brainstorming mulai merancang materi viral: "${text}".`);
+    setSelectedAgentId('naskah');
+    setLiveMessage(`📝 Dimas (Penulis Naskah AI) telah menulis naskah story writing untuk: "${text}". Siap direview di simulator video!`);
   }, []);
 
   // Eksekusi Tayang Otomatis Berdasarkan Jadwal Harian

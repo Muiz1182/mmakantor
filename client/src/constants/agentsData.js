@@ -124,23 +124,25 @@ export const INITIAL_AGENTS = [
     hue: 28,
     status: 'attention',
     sLabel: 'Menunggu persetujuan',
-    ringkas: 'Menulis hook, naskah video, dan alur isi untuk tiap konten.',
-    now: 'Draf 2 naskah YouTube 8 menit menunggu persetujuan Anda.',
-    nowAfter: 'Menulis hook 3 detik untuk Reels berikutnya.',
+    ringkas: 'Menulis alur story writing, hook emosional, narasi vokal penonton, dan storytelling video viral 9:16.',
+    now: 'Menulis alur story writing 4 adegan: hook kaget, empati masalah, demonstrasi trik, dan CTA bookmark.',
+    nowAfter: 'Mengonversi ide mentah menjadi naskah dialog bertutur penonton yang relatable.',
     tugas: [
-      { t: 'Tulis draf 1 naskah YouTube', d: true },
-      { t: 'Revisi menjadi draf 2', d: true },
-      { t: 'Tulis hook 3 detik untuk Reels', d: false }
+      { t: 'Tulis Hook 3s emosional scroll stopper', d: true },
+      { t: 'Rangkai narasi bertutur Masalah & Solusi (Story Writing)', d: true },
+      { t: 'Finalisasi punchline CTA persuasif', d: false }
     ],
     out: {
-      t: 'Pembuka naskah (contoh)',
+      t: 'Naskah Story Writing (Narasi Bertutur)',
       items: [
-        'Hook: "Tiga hal ini bikin videomu ditinggal di detik ketiga."',
-        'Isi: satu masalah, satu contoh, satu langkah.'
+        'Hook (0-3s): "Stop! Jangan buru-buru beli lampu studio mahal kalau videomu masih kusam kayak gini!"',
+        'Masalah (4-11s): "Banyak kreator salah fokus di kamera mahal, padahal bayangan kasar lampu plafon yang bikin muka kusam."',
+        'Solusi (11-22s): "Ambil styrofoam 15 ribuan dari warung, pantulin senter HP kamu. Seketika wajahmu dapet soft glow sinematik!"',
+        'CTA (22-30s): "Praktekin trik ini sekarang di kamar kamu, dan simpan video ini biar nggak lupa!"'
       ]
     },
-    terima: ['perencana'],
-    kirim: ['kamera']
+    terima: ['ide', 'perencana'],
+    kirim: ['kamera', 'editor']
   },
   {
     id: 'kamera',
@@ -365,33 +367,60 @@ export const INITIAL_APPROVALS = [
     id: 'a1',
     dari: 'naskah',
     kategori: 'Multimedia',
-    judul: '[Multimedia] Hook 3s: 3 Trik Lighting Studio Modal 100 Ribuan',
-    ringkas: 'Edukasi video: membandingkan setup pencahayaan sebelum dan sesudah dalam 3 detik pertama.',
-    detail: 'Hook (0-3s): "Jangan beli lampu mahal sebelum tahu trik pantulan dinding ini!"\nIsi: Key light diffuser plastik, fill light styrofoam, backlight senter HP.\nTarget: CapCut & Premiere Pro creator.',
+    judul: '[Multimedia] Naskah Video: 3 Trik Lighting Studio Modal 100 Ribuan',
+    ringkas: 'Naskah story writing edukasi video: membedah rahasia pencahayaan sinematik modal hemat dengan teknik bertutur relatable.',
+    detail: `Hook (0-3s): "Stop! Jangan buru-buru beli lampu studio mahal kalau video kamu masih kelihatan kusam kayak gini!"
+Masalah (4-11s): "Banyak kreator salah fokus di kamera mahal, padahal bayangan kasar dari lampu plafon yang bikin muka kamu berminyak dan gelap."
+Solusi (11-22s): "Ambil styrofoam 15 ribuan dari warung, pantulin senter HP kamu ke situ. Lihat, seketika wajahmu dapet soft glow sinematik ala film bioskop!"
+CTA (22-30s): "Praktekin trik ini sekarang di kamar kamu, dan simpan video ini biar nggak lupa pas mau syuting!"`,
+    naskahStory: {
+      hook: "Stop! Jangan buru-buru beli lampu studio mahal kalau video kamu masih kelihatan kusam kayak gini!",
+      problem: "Banyak kreator salah fokus di kamera mahal, padahal bayangan kasar dari lampu plafon yang bikin muka kamu berminyak dan gelap.",
+      solution: "Ambil styrofoam 15 ribuan dari warung, pantulin senter HP kamu ke situ. Seketika wajahmu dapet soft glow sinematik ala film bioskop!",
+      cta: "Praktekin trik ini sekarang di kamar kamu, dan simpan video ini biar nggak lupa pas mau syuting!"
+    },
     fypScore: 94,
-    alasanFyp: 'Peluang FYP Sangat Tinggi: Hook rasa penasaran instan, perbandingan visual ekstrem, memicu komentar share.',
+    alasanFyp: 'Peluang FYP Sangat Tinggi: Alur story writing mengalir tajam, memicu rasa penasaran instan, dan solusi mudah dipraktikkan seketika.',
     state: 'pending'
   },
   {
     id: 'a2',
-    dari: 'caption',
+    dari: 'naskah',
     kategori: 'Design',
-    judul: '[Design] Carousel 7 Slide: Kesalahan Tipografi yang Bikin Desain Murahan',
-    ringkas: 'Edukasi desain grafis: 7 slide studi kasus font pairing dan hirarki visual.',
-    detail: 'Slide 1: "Desain kamu kelihatan murah? Cek 3 kesalahan font ini!"\nSlide 2-6: Studi kasus font gratis vs font premium, leading, tracking.\nSlide 7: Daftar 5 font gratis Google yang terlihat mewah + ajakan simpan.',
+    judul: '[Design] Naskah Video: 3 Kesalahan Tipografi yang Bikin Desain Murahan',
+    ringkas: 'Naskah story writing edukasi desain grafis: bedah studi kasus font pairing dan hirarki visual yang sering bikin desain gagal estetik.',
+    detail: `Hook (0-3s): "Pernah ngerasa desain poster kamu udah rapi, tapi entah kenapa masih kelihatan murahan dan kayak bikinan amatir?"
+Masalah (4-11s): "Penyebab utamanya ada di font! Memakai lebih dari tiga jenis font berbeda dalam satu poster bikin mata audiens pusing dan gak fokus."
+Solusi (11-22s): "Pakai aturan dua font ini: satu Sans-Serif tegas untuk judul, dan satu Serif elegan untuk isi. Jangan lupa beri ruang bernapas di tepi kanvas!"
+CTA (22-30s): "Ketik 'FONT' di kolom komentar, nanti kita spill 5 kombinasi font gratis terbaik buat kamu!"`,
+    naskahStory: {
+      hook: "Pernah ngerasa desain poster kamu udah rapi, tapi entah kenapa masih kelihatan murahan dan kayak bikinan amatir?",
+      problem: "Penyebab utamanya ada di font! Memakai lebih dari tiga jenis font berbeda dalam satu poster bikin mata audiens pusing dan gak fokus.",
+      solution: "Pakai aturan dua font ini: satu Sans-Serif tegas untuk judul, dan satu Serif elegan untuk isi. Jangan lupa beri ruang bernapas di tepi kanvas!",
+      cta: "Ketik 'FONT' di kolom komentar, nanti kita spill 5 kombinasi font gratis terbaik buat kamu!"
+    },
     fypScore: 88,
-    alasanFyp: 'Peluang FYP Tinggi: Format carousel edukasi daftar memiliki rasio save dan share tertinggi di Instagram.',
+    alasanFyp: 'Peluang FYP Tinggi: Story writing menyentuh keresahan nyata para desainer dan memiliki rasio komentar serta save yang tinggi.',
     state: 'pending'
   },
   {
     id: 'a3',
-    dari: 'carousel',
+    dari: 'naskah',
     kategori: 'Web Development',
-    judul: '[Web Dev] Reels 25s: Cara Bikin Animasi 3D di Website Tanpa Lag',
-    ringkas: 'Edukasi coding: tutorial integrasi Three.js ringan untuk landing page interaktif.',
-    detail: 'Pembuka: "Website kamu masih 2D membosankan? Coba tambahkan 3D interaktif ini."\nIsi: Optimasi Three.js mesh polygon rendah, lighting hemat GPU, lazy loading canvas.',
-    fypScore: 68,
-    alasanFyp: 'Peluang FYP Sedang: Pembuka masih agak teknis, perlu hook visual website 3D yang berputar spektakuler agar memikat audiens umum.',
+    judul: '[Web Dev] Naskah Video: Bikin Animasi 3D Website 60 FPS Tanpa Lag',
+    ringkas: 'Naskah story writing coding Three.js: cara elegan menyulap website datar menjadi pengalaman interaktif 3D kelas dunia.',
+    detail: `Hook (0-3s): "Jangan bikin website yang ngebosenin cuma berisi teks dan foto diam kalau kamu mau banjir klien!"
+Masalah (4-11s): "Banyak developer takut pakai 3D karena mikir bikin laptop user ngehang dan kodingannya ribet setengah mati."
+Solusi (11-22s): "Triknya pakai Three.js dengan teknik instanced mesh: performa tetap 60 FPS mulus dan ukuran filenya super ringan!"
+CTA (22-30s): "Mau dibuatin website kelas dunia kayak gini? Klik link di bio buat konsultasi bareng tim MMA!"`,
+    naskahStory: {
+      hook: "Jangan bikin website yang ngebosenin cuma berisi teks dan foto diam kalau kamu mau banjir klien!",
+      problem: "Banyak developer takut pakai 3D karena mikir bikin laptop user ngehang dan kodingannya ribet setengah mati.",
+      solution: "Triknya pakai Three.js dengan teknik instanced mesh: performa tetap 60 FPS mulus dan ukuran filenya super ringan!",
+      cta: "Mau dibuatin website kelas dunia kayak gini? Klik link di bio buat konsultasi bareng tim MMA!"
+    },
+    fypScore: 91,
+    alasanFyp: 'Peluang FYP Sangat Tinggi: Naskah edukasi visual tech interaktif memiliki retensi tontonan tertinggi di segmen tech enthusiast.',
     state: 'pending'
   }
 ];

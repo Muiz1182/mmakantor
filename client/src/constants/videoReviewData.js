@@ -168,11 +168,99 @@ export function getVideoReviewPreset(idOrPilar) {
   return foundByPilar || VIDEO_REVIEW_PRESETS[0];
 }
 
+export function generateStoryScript(cleanTitle, pilar, rawDetail = '', naskahStory = null) {
+  // 1. Jika sudah ada naskahStory terstruktur, gunakan langsung
+  if (naskahStory && naskahStory.hook && naskahStory.solution) {
+    return {
+      hook: naskahStory.hook,
+      problem: naskahStory.problem || `Banyak orang salah langkah saat menerapkan konsep ini di awal.`,
+      solution: naskahStory.solution,
+      cta: naskahStory.cta || `Simpan video ini sekarang dan bagikan ke rekan tim kamu!`
+    };
+  }
+
+  // 2. Cek apakah di dalam rawDetail ada baris bertutur narasi / voiceover quotes
+  const lines = (rawDetail || '').split('\n').map(s => s.trim()).filter(Boolean);
+  const voiceoverQuotes = [];
+
+  for (const line of lines) {
+    const quoteMatch = line.match(/"([^"]+)"/);
+    if (quoteMatch && quoteMatch[1].length > 15) {
+      voiceoverQuotes.push(quoteMatch[1].trim());
+    } else {
+      const cleanLine = line
+        .replace(/^(Hook\s*\(\d+-\d+s?\):?|Masalah\s*\(\d+-\d+s?\):?|Solusi\s*\(\d+-\d+s?\):?|CTA\s*\(\d+-\d+s?\):?|Slide\s*\d+:?|Audio Voiceover:?|\[Visual:[^\]]+\])\s*/gi, '')
+        .replace(/^(Reels|Carousel|Shorts|Story|Edukasi)[^:]*:\s*/gi, '')
+        .trim();
+      if (cleanLine.length > 20 && !cleanLine.startsWith('Menjadwalkan') && !cleanLine.startsWith('Konsep edukasi') && !cleanLine.startsWith('Reels 30s:')) {
+        voiceoverQuotes.push(cleanLine);
+      }
+    }
+  }
+
+  if (voiceoverQuotes.length >= 3) {
+    return {
+      hook: voiceoverQuotes[0],
+      problem: voiceoverQuotes[1],
+      solution: voiceoverQuotes[2],
+      cta: voiceoverQuotes[3] || `Simpan video ini sekarang dan bagikan ke rekan tim kamu!`
+    };
+  }
+
+  // 3. GENERATOR STORY WRITING ADAPTIF BERDASARKAN TOPIK & PILAR (BUKAN METADATA/KONSEP)
+  // Menghasilkan naskah bertutur narasi orang pertama yang mengalir dan ramah penonton
+  const lowerTitle = (cleanTitle || '').toLowerCase();
+
+  if (lowerTitle.includes('light') || lowerTitle.includes('cahaya') || lowerTitle.includes('lampu') || lowerTitle.includes('studio') || lowerTitle.includes('sinematik')) {
+    return {
+      hook: `Stop! Jangan buru-buru beli lampu studio mahal kalau video kamu masih kelihatan kusam kayak gini!`,
+      problem: `Banyak kreator salah fokus beli kamera jutaan, padahal masalah utamanya ada di bayangan kasar lampu plafon kamar.`,
+      solution: `Ambil styrofoam 15 ribuan dari warung, pantulin senter HP kamu ke situ. Seketika wajahmu dapet soft glow sinematik ala film bioskop!`,
+      cta: `Coba praktekin sekarang di kamar kamu, dan simpan video ini biar nggak lupa pas mau syuting!`
+    };
+  }
+
+  if (lowerTitle.includes('edit') || lowerTitle.includes('cut') || lowerTitle.includes('premiere') || lowerTitle.includes('davinci') || lowerTitle.includes('warna') || lowerTitle.includes('grading')) {
+    return {
+      hook: `Ngedit video 30 detik tapi makan waktu 3 jam? Trik timeline ini bakal bikin proses editmu 5 kali lebih cepat!`,
+      problem: `Banyak editor pemula masih potong klip manual satu per satu pakai mouse, bikin leher kaku dan deadline keteteran.`,
+      solution: `Gunakan shortcut ripple delete dan pasang preset color grade Rec.709 ini. Sekali klik, timeline langsung ritmis dan warnanya menyala!`,
+      cta: `Save video ini sekarang, dan tag temen editor kamu yang masih sering lembur semalaman!`
+    };
+  }
+
+  if (lowerTitle.includes('font') || lowerTitle.includes('desain') || lowerTitle.includes('tipografi') || lowerTitle.includes('poster') || lowerTitle.includes('canva') || pilar === 'Design') {
+    return {
+      hook: `Pernah ngerasa desain poster kamu udah rapi, tapi entah kenapa masih kelihatan murahan dan kayak bikinan amatir?`,
+      problem: `Penyebab utamanya ada di font! Memakai lebih dari tiga jenis font berbeda dalam satu poster bikin mata audiens pusing dan gak fokus.`,
+      solution: `Pakai aturan dua font ini: satu Sans-Serif tegas untuk judul, dan satu Serif elegan untuk isi. Jangan lupa beri ruang bernapas di tepi kanvas!`,
+      cta: `Ketik kata 'FONT' di kolom komentar, nanti tim MMA spill 5 kombinasi font gratis terbaik buat kamu!`
+    };
+  }
+
+  if (lowerTitle.includes('web') || lowerTitle.includes('code') || lowerTitle.includes('3d') || lowerTitle.includes('three') || pilar === 'Web Development') {
+    return {
+      hook: `Jangan bikin website yang ngebosenin cuma berisi teks dan foto diam kalau kamu mau banjir klien!`,
+      problem: `Klien jaman sekarang gampang bosen dalam 3 detik pertama kalau websitemu gak punya interaksi yang memukau mata.`,
+      solution: `Cukup tambahkan animasi 3D Three.js ringan dengan teknik instanced mesh: efeknya interaktif, 60 FPS mulus, dan sama sekali gak bikin ngelag!`,
+      cta: `Mau dibuatin website kelas dunia kayak gini? Klik link di bio buat konsultasi bareng tim MMA!`
+    };
+  }
+
+  // Fallback Universal Story Writing (Narrative Story)
+  return {
+    hook: `Kamu masih lakuin cara lama pas ngerjain ${cleanTitle}? Pantesan hasilnya masih mentok dan susah viral!`,
+    problem: `Banyak orang gagal bukan karena kurang usaha, tapi karena melewatkan satu detail kecil yang paling krusial di 3 detik awal.`,
+    solution: `Nih trik rahasianya: fokus ke satu solusi paling tajam yang langsung menjawab rasa penasaran audiens tanpa intro bertele-tele.`,
+    cta: `Praktekin trik ini sekarang, dan simpan video ini biar nggak boncos di proyek berikutnya!`
+  };
+}
+
 export function buildDynamicVideoReviewData(approvalItem) {
   if (!approvalItem) return VIDEO_REVIEW_PRESETS[0];
 
   const rawTitle = approvalItem.judul || 'Ide Edukasi Viral';
-  const cleanTitle = rawTitle.replace(/^\[.*?\]\s*/, '').replace(/^Ide CEO:\s*/i, '');
+  const cleanTitle = rawTitle.replace(/^\[.*?\]\s*/, '').replace(/^(Ide CEO|Naskah Video):\s*/i, '');
   const pilar = approvalItem.kategori || 'Multimedia';
 
   // Format label pengirim draf (Editor, Naskah, Ide, Videografer)
@@ -184,16 +272,11 @@ export function buildDynamicVideoReviewData(approvalItem) {
     caption: 'Citra (Caption & SEO AI)',
     carousel: 'Bayu (Desain Grafis AI)'
   };
-  const editorName = agentNames[approvalItem.dari] || 'Mochammad (Editor AI)';
+  const editorName = agentNames[approvalItem.dari] || 'Dimas (Penulis Naskah AI)';
   const videographerName = 'Rian (Videographer AI)';
 
-  const detailLines = (approvalItem.detail || approvalItem.ringkas || '').split('\n').map(s => s.trim()).filter(Boolean);
-  const hookLine = detailLines[0] || `STOP! Sebelum eksekusi ${cleanTitle}, ketahui trik rahasia ini!`;
-  const bodyLine1 = detailLines[1] || `Banyak yang salah langkah saat mengeksekusi konsep ${pilar} ini.`;
-  const bodyLine2 = detailLines[2] || `Ikuti alur praktis ini agar kualitas video kamu naik kelas seketika.`;
-  const ctaLine = `Simpan video ini sekarang dan bagikan ke rekan tim kamu!`;
-
-  const cleanHookShort = hookLine.replace(/^(Hook\s*\(\d+-\d+s?\):?\s*|Slide\s*\d+:?\s*)/i, '').replace(/["']/g, '');
+  // Alur Story Writing (Narasi Bertutur Nyata)
+  const story = generateStoryScript(cleanTitle, pilar, approvalItem.detail, approvalItem.naskahStory);
 
   return {
     id: approvalItem.id,
@@ -206,16 +289,16 @@ export function buildDynamicVideoReviewData(approvalItem) {
     videographer: videographerName,
     audioProfile: '-14 LUFS (Vokal Jernih Narator + Beat Lo-Fi Ritmis)',
     colorGrade: pilar === 'Multimedia' ? 'DaVinci Resolve Rec.709 Sinematik' : (pilar === 'Design' ? 'Adobe Premiere Rec.709 Clean Modern' : 'Final Cut Pro Rec.709 Tech Vibrant'),
-    hook3sText: cleanHookShort.slice(0, 75),
-    hookScore: approvalItem.fypScore || 94,
-    fypScore: approvalItem.fypScore || 92,
-    fypVerdict: `SANGAT LAYAK UNGGAH (Peluang FYP ${approvalItem.fypScore || 92}%)`,
-    summary: approvalItem.ringkas || `Hasil eksekusi naskah dan editing timeline dari brainstorming tim: "${cleanTitle}".`,
+    hook3sText: story.hook,
+    hookScore: approvalItem.fypScore || 95,
+    fypScore: approvalItem.fypScore || 94,
+    fypVerdict: `SANGAT LAYAK UNGGAH (Peluang FYP ${approvalItem.fypScore || 94}%)`,
+    summary: approvalItem.ringkas || `Naskah story writing dari Penulis Naskah AI: alur tutur cerita dari Hook kaget, empati masalah kreator, demonstrasi solusi, dan ajakan simpan.`,
     subtitles: [
-      { start: 0, end: 4, text: cleanHookShort.slice(0, 65), highlight: cleanHookShort.slice(0, 24) },
-      { start: 4, end: 11, text: bodyLine1.slice(0, 75), highlight: bodyLine1.slice(0, 25) },
-      { start: 11, end: 22, text: bodyLine2.slice(0, 80), highlight: bodyLine2.slice(0, 28) },
-      { start: 22, end: 30, text: ctaLine, highlight: 'Simpan video ini' }
+      { start: 0, end: 4, text: story.hook, highlight: story.hook.slice(0, 24) },
+      { start: 4, end: 11, text: story.problem, highlight: story.problem.slice(0, 26) },
+      { start: 11, end: 22, text: story.solution, highlight: story.solution.slice(0, 28) },
+      { start: 22, end: 30, text: story.cta, highlight: 'Simpan video ini' }
     ],
     beforeAfter: {
       beforeLabel: 'SEBELUM (Konsep Mentah Tanpa Grading)',
@@ -224,7 +307,7 @@ export function buildDynamicVideoReviewData(approvalItem) {
       afterColor: pilar === 'Design' ? '#3b82f6' : (pilar === 'Web Development' ? '#10b981' : '#ff9a3c')
     },
     qcChecklist: [
-      { id: 'qc-hook', label: 'Hook Detik 0-3 (Scroll Stopper)', score: approvalItem.fypScore ? Math.min(99, approvalItem.fypScore + 2) : 95, status: 'pass', note: 'Hook tajam memicu rasa ingin tahu audiens sesuai arahan naskah.' },
+      { id: 'qc-hook', label: 'Hook Detik 0-3 (Scroll Stopper)', score: approvalItem.fypScore ? Math.min(99, approvalItem.fypScore + 2) : 96, status: 'pass', note: 'Hook tajam memicu rasa ingin tahu audiens sesuai arahan naskah.' },
       { id: 'qc-color', label: 'Visual & Color Grading Rec.709', score: 94, status: 'pass', note: 'Grading warna kulit natural, tone kontras konsisten di layar smartphone.' },
       { id: 'qc-audio', label: 'Audio Loudness & Artikulasi (-14 LUFS)', score: 92, status: 'pass', note: 'Vokal narator jernih di atas Lo-Fi BGM, sound effect cut selaras tempo.' },
       { id: 'qc-safe', label: 'Safe Zone Instagram & TikTok', score: 96, status: 'pass', note: 'Subtitle dan elemen penting berada di zona aman layar vertikal.' }
@@ -235,7 +318,7 @@ export function buildDynamicVideoReviewData(approvalItem) {
       bookmarks: '38.2K',
       shares: '10.5K',
       sound: 'MMA Production • Sound Edukasi Asli',
-      caption: `${cleanTitle} 🔥 Simpan video ini untuk referensi kamu! #mmaproduction #${pilar.toLowerCase().replace(/\s+/g, '')} #tipscreator #fyp`
+      caption: `${story.hook} 🔥 ${story.solution} Simpan video ini untuk referensi kamu! #mmaproduction #${pilar.toLowerCase().replace(/\s+/g, '')} #tipscreator #fyp`
     }
   };
 }
