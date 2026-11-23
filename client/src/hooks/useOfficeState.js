@@ -166,8 +166,8 @@ export function useOfficeState() {
     list.forEach((a, i) => {
       if (a.id === 'ceo' || a.status === 'working' || a.at) return;
       const order = a.rest && a.rest !== 'auto' ? [a.rest] : [];
-      for (let k = 0; k < 4; k++) {
-        order.push(LOUNGE_ROOMS[(i + k) % 4].id);
+      for (let k = 0; k < LOUNGE_ROOMS.length; k++) {
+        order.push(LOUNGE_ROOMS[(i + k) % LOUNGE_ROOMS.length].id);
       }
       for (let j = 0; j < order.length && !a.at; j++) {
         const rId = order[j];

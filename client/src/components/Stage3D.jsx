@@ -7,6 +7,7 @@ export function Stage3D({
   onSelectAgent,
   theme,
   timePhase = 'morning',
+  chatActive = true,
   onWebGLFallback
 }) {
   const canvasRef = useRef(null);
@@ -98,6 +99,13 @@ export function Stage3D({
       sceneRef.current.applyTheme();
     }
   }, [theme]);
+
+  // Chat active changes
+  useEffect(() => {
+    if (sceneRef.current) {
+      sceneRef.current.setChatActive(chatActive);
+    }
+  }, [chatActive]);
 
   const handleResetCamera = () => {
     if (sceneRef.current) {

@@ -13,6 +13,7 @@ export function App() {
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const [ideaText, setIdeaText] = useState('');
   const [selectedPilar, setSelectedPilar] = useState('Multimedia'); // 'Multimedia', 'Design', 'Web Development'
+  const [chatActive, setChatActive] = useState(true);
 
   const {
     agents,
@@ -136,6 +137,16 @@ export function App() {
           >
             🤖 AI Review: <b>{autoApproval ? 'OTOMATIS' : 'MANUAL'}</b>
           </button>
+
+          {/* Toggle Obrolan & Interaksi 3D */}
+          <button
+            type="button"
+            className={`status-pill chat-toggle-pill ${chatActive ? 'active' : ''}`}
+            onClick={() => setChatActive(prev => !prev)}
+            title={chatActive ? 'Obrolan AI Aktif: Karyawan jalan & ngobrol interaktif tentang Multimedia, Design, Web Dev' : 'Obrolan AI Nonaktif'}
+          >
+            💬 Obrolan: <b>{chatActive ? 'AKTIF' : 'SENYAP'}</b>
+          </button>
         </div>
 
         {/* Waktu Operasional WIB & Kontrol */}
@@ -242,6 +253,7 @@ export function App() {
             onSelectAgent={handleSelectAgent}
             theme={theme}
             timePhase={activeTimePhase}
+            chatActive={chatActive}
             onWebGLFallback={handleWebGLFallback}
           />
         ) : (
