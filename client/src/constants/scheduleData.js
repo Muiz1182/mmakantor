@@ -65,9 +65,9 @@ export const WEEKLY_SCHEDULE = [
         time: '13:00',
         pilar: 'Web Development',
         platform: 'Instagram Reels & TikTok',
-        format: 'Reels 28s',
-        title: 'Cara Bikin Website 3D Interaktif Tanpa Lag',
-        hook: 'Website kamu masih 2D membosankan? Coba teknik Three.js ini.',
+        format: 'Reels 33s',
+        title: 'Tutorial Bikin Kantor AI: 1-Command Installer Langsung Jadi',
+        hook: 'Beli VPS → Paste 1 command → Isi wizard divisi → Kantor AI langsung jalan! Komen KIT buat coba.',
         status: 'scheduled'
       },
       {

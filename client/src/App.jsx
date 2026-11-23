@@ -4,6 +4,7 @@ import { Stage3D } from './components/Stage3D';
 import { Plan2D } from './components/Plan2D';
 import { AgentPanel } from './components/AgentPanel';
 import { ScheduleModal } from './components/ScheduleModal';
+import { StarterKitModal } from './components/StarterKitModal';
 import { FLOW_STEPS } from './constants/flowData';
 import './App.css';
 
@@ -11,6 +12,7 @@ export function App() {
   const [webglError, setWebglError] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
+  const [isStarterKitOpen, setIsStarterKitOpen] = useState(false);
   const [ideaText, setIdeaText] = useState('');
   const [selectedPilar, setSelectedPilar] = useState('Multimedia'); // 'Multimedia', 'Design', 'Web Development'
   const [chatActive, setChatActive] = useState(true);
@@ -158,6 +160,16 @@ export function App() {
             title={isMeetingActive ? 'Selesaikan Rapat Resmi dengan CEO di Ruang Meeting' : 'Ruang meeting bukan tempat santai: Panggil tim untuk sesi rapat khusus bersama CEO'}
           >
             💼 Rapat CEO: <b>{isMeetingActive ? 'BERLANGSUNG' : 'MULAI'}</b>
+          </button>
+
+          {/* Tombol Konsep Viral TikTok : Starter Kit 1-Command */}
+          <button
+            type="button"
+            className="status-pill starter-kit-pill"
+            onClick={() => setIsStarterKitOpen(true)}
+            title="Konsep Viral TikTok: Beli VPS → Paste 1 Command → Isi Wizard → Kantor AI Langsung Jalan"
+          >
+            🚀 <b>Starter KIT (1-Command)</b>
           </button>
         </div>
 
@@ -382,6 +394,12 @@ export function App() {
         currentMinute={clockTime?.m}
         onTriggerPublish={triggerPublishSlot}
         onTriggerRoutine={triggerOfficeRoutine}
+      />
+
+      {/* Modal Konsep Viral TikTok: 1-Command Starter Kit Installer */}
+      <StarterKitModal
+        isOpen={isStarterKitOpen}
+        onClose={() => setIsStarterKitOpen(false)}
       />
     </div>
   );

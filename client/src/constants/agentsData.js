@@ -393,5 +393,16 @@ export const INITIAL_APPROVALS = [
     fypScore: 68,
     alasanFyp: 'Peluang FYP Sedang: Pembuka masih agak teknis, perlu hook visual website 3D yang berputar spektakuler agar memikat audiens umum.',
     state: 'pending'
+  },
+  {
+    id: 'a4',
+    dari: 'naskah',
+    kategori: 'Web Development',
+    judul: '[Viral Kit] Tutorial Bikin Kantor AI: 1-Command Installer Langsung Jadi',
+    ringkas: 'Konsep video viral TikTok: Beli VPS → Paste 1 command → Isi wizard → Pilih divisi (Multimedia, Design, Web Dev) → Kantor AI langsung jalan.',
+    detail: 'Hook (0-3s): "Banyak yang kemarin minta tutorial bikin kantor AI virtual... Pas coba disusun tutornya, ribet banget kalau setup coding satu-satu 😭"\nSolusi (3-15s): "Akhirnya kita bikinin 1-Command Installer. Targetnya simpel: Beli VPS → Paste 1 command → Isi wizard divisi MMA → Langsung jalan!"\nShowcase (15-25s): Tampilkan kantor 3D interaktif, karyawan jalan & ngobrol edukasi, ruang meeting kaca CEO, dan AI review otomatis.\nCTA (25-33s): "Sekarang prototype-nya sudah siap dicoba. Kalau mau akses kit kantor AI ini, komen \'KIT\' di bawah!"',
+    fypScore: 96,
+    alasanFyp: 'Peluang FYP Maksimal (96%): Masalah relatable (coding manual ribet) + solusi praktis 1 baris perintah + CTA trigger komentar "KIT" yang memicu lonjakan algoritma TikTok.',
+    state: 'pending'
   }
 ];

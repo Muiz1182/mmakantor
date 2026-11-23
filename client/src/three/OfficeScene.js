@@ -124,6 +124,8 @@ const CHAT_DIALOGUES = {
   ],
   webdev: [
     'Three.js isometric ini kita optimasi draw calls biar stabil di 60 FPS!',
+    'Target kita simpel: Beli VPS → Paste 1 command → Kantor AI langsung jalan!',
+    'Installer 1 baris kita otomatis konfigurasi PostgreSQL + Express tanpa coding manual.',
     'Next.js 15 Server Components bikin TTFB tembus di bawah 80 milidetik!',
     'PostgreSQL lokal + Drizzle ORM bikin antrean persetujuan zero latency!',
     'Desain kantor 3D ini sudah modular dan responsive di layar apapun!',
@@ -131,7 +133,7 @@ const CHAT_DIALOGUES = {
   ],
   general: [
     'Kopi espresso dulu yuk di cafe bar sebelum review materi jam 14.00 ☕',
-    'Video tips edukasi kemarin tembus 480k views dan 25k saves di TikTok! 🔥',
+    'Video TikTok tutorial 1-command installer kantor AI tembus 50k views & banyak yang komen KIT!',
     'Bentar lagi jam meeting koordinasi di ruang meeting kaca, siapin slide ya!',
     'Rehat sejenak sholat di Musholla biar pikiran makin tenang dan fokus 🤲',
     'Stretching di treadmill gym 10 menit bakar kalori setelah ngedit 💪',
