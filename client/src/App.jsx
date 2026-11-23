@@ -5,6 +5,7 @@ import { Plan2D } from './components/Plan2D';
 import { AgentPanel } from './components/AgentPanel';
 import { ScheduleModal } from './components/ScheduleModal';
 import { FLOW_STEPS } from './constants/flowData';
+import { WEEKLY_SCHEDULE } from './constants/scheduleData';
 import './App.css';
 
 export function App() {
@@ -303,6 +304,8 @@ export function App() {
             chatActive={chatActive}
             onWebGLFallback={handleWebGLFallback}
             onPipelineEvent={handlePipelineEvent}
+            clockTime={clockTime}
+            todayTheme={WEEKLY_SCHEDULE.find(d => d.dayIndex === clockTime?.dayIndex)?.theme || 'Multimedia & Visual AI'}
           />
         ) : (
           <div className="plan2d-fullscreen-wrapper">

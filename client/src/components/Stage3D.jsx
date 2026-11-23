@@ -9,12 +9,17 @@ export function Stage3D({
   timePhase = 'morning',
   chatActive = true,
   onWebGLFallback,
-  onPipelineEvent
+  onPipelineEvent,
+  clockTime,
+  todayTheme
 }) {
   const canvasRef = useRef(null);
   const sceneRef = useRef(null);
   const agentsRef = useRef(agents);
   agentsRef.current = agents;
+
+  const contextRef = useRef({ clockTime, todayTheme });
+  contextRef.current = { clockTime, todayTheme };
 
   const getThemeTokens = () => {
     if (typeof window === 'undefined') return {};
@@ -40,7 +45,8 @@ export function Stage3D({
         onSelectAgent,
         getAgentsData: () => agentsRef.current,
         getThemeTokens,
-        onPipelineEvent
+        onPipelineEvent,
+        getOfficeContext: () => contextRef.current
       });
     } catch (err) {
       console.warn('Gagal menginisialisasi Three.js 3D:', err);

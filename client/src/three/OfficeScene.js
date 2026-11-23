@@ -102,58 +102,6 @@ const ROOM3 = {
   }
 };
 
-// ============================================================================
-// DATABASE OBROLAN EDUKASI VIRAL (Multimedia, Design, Web Development, Kantor)
-// ============================================================================
-const CHAT_DIALOGUES = {
-  multimedia: [
-    'Lighting 3-point: key light 45° + rim light biar rambut berdimensi!',
-    'Color grading DaVinci Resolve pakai LUT Rec.709 hasilnya sinematik banget!',
-    'Hook 3 detik pertama video edukasi ini bikin audiens tahan jempol!',
-    'Audio voiceover udah di-denoise & EQ, suaranya renyah di headphone!',
-    'Render timeline 4K 60fps untuk Reels selesai, ritme potongannya pas!',
-    'Pake lensa 35mm f/1.8 biar bokeh latar belakangnya fokus ke presenter!'
-  ],
-  design: [
-    'Hierarki visual 60-30-10: 60% netral, 30% brand, 10% aksen CTA!',
-    'Font pairing: Serif modern buat judul, Sans-serif buat body text di layar HP.',
-    'Thumbnail YouTube high-contrast dengan teks 3 kata CTR tembus 14%!',
-    'Carousel 7 slide: beri negative space cukup agar mata audiens bernapas.',
-    'Desain grafis edukasi ini kita sesuaikan format 9:16 untuk feed Reels & TikTok.',
-    'Pilih color palette complementary biar elemen visualnya langsung nampol!'
-  ],
-  webdev: [
-    'Three.js isometric ini kita optimasi draw calls biar stabil di 60 FPS!',
-    'Arsitektur web app modern: React frontend + Express API + PostgreSQL lokal.',
-    'Next.js 15 Server Components bikin TTFB tembus di bawah 80 milidetik!',
-    'PostgreSQL lokal + Drizzle ORM bikin antrean persetujuan zero latency!',
-    'Desain kantor 3D ini sudah modular dan responsive di layar apapun!',
-    'State management custom hook React bikin sinkronisasi data instan!'
-  ],
-  general: [
-    'Kopi espresso dulu yuk di cafe bar sebelum review materi jam 14.00 ☕',
-    'Konten edukasi pilar Web Dev dan Design kemarin tembus engagement tinggi!',
-    'Bentar lagi jam meeting koordinasi di ruang meeting kaca, siapin slide ya!',
-    'Rehat sejenak sholat di Musholla biar pikiran makin tenang dan fokus 🤲',
-    'Stretching di treadmill gym 10 menit bakar kalori setelah ngedit 💪',
-    'Santai di pool deck sambil dengerin referensi sound trending 🏊',
-    'Draf konten edukasi siap tayang prime time jam 19.00 malam ini!'
-  ]
-};
-
-function getRandomDialogue(agentId) {
-  if (agentId === 'kamera' || agentId === 'editor' || agentId === 'upload') {
-    return CHAT_DIALOGUES.multimedia[Math.floor(Math.random() * CHAT_DIALOGUES.multimedia.length)];
-  }
-  if (agentId === 'carousel' || agentId === 'caption' || agentId === 'story') {
-    return CHAT_DIALOGUES.design[Math.floor(Math.random() * CHAT_DIALOGUES.design.length)];
-  }
-  if (agentId === 'analis' || agentId === 'auditor') {
-    return CHAT_DIALOGUES.webdev[Math.floor(Math.random() * CHAT_DIALOGUES.webdev.length)];
-  }
-  return CHAT_DIALOGUES.general[Math.floor(Math.random() * CHAT_DIALOGUES.general.length)];
-}
-
 function wrapAngle(a) {
   while (a > Math.PI) a -= 2 * Math.PI;
   while (a < -Math.PI) a += 2 * Math.PI;
@@ -174,7 +122,7 @@ function roundRect(ctx, px, py, w, h, r) {
   ctx.closePath();
 }
 
-export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getThemeTokens, onPipelineEvent }) {
+export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getThemeTokens, onPipelineEvent, getOfficeContext }) {
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
@@ -183,7 +131,247 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     return null;
   }
 
-  // Latar belakang studio arsitektur elegan (bukan hitam pekat void)
+  // ============================================================================
+  // GENERATOR OBROLAN DINAMIS KANTOR MMA (Kontekstual, Anti-Monoton & Anti-Slop)
+  // Menyesuaikan dengan keadaan nyata kantor: pekerjaan a.now, jam kerja, antrean, pilar edukasi
+  // ============================================================================
+  function getDynamicDialogue(agentId, contextType = 'idle', targetId = null) {
+    const allAgents = getAgentsData ? getAgentsData() : [];
+    const agent = allAgents.find(a => a.id === agentId);
+    const targetAgent = targetId ? allAgents.find(a => a.id === targetId) : null;
+    const ctx = getOfficeContext ? getOfficeContext() : {};
+    const todayTheme = ctx.todayTheme || 'Multimedia & Visual AI';
+
+    // 1. Serah terima materi pipeline estafet antar divisi (Handover Sender)
+    if (contextType === 'handover_sender' && targetAgent) {
+      const senderLines = {
+        analis: [
+          `${targetAgent.nama}, data retensi konten ${todayTheme} sudah saya petakan. Hook 3 detik awal paling tinggi angka simpan dan bagikannya!`,
+          `Pola performa 20 konten terakhir sudah siap. Penonton suka konten ringkas to-the-point, tolong olah jadi ide ya!`,
+          `Analisa retensi penonton baru beres. Ada peluang viral besar di topik hari ini, silakan diracik konsepnya!`
+        ],
+        ide: [
+          `${targetAgent.nama}, 3 konsep hook viral untuk ${todayTheme} sudah saya susun. Tolong tuangkan ke naskah dan shot list ya!`,
+          `Ini daftar sudut pandang konten edukasi hari ini. Sudut masalahnya relevan banget, tolong tulis draf script-nya!`,
+          `Konsep ide edukasi praktis sudah siap. Formatnya kita buat 30 detik padat isi, silakan dibuatkan naskahnya!`
+        ],
+        naskah: [
+          `${targetAgent.nama}, naskah 30 detik dan breakdown shot list sudah selesai. Studio green screen bisa langsung take!`,
+          `Naskah edukasi ${todayTheme} sudah matang dengan hook provokatif di 2 detik awal. Siap untuk pengambilan gambar di studio!`,
+          `Shot list 3 adegan dan naskah presenter sudah ready. Peralatan dan lighting studio sudah bisa disesuaikan!`
+        ],
+        kamera: [
+          `${targetAgent.nama}, rekaman footage 4K 60fps dan audio studio sudah siap. File sudah masuk ke folder produksi, silakan dipotong!`,
+          `Take rekaman di studio green screen selesai, lighting 3-point dan audio sudah bersih. Tolong dieksekusi di timeline!`,
+          `Footage kamera sinematik sudah lengkap sesuai storyboard. Silakan pasang cut list dan ritme potongan dinamis!`
+        ],
+        editor: [
+          `${targetAgent.nama}, video Reels 4K selesai di-render dengan kinetic subtitle. Tolong buatkan cover thumbnail kontras tinggi dan carousel pendukung!`,
+          `Timeline video sudah rampung dengan color grading Rec.709. Tolong rancang thumbnail 9:16 dan slide edukasi 7 halaman!`,
+          `Render final video edukasi sudah beres. Visual carousel pendukung dan cover eye-catching tolong disiapkan!`
+        ],
+        carousel: [
+          `Pak CEO, seluruh paket materi edukasi ${todayTheme} sudah lengkap. Draf video dan desain slide siap direview di antrean persetujuan!`,
+          `Pak CEO, materi konten hari ini sudah selesai dirancang dengan visual bersih. Mohon ditinjau kelayakannya untuk jadwal prime time!`,
+          `Pak CEO, paket konten siap publish: video 4K, thumbnail CTR tinggi, dan carousel edukasi sudah masuk di dashboard persetujuan!`
+        ],
+        ceo: [
+          `${targetAgent.nama}, konten edukasi hari ini sudah saya setujui. Tolong jadwalkan tayang otomatis di jam prime time 19.00 WIB!`,
+          `Materi sangat tajam dan edukatif. Sudah saya approve, segera koordinasikan jadwal rilis ke seluruh platform medsos!`,
+          `Persetujuan selesai. Pastikan caption, tagar, dan thumbnail terpasang sempurna untuk rilis malam nanti!`
+        ]
+      };
+
+      const lines = senderLines[agentId];
+      if (lines && lines.length > 0) {
+        return lines[Math.floor(Math.random() * lines.length)];
+      }
+    }
+
+    // 2. Respon penerima serah terima estafet (Handover Target)
+    if (contextType === 'handover_target' && targetAgent) {
+      const targetLines = {
+        ide: [
+          `Siap ${targetAgent.nama}! Langsung saya olah jadi konsep konten yang segar dan mudah dipahami penonton.`,
+          `Diterima! Data ini pas banget buat bikin hook edukasi yang relevan dengan tren saat ini.`,
+          `Sip! Segera saya rumuskan 3 angle ide terbaik untuk dieksekusi tim produksi.`
+        ],
+        naskah: [
+          `Mantap ${targetAgent.nama}! Langsung saya tulis naskah padat isi dengan hook 2 detik pertama yang nampol.`,
+          `Oke, naskah 30 detik segera saya selesaikan lengkap dengan panduan intonasi presenter.`,
+          `Siap! Saya pastikan alur naskahnya mengalir tanpa kalimat bertele-tele.`
+        ],
+        kamera: [
+          `Keren ${targetAgent.nama}! Studio green screen, lensa 35mm, dan lighting 3-point sudah ready, langsung take!`,
+          `Siap! Framing kamera dan mikrofon clip-on sudah diset, pengambilan gambar segera dimulai.`,
+          `Sip, storyboard-nya jelas banget. Kami eksekusi adegannya di studio sekarang.`
+        ],
+        editor: [
+          `Diterima ${targetAgent.nama}! Langsung saya import ke timeline, pasang cut list cepat, dan grading warna sinematik.`,
+          `Mantap! Saya racik transisi ritmis dan sound effect pas agar retensi penonton terjaga sampai akhir.`,
+          `Sip! Saya selesaikan potongan video 4K 60fps ini agar siap tepat waktu.`
+        ],
+        carousel: [
+          `Siap ${targetAgent.nama}! Saya buatkan cover thumbnail dengan hierarki teks tegas dan carousel 7 slide yang rapi.`,
+          `Diterima! Saya gunakan format 1080x1350 dengan negative space lega agar nyaman dibaca di layar smartphone.`,
+          `Oke! Visual pendukungnya segera saya selesaikan dengan gaya visual konsisten.`
+        ],
+        ceo: [
+          `Terima kasih! Saya evaluasi draf konten dan potensi skor FYP-nya di antrean persetujuan sekarang.`,
+          `Bagus sekali! Saya periksa kelengkapan pesan edukasinya sebelum disetujui tayang.`,
+          `Materi saya terima. Segera saya tinjau kualitasnya di dashboard persetujuan.`
+        ],
+        upload: [
+          `Siap Pak CEO! Metadata, cover, caption, dan jam tayang 19.00 WIB langsung dikunci di sistem publikasi.`,
+          `Laksanakan Pak CEO! Semua aset konten sudah ready untuk dipublikasikan otomatis.`,
+          `Siap! Kami pantau interaksi awal dan performa retensinya begitu konten mengudara.`
+        ]
+      };
+
+      const lines = targetLines[agentId];
+      if (lines && lines.length > 0) {
+        return lines[Math.floor(Math.random() * lines.length)];
+      }
+    }
+
+    // 3. Obrolan Rapat Resmi CEO di Ruang Meeting (Meeting Dialogues)
+    if (contextType === 'meeting') {
+      const meetingReports = {
+        ceo: [
+          `Evaluasi performa konten: pastikan pesan edukasi kita tetap padat, praktis, dan mudah dipraktekkan audiens.`,
+          `Bagaimana progres kesiapan paket konten edukasi ${todayTheme} untuk rilis prime time hari ini?`,
+          `Fokus kita menjaga kualitas hook dan visual di level tertinggi tanpa ada detail yang terlewat.`
+        ],
+        analis: [
+          `Data analitik: video edukasi dengan hook langsung di 3 detik awal mempertahankan 68% audiens sampai akhir.`,
+          `Rasio simpan carousel tips minggu ini naik 35%, audiens paling menyukai format panduan langkah demi langkah.`,
+          `Pola waktu unggah terbaik tetap di jam 19.00 WIB saat audiens aktif beristirahat malam.`
+        ],
+        ide: [
+          `Tim riset menyiapkan turunan topik ${todayTheme} dengan pendekatan komparasi visual sebelum dan sesudah.`,
+          `Kami menyaring 10 ide mentah menjadi 3 konsep terkuat yang paling relevan dengan masalah audiens.`,
+          `Setiap konsep edukasi dirancang memiliki 1 pesan kunci yang tajam dan mudah diingat.`
+        ],
+        kamera: [
+          `Peralatan studio green screen, pencahayaan 3-point, dan mikrofon studio sudah dikalibrasi optimal.`,
+          `Sudut pengambilan gambar lensa 35mm menghasilkan kedalaman visual yang fokus dan profesional.`,
+          `Jadwal rekaman presenter sudah disinkronkan dengan kesiapan naskah dari tim penulisan.`
+        ],
+        editor: [
+          `Standar editing 4K 60fps dengan ritme potongan cepat dan kinetic subtitle sudah diterapkan konsisten.`,
+          `Color grading Rec.709 memastikan warna tetap natural dan kontras di semua tipe layar smartphone.`,
+          `Transisi ritmis di beat musik terbukti menjaga tempo video tetap dinamis dari awal hingga penutup.`
+        ],
+        carousel: [
+          `Hierarki visual 60-30-10 dan format 1080x1350 memastikan kenyamanan membaca di mobile.`,
+          `Cover slide dengan kontras tinggi dan teks maksimal 4 kata terbukti mendongkrak rasio klik (CTR).`,
+          `Slide penutup selalu dilengkapi ajakan menyimpan referensi yang jelas dan elegan.`
+        ]
+      };
+
+      const lines = meetingReports[agentId] || meetingReports.analis;
+      return lines[Math.floor(Math.random() * lines.length)];
+    }
+
+    // 4. Tanggapan Rekan Kerja di Meja (Desk Reply)
+    if (contextType === 'desk_reply') {
+      const replies = [
+        `Bener banget, formula itu terbukti paling konsisten performanya di akun kita.`,
+        `Setuju, nanti kita sinkronkan lagi pas review materi sebelum rilis malam.`,
+        `Mantap, hasilnya kelihatan rapi dan profesional banget.`,
+        `Sip, nanti pas rilis jam 19.00 WIB kita pantau bareng respon di 10 menit pertama.`,
+        `Keren, ritme kerja tim hari ini beneran solid dan terstruktur.`
+      ];
+      return replies[Math.floor(Math.random() * replies.length)];
+    }
+
+    // 5. Obrolan Spontan Nyata Sesuai Pekerjaan Karyawan Saat Ini (Desk Chat)
+    if (agent) {
+      if (agent.now && agent.now.length > 15 && Math.random() < 0.45) {
+        return `Sedang fokus: ${agent.now}`;
+      }
+
+      const roleThoughts = {
+        auditor: [
+          `Lagi cek keselarasan palet warna feed: konsistensi visual terbukti bikin akun kelihatan jauh lebih kredibel.`,
+          `Bio akun perlu dibuat lebih to-the-point: sebutkan solusi apa yang kita tawarkan dalam 5 kata pertama.`,
+          `Gaya sampul highlight sudah diseragamkan dengan tema ${todayTheme} agar profil terlihat rapi.`
+        ],
+        analis: [
+          `Grafik retensi membuktikan: 3 detik pertama menentukan 70% keberhasilan video edukasi.`,
+          `Konten format komparasi visual paling banyak disimpan audiens minggu ini.`,
+          `Rasio share konten melonjak saat kita membahas solusi praktis yang langsung bisa dicoba.`
+        ],
+        ide: [
+          `Fokus kita hari ini: 1 video, 1 masalah spesifik, 1 langkah solusi konkret tanpa basa-basi.`,
+          `Format micro-learning 20-30 detik sedang jadi format yang paling disukai algoritma.`,
+          `Lagi godok topik edukasi ${todayTheme} dengan studi kasus nyata yang sering dialami kreator.`
+        ],
+        perencana: [
+          `Jadwal konten pekan ini sudah dipetakan rapi agar audiens mendapatkan insight rutin setiap hari.`,
+          `Jam tayang prime time 19.00 WIB di Instagram dan TikTok tetap jadi jendela rilis paling efektif.`,
+          `Variasi topik harian Multimedia, Design, dan Web Dev menjaga channel tetap variatif dan mendidik.`
+        ],
+        naskah: [
+          `Lagi poles hook kalimat pembuka: buang intro klise, langsung tembak inti masalah di detik ke-2.`,
+          `Naskah edukasi yang bagus itu padat, renyah, dan memakai bahasa sehari-hari yang santai tapi berbobot.`,
+          `Struktur naskah 3 bagian: hook rasa penasaran, demonstrasi solusi, dan call to action to-the-point.`
+        ],
+        kamera: [
+          `Lighting 3-point di studio sudah optimal: bayangan halus bikin subjek presenter berdimensi.`,
+          `Sudut kamera 45 derajat dengan lensa fixed 35mm menghasilkan kedalaman ruang yang sinematik.`,
+          `Perekaman green screen butuh pencahayaan latar yang rata agar proses chroma key di editing zero noise.`
+        ],
+        editor: [
+          `Editing video ritme cepat: potong jeda nafas presenter agar tempo video tidak drop di tengah jalan.`,
+          `Grading warna LUT Rec.709 sudah pas di layar smartphone, kontras dan saturasi kulit terlihat alami.`,
+          `Kinetic subtitle dengan font Sans-Serif tebal memudahkan audiens yang menonton tanpa menyalakan suara.`
+        ],
+        carousel: [
+          `Hierarki visual 60-30-10: dominasi ruang bersih agar pesan utama langsung tertangkap mata pembaca.`,
+          `Tata letak 1080x1350 rasio 4:5 memanfaatkan area layar HP secara maksimal dibanding format kotak 1:1.`,
+          `Desain slide edukasi harus memandu mata pembaca secara berurutan dari judul ke poin utama.`
+        ],
+        caption: [
+          `Paragraf pertama caption berfungsi sebagai hook kedua setelah video: harus memancing orang membaca tuntas.`,
+          `Pilihan 5 tagar relevan terbukti lebih efektif menjangkau audiens tepat dibanding menumpuk 30 tagar acak.`,
+          `Ajakan menyimpan referensi di penutup caption terbukti mendongkrak algoritma save.`
+        ],
+        upload: [
+          `Pengecekan resolusi file 1080x1920 dan framerate 60fps sudah sesuai standar kualitas tayang.`,
+          `Integrasi sistem otomatis memastikan konten mengudara tepat waktu sesuai jadwal operasional kantor.`,
+          `Seluruh aset rilis konten malam ini sudah terverifikasi di folder publikasi.`
+        ],
+        story: [
+          `Teaser story 10 detik dengan stiker pertanyaan interaktif disiapkan untuk mendongkrak engagement awal.`,
+          `Polling sederhana di story efektif memancing pengikut untuk ikut berpendapat sebelum video utama rilis.`,
+          `Interaksi story menjaga hubungan dua arah yang hangat dengan audiens MMA Production.`
+        ],
+        komentar: [
+          `Menjawab pertanyaan teknis audiens di kolom komentar dengan ramah membangun komunitas yang loyal.`,
+          `Feedback dan pertanyaan di komentar sering kali jadi sumber ide konten edukasi berikutnya.`,
+          `Draf tanggapan untuk komentar masuk sudah disusun rapi dan menunggu kurasi.`
+        ],
+        dm: [
+          `Menyusun draf balasan pesan langsung dengan informasi layanan yang jelas dan profesional.`,
+          `Pertanyaan calon klien seputar kerjasama produksi langsung diteruskan ke CEO untuk follow-up.`,
+          `Respon cepat pada pesan masuk mencerminkan profesionalitas agensi kreatif modern.`
+        ],
+        ceo: [
+          `Fokus kita di MMA Production adalah konsistensi value edukasi berkualitas tinggi yang berdampak nyata.`,
+          `Antrean persetujuan selalu saya tinjau dari sudut pandang kemanfaatan konten bagi audiens.`,
+          `Kolaborasi antar divisi berjalan solid dan sistematis, target rilis hari ini siap tercapai.`
+        ]
+      };
+
+      const lines = roleThoughts[agentId];
+      if (lines && lines.length > 0) {
+        return lines[Math.floor(Math.random() * lines.length)];
+      }
+    }
+
+    return `Fokus menyelesaikan tugas ${todayTheme} tepat waktu.`;
+  }
   renderer.setClearColor(0x0e1726, 1);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -1405,14 +1593,25 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       sender.ry = Math.atan2(-dx, -dz);
       target.ry = Math.atan2(dx, dz);
 
-      sender.say(step.dialogueSender, 5.0);
+      const senderText = getDynamicDialogue(step.senderId, 'handover_sender', step.targetId);
+      const targetText = getDynamicDialogue(step.targetId, 'handover_target', step.senderId);
+
+      sender.say(senderText, 5.2);
       if (onPipelineEvent) {
-        onPipelineEvent({ type: 'dialogue', stepIndex: idx, step });
+        onPipelineEvent({
+          type: 'dialogue',
+          stepIndex: idx,
+          step: {
+            ...step,
+            dialogueSender: senderText,
+            dialogueTarget: targetText
+          }
+        });
       }
 
       setTimeout(() => {
         if (!isRunning) return;
-        target.say(step.dialogueTarget, 4.5);
+        target.say(targetText, 4.8);
 
         setTimeout(() => {
           if (!isRunning) return;
@@ -1452,15 +1651,6 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
   let wanderCountdown = 9.0;
   const roamingAgentKeys = ['editor', 'kamera', 'carousel', 'ide', 'analis', 'caption'];
 
-  const MEETING_DIALOGUES = [
-    { id: 'ceo', text: 'Bagaimana evaluasi konten edukasi pilar Multimedia, Design, dan Web Dev hari ini?' },
-    { id: 'analis', text: 'Retensi video edukasi 30 detik naik 42%, hook di 3 detik pertama terbukti paling efektif!' },
-    { id: 'ide', text: 'Kami siapkan 3 ide viral: lighting studio murah, hierarki visual, dan Three.js 60 FPS!' },
-    { id: 'kamera', text: 'Shooting studio green screen sudah terjadwal, lighting & audio siap dieksekusi!' },
-    { id: 'editor', text: 'Editing video reels 4K 60fps dengan ritme potongan cepat siap rilis jam 19.00 WIB!' },
-    { id: 'carousel', text: 'Desain carousel 7 slide dengan negative space rapi siap tayang prime time!' }
-  ];
-
   function tickSocialSimulation(dt) {
     if (!chatActive) return;
 
@@ -1480,10 +1670,9 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       wanderCountdown -= dt;
       if (wanderCountdown <= 0) {
         wanderCountdown = 7.0 + Math.random() * 4.0;
-        const meetingItem = MEETING_DIALOGUES[Math.floor(Math.random() * MEETING_DIALOGUES.length)];
-        const speaker = nodes[meetingItem.id] || meetingAgents[Math.floor(Math.random() * meetingAgents.length)];
+        const speaker = meetingAgents[Math.floor(Math.random() * meetingAgents.length)];
         if (speaker && speaker.say) {
-          speaker.say(meetingItem.text, 6.0);
+          speaker.say(getDynamicDialogue(speaker.id, 'meeting'), 6.0);
         }
       }
       return;
@@ -1499,7 +1688,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     }
 
     // Jika di luar jam rapat: Ruang meeting formal tertutup, bukan tempat santai!
-    // Pemicu acak karyawan berdiri, berjalan, dan mengobrol di fasilitas santai / antar meja
+    // Pemicu dinamis karyawan mengobrol kontekstual sesuai pekerjaan riil mereka
     wanderCountdown -= dt;
     if (wanderCountdown <= 0) {
       wanderCountdown = 12.0 + Math.random() * 8.0;
@@ -1507,15 +1696,15 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       const randomKey = roamingAgentKeys[Math.floor(Math.random() * roamingAgentKeys.length)];
       const speaker = nodes[randomKey];
       if (speaker && speaker.mode !== 'walk') {
-        const text = getRandomDialogue(randomKey);
+        const text = getDynamicDialogue(randomKey, 'desk_chat');
         speaker.say(text, 6.0);
 
-        // Jika dekat dengan rekan kerja, respon 2.5 detik kemudian
+        // Rekan kerja merespon secara kontekstual 2.5 detik kemudian
         setTimeout(() => {
           const partnerKey = roamingAgentKeys.find(k => k !== randomKey);
           const partner = nodes[partnerKey];
           if (partner && partner.mode !== 'walk') {
-            const replyText = getRandomDialogue(partnerKey);
+            const replyText = getDynamicDialogue(partnerKey, 'desk_reply', randomKey);
             partner.say(replyText, 5.5);
           }
         }, 2800);
@@ -1584,7 +1773,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     const id = pickAt(e);
     if (id) {
       if (nodes[id]) {
-        nodes[id].say(getRandomDialogue(id), 6.0);
+        nodes[id].say(getDynamicDialogue(id, 'desk_chat'), 6.0);
       }
       if (onSelectAgent) {
         onSelectAgent(id);
@@ -1753,7 +1942,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     getCurrentAgencyStep: () => AGENCY_PIPELINE_STEPS[currentAgencyStepIdx],
     triggerAgentChat: (id, text) => {
       if (nodes[id]) {
-        nodes[id].say(text || getRandomDialogue(id), 6.5);
+        nodes[id].say(text || getDynamicDialogue(id, 'desk_chat'), 6.5);
       }
     },
     destroy: () => {
