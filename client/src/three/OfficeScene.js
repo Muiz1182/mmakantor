@@ -165,7 +165,11 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
           `Take rekaman di studio green screen selesai, lighting 3-point dan audio sudah bersih. Tolong dieksekusi di timeline!`,
           `Footage kamera sinematik sudah lengkap sesuai storyboard. Silakan pasang cut list dan ritme potongan dinamis!`
         ],
-        editor: [
+        editor: targetId === 'upload' ? [
+          `Halo tim medsos! Master video 4K 60fps untuk jadwal upload sudah selesai di-render dan lulus QC. Tolong segera dikelola dan diunggah ke Reels & TikTok!`,
+          `Tim Medsos, master video edukasi ${todayTheme} sudah rampung lengkap dengan kinetic subtitle & audio jernih. Silakan diproses untuk rilis sekarang!`,
+          `Master video sudah siap di folder sharing! Tolong tim medsos koordinasikan caption, cover, dan publish ke semua platform!`
+        ] : [
           `${targetAgent.nama}, video Reels 4K selesai di-render dengan kinetic subtitle. Tolong buatkan cover thumbnail kontras tinggi dan carousel pendukung!`,
           `Timeline video sudah rampung dengan color grading Rec.709. Tolong rancang thumbnail 9:16 dan slide edukasi 7 halaman!`,
           `Render final video edukasi sudah beres. Visual carousel pendukung dan cover eye-catching tolong disiapkan!`
@@ -221,8 +225,12 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
           `Bagus sekali! Saya periksa kelengkapan pesan edukasinya sebelum disetujui tayang.`,
           `Materi saya terima. Segera saya tinjau kualitasnya di dashboard persetujuan.`
         ],
-        upload: [
-          `Siap Pak CEO! Metadata, cover, caption, dan jam tayang 19.00 WIB langsung dikunci di sistem publikasi.`,
+        upload: targetAgent?.id === 'editor' ? [
+          `Siap Tim Editing! Master video 4K 60fps kami terima. Langsung kami pasang cover thumbnail CTR tinggi, caption SEO, dan jadwalkan rilis sekarang!`,
+          `Mantap Tim Editing! File video sudah masuk sistem publikasi multi-platform (Instagram, TikTok, YouTube).`,
+          `Diterima! Tim medsos langsung bergerak mengelola postingan dan menyiapkan teaser story!`
+        ] : [
+          `Siap Pak CEO! Metadata, cover, caption, dan jam tayang jadwal operasional langsung dikunci di sistem publikasi.`,
           `Laksanakan Pak CEO! Semua aset konten sudah ready untuk dipublikasikan otomatis.`,
           `Siap! Kami pantau interaksi awal dan performa retensinya begitu konten mengudara.`
         ]
@@ -1524,6 +1532,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     },
     {
       step: 5,
+      id: 'step-editor-carousel',
       title: 'Desain Carousel & Thumbnail',
       senderId: 'editor',
       targetId: 'carousel',
@@ -1534,6 +1543,30 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     },
     {
       step: 6,
+      id: 'step-editor-upload',
+      title: 'Serah Terima Video (Editing ➔ Medsos)',
+      senderId: 'editor',
+      targetId: 'upload',
+      pilar: 'Multimedia & Medsos',
+      dialogueSender: 'Tim Medsos, ini master video 4K 60fps untuk jadwal upload sudah lulus QC dan siap tayang!',
+      dialogueTarget: 'Siap! Master video kami terima. Langsung kami pasang cover thumbnail, siapkan caption, dan publish!',
+      summary: 'Tim Editing membawa master video 4K 60fps dari Studio ke Tim Medsos di Meja Publikasi untuk diunggah',
+      isUploadHandover: true
+    },
+    {
+      step: 7,
+      id: 'step-upload-caption',
+      title: 'Penyelarasan Caption & SEO Medsos',
+      senderId: 'upload',
+      targetId: 'caption',
+      pilar: 'Medsos & SEO',
+      dialogueSender: 'Master video sudah masuk sistem upload, tolong sematkan caption dan 7 hashtag SEO terkurasi ya!',
+      dialogueTarget: 'Beres! Caption persuasif dan hashtag pilar edukasi sudah siap tayang bareng video!',
+      summary: 'Tim Upload berkoordinasi dengan Penulis Caption untuk penyematan copy'
+    },
+    {
+      step: 8,
+      id: 'step-carousel-ceo',
       title: 'Review Final & Approval CEO',
       senderId: 'carousel',
       targetId: 'ceo',
@@ -1543,12 +1576,13 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       summary: 'Desainer menyerahkan paket konten ke Ruang CEO untuk persetujuan'
     },
     {
-      step: 7,
-      title: 'Publikasi Otomatis Medsos',
+      step: 9,
+      id: 'step-ceo-upload',
+      title: 'Mandat Publikasi dari CEO',
       senderId: 'ceo',
       targetId: 'upload',
       pilar: 'Web Dev & Sosmed',
-      dialogueSender: 'Konten sudah disetujui! Tim Medsos, jadwalkan tayang otomatis jam 19.00 WIB!',
+      dialogueSender: 'Konten sudah disetujui! Tim Medsos, eksekusi tayang otomatis sesuai jam jadwal operasional!',
       dialogueTarget: 'Siap Pak CEO! Metadata, thumbnail, & jadwal tayang sudah terprogram otomatis!',
       summary: 'CEO memberikan mandat ke Tim Medsos untuk publikasi otomatis'
     }
@@ -1613,6 +1647,23 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
         if (!isRunning) return;
         target.say(targetText, 4.8);
 
+        // Jika ini adalah serah terima video ke tim medsos, tim caption & story ikut merespon aktif!
+        if (step.senderId === 'editor' && step.targetId === 'upload') {
+          setTimeout(() => {
+            if (!isRunning) return;
+            if (nodes['caption']) {
+              nodes['caption'].say('Caption persuasif dan 7 hashtag SEO sudah siap disematkan!', 4.5);
+            }
+          }, 1500);
+
+          setTimeout(() => {
+            if (!isRunning) return;
+            if (nodes['story']) {
+              nodes['story'].say('Teaser & stiker link di Story langsung kami publish sekarang!', 4.5);
+            }
+          }, 3000);
+        }
+
         setTimeout(() => {
           if (!isRunning) return;
           const returnPath = generateAgentWalkPath(sender.x, sender.z, sender.sx, sender.sz, target.zone, sender.zone);
@@ -1649,6 +1700,8 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
   // 15. SIMULASI OTOMATIS: KARYAWAN JALAN & OBROLAN INTERAKTIF
   // =========================================================================
   let wanderCountdown = 9.0;
+  let lastPublishHandoverSlot = null;
+  let publishCheckCountdown = 1.0;
   const roamingAgentKeys = ['editor', 'kamera', 'carousel', 'ide', 'analis', 'caption'];
 
   function tickSocialSimulation(dt) {
@@ -1678,7 +1731,32 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       return;
     }
 
-    // Estafet Alur Agensi Mandiri (Autonomous Creative Agency Pipeline)
+    // 1. Deteksi Otomatis Jadwal Pengunggahan / Publikasi Konten Medsos
+    // Jika jam publikasi tiba (misal jam 11:00 atau jam 19:00 WIB),
+    // Tim Editing (Editor) OTOMATIS berdiri dan berjalan ke Tim Medsos (Upload Video) untuk menyerahkan video!
+    publishCheckCountdown -= dt;
+    if (publishCheckCountdown <= 0 && !isAgencyStepRunning) {
+      publishCheckCountdown = 4.0;
+      const ctx = getOfficeContext ? getOfficeContext() : {};
+      const clockTime = ctx.clockTime;
+      if (clockTime) {
+        const h = clockTime.h;
+        // Jam-jam publikasi medsos operasional (Slot Siang 11.00 - 14.00, Slot Prime Time Malam 18.30 - 21.30)
+        const isPublishHour = (h === 11) || (h === 12) || (h === 13) || (h === 14) || (h >= 18 && h <= 21);
+        const slotKey = `${clockTime.dayIndex}-${h}`;
+
+        if (isPublishHour && lastPublishHandoverSlot !== slotKey) {
+          lastPublishHandoverSlot = slotKey;
+          const uploadStepIdx = AGENCY_PIPELINE_STEPS.findIndex(s => s.senderId === 'editor' && s.targetId === 'upload');
+          if (uploadStepIdx !== -1) {
+            runAgencyStep(uploadStepIdx);
+            return;
+          }
+        }
+      }
+    }
+
+    // 2. Estafet Alur Agensi Mandiri (Autonomous Creative Agency Pipeline)
     // Agen berdiri, berjalan antar ruangan, serah terima materi naskah, video, desain & persetujuan CEO
     if (!isAgencyStepRunning) {
       agencyStepTimer -= dt;
@@ -1934,10 +2012,18 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     setTimePhase,
     resize,
     setChatActive: (val) => { chatActive = val; },
-    triggerNextAgencyStep: () => {
-      if (!isAgencyStepRunning) {
-        runAgencyStep(currentAgencyStepIdx);
+    triggerNextAgencyStep: (targetStepId) => {
+      if (isAgencyStepRunning) return;
+      if (targetStepId) {
+        const found = AGENCY_PIPELINE_STEPS.findIndex(s =>
+          s.id === targetStepId || s.senderId === targetStepId || s.targetId === targetStepId
+        );
+        if (found !== -1) {
+          runAgencyStep(found);
+          return;
+        }
       }
+      runAgencyStep(currentAgencyStepIdx);
     },
     getCurrentAgencyStep: () => AGENCY_PIPELINE_STEPS[currentAgencyStepIdx],
     triggerAgentChat: (id, text) => {

@@ -181,10 +181,10 @@ export function App() {
           <button
             type="button"
             className={`status-pill agency-pipeline-pill ${activeAgencyMission ? 'active' : ''}`}
-            onClick={() => window.__triggerAgencyStep && window.__triggerAgencyStep()}
-            title="Klik untuk memicu langkah estafet berikutnya secara langsung (karyawan berdiri dan berjalan antar meja)"
+            onClick={() => window.__triggerAgencyStep && window.__triggerAgencyStep('editor')}
+            title="Klik untuk memicu serah terima video atau langkah estafet berikutnya secara langsung (karyawan berdiri dan berjalan antar meja)"
           >
-            ⚡ Estafet Agensi: <b>{activeAgencyMission ? activeAgencyMission.title : 'Berjalan Mandiri'}</b>
+            ⚡ Estafet Agensi: <b>{activeAgencyMission ? activeAgencyMission.title : 'Serah Terima Video'}</b>
           </button>
         </div>
 
@@ -358,8 +358,13 @@ export function App() {
                 <button
                   type="button"
                   className={`step-bubble ${isSelected ? 'active' : ''} ${isAgencyActive ? 'agency-active-step' : ''}`}
-                  onClick={() => handleSelectAgent(id)}
-                  title={`Buka ${agent ? agent.nama : id}`}
+                  onClick={() => {
+                    handleSelectAgent(id);
+                    if (id === 'editor' || id === 'upload') {
+                      window.__triggerAgencyStep && window.__triggerAgencyStep('editor');
+                    }
+                  }}
+                  title={`Buka ${agent ? agent.nama : id} (klik untuk memicu serah terima video jika memilih Editor/Upload)`}
                 >
                   <span className="step-num">{curStep}</span>
                   {agent ? (agent.id === 'kamera' ? 'Videographer' : agent.nama) : id}
