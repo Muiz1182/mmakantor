@@ -532,14 +532,24 @@ export function VideoReviewModal({
                         : 'Format vertikal 9:16, audio -14 LUFS, dan naskah sudah siap. Buka Creator Center untuk unggah.'}
                     </p>
                   </div>
-                  <a
-                    href="https://www.tiktok.com/creator-center/upload"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="dist-link-btn"
-                  >
-                    Buka TikTok Creator Center ↗
-                  </a>
+                  <div className="dist-card-action-group">
+                    <a
+                      href="/videos/3-Trik-Lighting-Studio-Modal-100-Ribuan.mp4"
+                      download="3-Trik-Lighting-Studio-Modal-100-Ribuan.mp4"
+                      className="dist-download-btn"
+                      title="Unduh file video MP4 1080x1920 untuk diupload ke TikTok"
+                    >
+                      ⬇️ Unduh File Video (.MP4)
+                    </a>
+                    <a
+                      href="https://www.tiktok.com/creator-center/upload"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="dist-link-btn"
+                    >
+                      Buka TikTok Creator Center ↗
+                    </a>
+                  </div>
                 </div>
 
                 {/* 2. INSTAGRAM */}
@@ -620,6 +630,14 @@ export function VideoReviewModal({
 
             {/* AKSI BAWAH */}
             <div className="dist-footer-actions">
+              <a
+                href="/videos/3-Trik-Lighting-Studio-Modal-100-Ribuan.mp4"
+                download="3-Trik-Lighting-Studio-Modal-100-Ribuan.mp4"
+                className="btn-download-video-file"
+                title="Unduh file video MP4 1080x1920 untuk diposting ke TikTok / Instagram"
+              >
+                ⬇️ Unduh File Video (.MP4)
+              </a>
               <button
                 type="button"
                 className="btn-copy-again"
@@ -938,6 +956,15 @@ export function VideoReviewModal({
               >
                 📋 Salin Caption
               </button>
+
+              <a
+                href="/videos/3-Trik-Lighting-Studio-Modal-100-Ribuan.mp4"
+                download="3-Trik-Lighting-Studio-Modal-100-Ribuan.mp4"
+                className="btn-quick-download-video"
+                title="Unduh file video MP4 1080x1920 untuk diposting"
+              >
+                ⬇️ Unduh MP4
+              </a>
             </div>
 
             {copiedNotification && (

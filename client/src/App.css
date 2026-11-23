@@ -4605,6 +4605,75 @@ button:focus-visible, input:focus-visible {
   justify-content: flex-end;
   gap: 12px;
   margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.btn-download-video-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  border: none;
+  border-radius: 10px;
+  color: #ffffff;
+  font: 700 13px var(--f-body);
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+  transition: all 0.2s ease;
+}
+
+.btn-download-video-file:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.55);
+  color: #ffffff;
+}
+
+.dist-card-action-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dist-download-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  border-radius: 8px;
+  color: #60a5fa;
+  text-decoration: none;
+  font: 700 12px var(--f-body);
+  transition: all 0.2s ease;
+}
+
+.dist-download-btn:hover {
+  background: rgba(59, 130, 246, 0.3);
+  color: #ffffff;
+  border-color: #3b82f6;
+}
+
+.btn-quick-download-video {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  border-radius: 6px;
+  color: #60a5fa;
+  text-decoration: none;
+  font: 700 11.5px var(--f-body);
+  transition: all 0.2s ease;
+}
+
+.btn-quick-download-video:hover {
+  background: rgba(59, 130, 246, 0.25);
+  color: #ffffff;
 }
 
 .btn-copy-again {
