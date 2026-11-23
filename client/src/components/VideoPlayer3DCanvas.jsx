@@ -415,6 +415,69 @@ export function VideoPlayer3DCanvas({
 
       scene.add(reflectorGroup);
 
+      // PROP 2B: Lampu Plafon Menggantung (Ceiling Lamp Harsh Light - Scene 1 Lighting)
+      const ceilingLampGroup = new THREE.Group();
+      ceilingLampGroup.position.set(0, 2.15, 0.4);
+
+      const lampWireGeo = new THREE.CylinderGeometry(0.008, 0.008, 0.8, 8);
+      const lampWireMat = new THREE.MeshBasicMaterial({ color: 0x334155 });
+      const lampWireMesh = new THREE.Mesh(lampWireGeo, lampWireMat);
+      lampWireMesh.position.y = 0.4;
+      ceilingLampGroup.add(lampWireMesh);
+
+      const bulbGeo = new THREE.SphereGeometry(0.11, 16, 16);
+      const bulbMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        emissive: 0xfef08a,
+        emissiveIntensity: 0.9,
+        roughness: 0.1
+      });
+      const bulbMesh = new THREE.Mesh(bulbGeo, bulbMat);
+      ceilingLampGroup.add(bulbMesh);
+
+      const harshLightConeGeo = new THREE.ConeGeometry(0.55, 1.2, 16, 1, true);
+      const harshLightConeMat = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.18,
+        side: THREE.DoubleSide
+      });
+      const harshLightConeMesh = new THREE.Mesh(harshLightConeGeo, harshLightConeMat);
+      harshLightConeMesh.position.y = -0.6;
+      ceilingLampGroup.add(harshLightConeMesh);
+
+      scene.add(ceilingLampGroup);
+
+      // PROP 2C: Smartphone dengan Senter HP (Phone Torch - Scene 2 Lighting)
+      const phoneTorchGroup = new THREE.Group();
+      phoneTorchGroup.position.set(0.65, 0.95, 0.85);
+      phoneTorchGroup.rotation.y = -Math.PI / 3;
+
+      const phoneBodyGeo = new THREE.BoxGeometry(0.16, 0.32, 0.02);
+      const phoneBodyMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.8, roughness: 0.2 });
+      const phoneBodyMesh = new THREE.Mesh(phoneBodyGeo, phoneBodyMat);
+      phoneTorchGroup.add(phoneBodyMesh);
+
+      const torchLensGeo = new THREE.SphereGeometry(0.025, 8, 8);
+      const torchLensMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const torchLensMesh = new THREE.Mesh(torchLensGeo, torchLensMat);
+      torchLensMesh.position.set(0.05, 0.12, 0.015);
+      phoneTorchGroup.add(torchLensMesh);
+
+      const torchBeamGeo = new THREE.ConeGeometry(0.35, 1.1, 16, 1, true);
+      torchBeamGeo.rotateX(Math.PI / 2);
+      const torchBeamMat = new THREE.MeshBasicMaterial({
+        color: 0xfffbeb,
+        transparent: true,
+        opacity: 0.35,
+        side: THREE.DoubleSide
+      });
+      const torchBeamMesh = new THREE.Mesh(torchBeamGeo, torchBeamMat);
+      torchBeamMesh.position.set(0.05, 0.12, 0.55);
+      phoneTorchGroup.add(torchBeamMesh);
+
+      scene.add(phoneTorchGroup);
+
       // PROP 3: Ikon 3D Bookmark Pita Melayang (CTA Scene)
       const ctaGroup = new THREE.Group();
       ctaGroup.position.set(-0.85, 1.65, 0.7);
@@ -543,17 +606,29 @@ export function VideoPlayer3DCanvas({
           hookBadgeGroup.position.y = 1.65 + Math.sin(elapsed * 4) * 0.06;
         }
 
-        // Scene 1: Camera Studio Active
-        cameraTripodGroup.visible = activeSceneIdx === 1;
+        // Scene 1: Camera Studio & Lampu Plafon Kasar
+        const isLightingTopic = curPilar === 'Multimedia' || (stateRef.current.videoData?.judul || '').toLowerCase().includes('light');
+        cameraTripodGroup.visible = activeSceneIdx === 1 && !isLightingTopic;
         if (cameraTripodGroup.visible) {
           cameraTripodGroup.rotation.y = Math.PI / 4 + Math.sin(elapsed * 1.5) * 0.08;
         }
 
-        // Scene 2: Reflektor Styrofoam Active
+        ceilingLampGroup.visible = activeSceneIdx === 1 && isLightingTopic;
+        if (ceilingLampGroup.visible) {
+          ceilingLampGroup.rotation.z = Math.sin(elapsed * 2.5) * 0.05;
+          harshLightConeMesh.material.opacity = 0.15 + Math.sin(elapsed * 6) * 0.06;
+        }
+
+        // Scene 2: Reflektor Styrofoam & Senter HP Active
         reflectorGroup.visible = activeSceneIdx === 2;
+        phoneTorchGroup.visible = activeSceneIdx === 2 && isLightingTopic;
         if (reflectorGroup.visible) {
-          beamMesh.material.opacity = 0.15 + Math.sin(elapsed * 5) * 0.08;
+          beamMesh.material.opacity = 0.2 + Math.sin(elapsed * 5) * 0.1;
           reflectorGroup.position.y = 0.85 + Math.sin(elapsed * 2) * 0.02;
+        }
+        if (phoneTorchGroup.visible) {
+          phoneTorchGroup.rotation.y = -Math.PI / 3 + Math.sin(elapsed * 3) * 0.04;
+          torchBeamMesh.material.opacity = 0.3 + Math.sin(elapsed * 8) * 0.15;
         }
 
         // Scene 3: CTA Bookmark Active

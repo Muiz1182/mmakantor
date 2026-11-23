@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { VIDEO_REVIEW_PRESETS, getVideoReviewPreset, buildDynamicVideoReviewData, OFFICIAL_SOCIAL_ACCOUNTS } from '../constants/videoReviewData';
 import { VideoPlayer3DCanvas } from './VideoPlayer3DCanvas';
+import { TopicNarrativeOverlays } from './TopicNarrativeOverlays';
 
 // ============================================================================
 // AUDIO REVIEW ENGINE (WEB AUDIO API SOUND SYNTHESIZER + SPEECH SYNTHESIS TTS)
@@ -514,39 +515,13 @@ export function VideoReviewModal({
                       <div className={`studio-light-beam ${isPlaying ? 'light-sweep' : ''}`} />
                     )}
                     
-                    {/* Elemen Visual Sesuai Adegan (Multi-Scene Graphics Dinamis) */}
-                    {currentSceneIndex === 0 && (
-                      <div className="scene-hook-overlay">
-                        <div className="hook-warning-pill">⚡ HOOK VIRAL 3S • {videoData.pilar.toUpperCase()}</div>
-                        <h3 className="hook-big-headline">{videoData.hook3sText || videoData.subtitles[0]?.text || 'HOOK VIRAL'}</h3>
-                      </div>
-                    )}
-
-                    {currentSceneIndex === 1 && (
-                      <div className="scene-vectorscope-overlay">
-                        <span className="vectorscope-badge">{videoData.colorGrade}</span>
-                        <div className="color-meter-bars">
-                          <span className="bar r" style={{ height: '70%' }}></span>
-                          <span className="bar g" style={{ height: '85%' }}></span>
-                          <span className="bar b" style={{ height: '65%' }}></span>
-                        </div>
-                      </div>
-                    )}
-
-                    {currentSceneIndex === 2 && (
-                      <div className="scene-tutorial-step-overlay">
-                        <div className="step-callout-card">
-                          <span className="step-num">STUDI & SOLUSI TIM</span>
-                          <strong className="step-txt">{videoData.subtitles[2]?.text || videoData.judul}</strong>
-                        </div>
-                      </div>
-                    )}
-
-                    {currentSceneIndex === 3 && (
-                      <div className="scene-cta-overlay">
-                        <div className="cta-bookmark-glow">📌 {videoData.subtitles[3]?.text || 'Simpan Video Ini Sebelum Hilang!'}</div>
-                      </div>
-                    )}
+                    {/* ELEMEN GRAFIS STIKER NARASI TIKTOK KREATOR (Gaya @bukanahli127) */}
+                    <TopicNarrativeOverlays
+                      sceneIndex={currentSceneIndex}
+                      currentTime={currentTime}
+                      isPlaying={isPlaying}
+                      videoData={videoData}
+                    />
 
                     {/* Presenter Karakter 2D Fallback jika Mode 3D dimatikan */}
                     {!viewMode3D && (
