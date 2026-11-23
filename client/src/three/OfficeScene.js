@@ -295,8 +295,32 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
 
     // 5. Obrolan Spontan Nyata Sesuai Pekerjaan Karyawan Saat Ini (Desk Chat)
     if (agent) {
-      if (agent.now && agent.now.length > 15 && Math.random() < 0.45) {
-        return `Sedang fokus: ${agent.now}`;
+      // Jika agen sedang istirahat (cafe / musholla / lounge)
+      if (agent.at === 'lunch' || agent.at === 'ps' || agent.at === 'pool') {
+        const breakQuotes = [
+          `Santap siang dan rehat dulu di area Cafe, menu makanannya enak buat isi energi.`,
+          `Rehat sejenak sambil ngobrol santai sebelum sesi kerja berikutnya dimulai.`,
+          `Waktu istirahat resmi kantor: santai dulu agar pikiran segar kembali.`,
+          `Segelas kopi hangat dulu di cafe biar fokus kerja sore nanti maksimal.`
+        ];
+        return breakQuotes[Math.floor(Math.random() * breakQuotes.length)];
+      }
+
+      // Jika agen sedang tidur di asrama
+      if (agent.at === 'dorm') {
+        return 'Istirahat malam di Asrama Karyawan MMA.';
+      }
+
+      // Prioritas Utama: Bicara langsung mengenai pekerjaan yang sedang dikerjakan saat ini (realtime)
+      if (agent.now && agent.now.length > 8) {
+        const nowQuotes = [
+          `Lagi fokus: ${agent.now}`,
+          `${agent.now}`,
+          `Target jam ini: ${agent.now}`
+        ];
+        if (Math.random() < 0.75) {
+          return nowQuotes[Math.floor(Math.random() * nowQuotes.length)];
+        }
       }
 
       const roleThoughts = {
@@ -1958,37 +1982,55 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       return;
     }
 
-    // 1. Deteksi Otomatis Jadwal Pengunggahan / Publikasi Konten Medsos
-    // Jika jam publikasi tiba (misal jam 11:00 atau jam 19:00 WIB),
-    // Tim Editing (Editor) OTOMATIS berdiri dan berjalan ke Tim Medsos (Upload Video) untuk menyerahkan video!
+    // 1. Eksekusi Estafet Mandiri REALTIME Sesuai Jam Operasional Kantor (Bukan Looping 16 Detik)
+    // Karakter berjalan serah terima materi HANYA saat waktu operasional tiba di dunia nyata:
     publishCheckCountdown -= dt;
     if (publishCheckCountdown <= 0 && !isAgencyStepRunning) {
-      publishCheckCountdown = 4.0;
+      publishCheckCountdown = 5.0;
       const ctx = getOfficeContext ? getOfficeContext() : {};
       const clockTime = ctx.clockTime;
-      if (clockTime) {
+      const routine = ctx.currentRoutine;
+      if (clockTime && routine) {
         const h = clockTime.h;
-        // Jam-jam publikasi medsos operasional (Slot Siang 11.00 - 14.00, Slot Prime Time Malam 18.30 - 21.30)
-        const isPublishHour = (h === 11) || (h === 12) || (h === 13) || (h === 14) || (h >= 18 && h <= 21);
-        const slotKey = `${clockTime.dayIndex}-${h}`;
+        const m = clockTime.m;
+        const dayIdx = clockTime.dayIndex;
+        const title = (routine.title || '').toLowerCase();
 
-        if (isPublishHour && lastPublishHandoverSlot !== slotKey) {
-          lastPublishHandoverSlot = slotKey;
+        // A. Serah terima video saat jadwal tayang (Slot 1 jam 11:00 atau Slot 2 jam 19:00 WIB)
+        const isPublishSlot = routine.linkedSlotTime || (h === 11) || (h === 19);
+        const pubKey = `pub-${dayIdx}-${h}`;
+        if (isPublishSlot && lastPublishHandoverSlot !== pubKey) {
+          lastPublishHandoverSlot = pubKey;
           const uploadStepIdx = AGENCY_PIPELINE_STEPS.findIndex(s => s.senderId === 'editor' && s.targetId === 'upload');
           if (uploadStepIdx !== -1) {
             runAgencyStep(uploadStepIdx);
             return;
           }
         }
-      }
-    }
 
-    // 2. Estafet Alur Agensi Mandiri (Autonomous Creative Agency Pipeline)
-    // Agen berdiri, berjalan antar ruangan, serah terima materi naskah, video, desain & persetujuan CEO
-    if (!isAgencyStepRunning) {
-      agencyStepTimer -= dt;
-      if (agencyStepTimer <= 0) {
-        runAgencyStep(currentAgencyStepIdx);
+        // B. Penyerahan Naskah ke Studio saat jam produksi studio dimulai (misal 13:00 WIB)
+        const isStudioStart = (title.includes('produksi') || title.includes('studio')) && h === 13;
+        const studioKey = `studio-${dayIdx}-${h}`;
+        if (isStudioStart && lastPublishHandoverSlot !== studioKey) {
+          lastPublishHandoverSlot = studioKey;
+          const naskahStepIdx = AGENCY_PIPELINE_STEPS.findIndex(s => s.senderId === 'naskah' && s.targetId === 'kamera');
+          if (naskahStepIdx !== -1) {
+            runAgencyStep(naskahStepIdx);
+            return;
+          }
+        }
+
+        // C. Penyerahan paket draf ke CEO sebelum rapat evaluasi sore (16:30 WIB)
+        const isReviewStart = title.includes('review') || (h === 16 && m >= 25);
+        const reviewKey = `review-${dayIdx}-${h}`;
+        if (isReviewStart && lastPublishHandoverSlot !== reviewKey) {
+          lastPublishHandoverSlot = reviewKey;
+          const reviewStepIdx = AGENCY_PIPELINE_STEPS.findIndex(s => s.senderId === 'carousel' && s.targetId === 'ceo');
+          if (reviewStepIdx !== -1) {
+            runAgencyStep(reviewStepIdx);
+            return;
+          }
+        }
       }
     }
 

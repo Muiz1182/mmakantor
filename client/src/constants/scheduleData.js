@@ -1164,3 +1164,148 @@ export function getCurrentRoutine(hour, minute, dayIndex = 1) {
 
   return dayRoutines[0] || DAILY_ROUTINES[0];
 }
+
+/**
+ * Memberikan tugas pekerjaan kontekstual per agen sesuai dengan jadwal operasional yang sedang berlangsung.
+ * Mengubah deskripsi a.now dan fokus kerja agar 100% selaras dengan jam operasional kantor.
+ */
+export function getRoleTaskForRoutine(agentId, routine, todayTheme = 'Multimedia') {
+  if (!routine) return 'Fokus menyelesaikan target pekerjaan harian.';
+  
+  const title = (routine.title || '').toLowerCase();
+
+  // 1. Sesi Rapat Resmi CEO
+  if (routine.category === 'meeting' || routine.locationId === 'meeting') {
+    if (agentId === 'ceo') return `Memimpin ${routine.title} bersama tim inti di Ruang Meeting Kaca.`;
+    const meetingParticipants = ['analis', 'ide', 'kamera', 'editor', 'carousel'];
+    if (meetingParticipants.includes(agentId)) {
+      return `Mengikuti ${routine.title} bersama CEO: evaluasi QC dan kelayakan konten.`;
+    }
+    return `Bekerja mandiri di meja selama agenda ${routine.title} berlangsung.`;
+  }
+
+  // 2. Sesi Istirahat
+  if (routine.category === 'break') {
+    return `Mengikuti ${routine.title} di ${routine.locationLabel || 'Cafe & Musholla'}.`;
+  }
+
+  // 3. Sesi Tidur
+  if (routine.category === 'sleep') {
+    return 'Istirahat malam di Asrama Karyawan MMA.';
+  }
+
+  // 4. Jam Kerja Sesuai Tema Rutinitas
+  // A. Riset Tren & Analisa Pagi
+  if (title.includes('tren') || title.includes('riset') || title.includes('analisa') || title.includes('kalibrasi')) {
+    const map = {
+      analis: `Menganalisa grafik retensi penonton dan topik audio-visual viral untuk tema ${todayTheme}.`,
+      auditor: `Audit konsistensi palet warna feed, bio, dan highlight profil medsos.`,
+      ide: `Menyaring 3 sudut pandang ide edukasi yang paling relevan dengan masalah audiens.`,
+      perencana: `Menyusun matriks topik konten mingguan dan rencana jam rilis optimal.`,
+      naskah: `Menyiapkan referensi hook verbal dan kalimat pembuka yang memicu rasa ingin tahu.`,
+      kamera: `Kalibrasi warna kamera, lensa 35mm, dan pengecekan mikrofon wireless studio.`,
+      editor: `Menyiapkan sound effect tren, preset transisi ritmis, dan font subtitle.`,
+      carousel: `Riset layout visual 1080x1350 dan tipografi cover bernilai CTR tinggi.`,
+      caption: `Riset 5 tagar SEO terverifikasi dan formula hook copywriting 2 baris pertama.`,
+      upload: `Pengecekan akun medsos dan kesiapan sistem rilis multi-platform.`,
+      story: `Menyiapkan polling dan stiker interaksi untuk teaser pagi.`,
+      komentar: `Merekap sentimen komentar audiens dari postingan hari sebelumnya.`,
+      dm: `Membalas pesan langsung (DM) calon klien dan komunitas edukasi.`,
+      ceo: `Meninjau roadmap konten dan target retensi harian.`
+    };
+    return map[agentId] || `Fokus riset dan persiapan kerja: ${routine.title}.`;
+  }
+
+  // B. Penulisan Naskah, Hook & Storyboard
+  if (title.includes('naskah') || title.includes('hook') || title.includes('storyboard') || title.includes('skrip')) {
+    const map = {
+      naskah: `Menulis draf naskah Reels 30 detik lengkap dengan breakdown shot list 3 adegan.`,
+      ide: `Mematangkan konsep hook 2 detik pertama yang provokatif dan to-the-point.`,
+      perencana: `Memvalidasi durasi dan alur logika naskah agar padat tanpa kalimat bertele-tele.`,
+      kamera: `Mempelajari storyboard dan menyiapkan blocking sudut kamera studio.`,
+      editor: `Menyusun template timeline dan cut list sesuai tempo naskah.`,
+      carousel: `Merancang draf struktur slide edukasi 7 halaman yang selaras dengan naskah.`,
+      caption: `Menyusun draf caption edukatif dan ajakan bertindak (CTA) penutup.`,
+      analis: `Menguji potensi retensi kalimat pembuka naskah berdasarkan data historis.`,
+      auditor: `Memastikan naskah bebas dari klaim berlebihan dan selaras dengan panduan brand.`,
+      upload: `Menyiapkan antrean draft sistem publikasi dan penamaan file.`,
+      story: `Menyiapkan visual teaser di Instagram Story.`,
+      komentar: `Menyusun bank respon untuk pertanyaan teknis yang diprediksi muncul.`,
+      dm: `Pelayanan konsultasi dan filter pesan masuk.`,
+      ceo: `Memantau progres penulisan naskah edukasi harian.`
+    };
+    return map[agentId] || `Fokus penulisan dan perancangan materi: ${routine.title}.`;
+  }
+
+  // C. Produksi Studio Green Screen & Editing
+  if (title.includes('produksi') || title.includes('studio') || title.includes('editing') || title.includes('green screen') || title.includes('syuting')) {
+    const map = {
+      kamera: `Merekam adegan presenter di Studio Green Screen (4K 60fps) dengan lighting 3-point.`,
+      editor: `Color grading DaVinci Resolve Rec.709 dan pemotongan timeline ritmis di CapCut PC.`,
+      naskah: `Mengarahkan presenter di studio agar pelafalan naskah dan intonasi tepat sasaran.`,
+      carousel: `Finishing slide carousel edukasi 7 halaman di Figma dengan hierarki visual lega.`,
+      caption: `Meracik 3 variasi headline caption dan memilih 5 tagar SEO terkuat.`,
+      story: `Merekam momen behind-the-scenes (BTS) di studio untuk konten Story.`,
+      upload: `Pengecekan spesifikasi video render (1080x1920, bitrate optimal, zero noise).`,
+      analis: `Menyiapkan metrik KPI yang akan diukur begitu video ini diunggah.`,
+      auditor: `Quality check keselarasan visual cover video dan slide carousel.`,
+      ide: `Mengevaluasi hasil take pertama untuk memastikan pesan utama tersampaikan.`,
+      perencana: `Menyesuaikan timeline rilis berdasarkan estimasi selesai render editing.`,
+      komentar: `Menyiapkan pin komentar pertama untuk memicu diskusi penonton.`,
+      dm: `Mengarahkan audiens yang bertanya di DM ke jadwal tayang video hari ini.`,
+      ceo: `Siap menerima paket materi konten untuk review kelayakan.`
+    };
+    return map[agentId] || `Fokus produksi dan eksekusi konten: ${routine.title}.`;
+  }
+
+  // D. Publikasi Medsos & Live Engagement
+  if (title.includes('publikasi') || title.includes('tayang') || title.includes('prime time') || title.includes('respons') || title.includes('engagement')) {
+    const map = {
+      upload: `Memproses rilis video 4K & carousel ke Reels, TikTok, dan YouTube secara tepat waktu.`,
+      editor: `Menyerahkan file master video final ke tim medsos dan memantau kompresi platform.`,
+      caption: `Menyematkan caption persuasif, kredit tim, dan memantau hashtag terindeks.`,
+      story: `Mempublikasikan stiker link video baru di Story untuk mendatangkan traffic awal.`,
+      komentar: `Membalas 20 komentar penonton pertama dalam 30 menit awal untuk mendongkrak algoritma.`,
+      dm: `Merespons pesan masuk audiens yang tertarik dengan edukasi di video baru.`,
+      analis: `Memantau kurva retensi detik ke-3 dan rasio simpan/share di jam pertama penayangan.`,
+      auditor: `Memastikan tampilan cover video di grid profil tersusun simetris dan rapi.`,
+      kamera: `Merapikan peralatan studio dan mem-backup file footage mentah ke storage.`,
+      naskah: `Mencatat respon audiens di kolom komentar sebagai masukan naskah berikutnya.`,
+      ide: `Menilai apakah angle hook hari ini berhasil memicu share tinggi.`,
+      perencana: `Merekap status publikasi harian ke laporan kalender editorial.`,
+      carousel: `Memantau swipe rate carousel slide demi slide.`,
+      ceo: `Memantau dashboard analitik performa rilis konten hari ini.`
+    };
+    return map[agentId] || `Fokus publikasi dan interaksi audiens: ${routine.title}.`;
+  }
+
+  // E. Sinkronisasi Database Analitik & Penataan Studio Malam
+  if (title.includes('sinkronisasi') || title.includes('database') || title.includes('penataan') || title.includes('rekap')) {
+    const map = {
+      analis: `Menyimpan metrik performa video, retention rate, dan jumlah share ke database PostgreSQL.`,
+      upload: `Merekap total engagement 2 jam pertama dan mengarsipkan link postingan.`,
+      kamera: `Shutdown lampu studio, kalibrasi ulang baterai, dan merapikan kabel kamera.`,
+      editor: `Backup project file Premiere/DaVinci ke server lokal MMA Production.`,
+      komentar: `Memastikan seluruh komentar penting hari ini sudah mendapatkan tanggapan.`,
+      dm: `Menandai percakapan penting untuk ditindaklanjuti besok pagi.`,
+      ceo: `Mengevaluasi rekap capaian harian seluruh divisi sebelum kantor tutup.`
+    };
+    return map[agentId] || `Sinkronisasi data dan penutupan operasional harian: ${routine.title}.`;
+  }
+
+  return `Menjalankan tugas operasional: ${routine.title}.`;
+}
+
+export function getPipelineStepForRoutine(routine) {
+  if (!routine) return 'analis';
+  const title = (routine.title || '').toLowerCase();
+  if (title.includes('tren') || title.includes('riset') || title.includes('analisa')) return 'analis';
+  if (title.includes('kickoff') || title.includes('ide') || title.includes('brainstorming')) return 'ide';
+  if (title.includes('naskah') || title.includes('hook') || title.includes('storyboard')) return 'naskah';
+  if (title.includes('produksi') || title.includes('studio') || title.includes('kamera')) return 'kamera';
+  if (title.includes('editing') || title.includes('color grading')) return 'editor';
+  if (title.includes('review') || routine.category === 'meeting') return 'GATE';
+  if (title.includes('publikasi') || title.includes('prime time')) return 'upload';
+  if (title.includes('sinkronisasi') || title.includes('database')) return 'analis';
+  return 'analis';
+}

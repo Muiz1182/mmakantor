@@ -2047,3 +2047,9 @@ button:focus-visible, input:focus-visible {
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.6) !important;
   transform: scale(1.06);
 }
+
+.step-bubble.routine-focused-step {
+  border-color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.18) !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.45) !important;
+}

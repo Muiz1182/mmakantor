@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { INITIAL_AGENTS, INITIAL_APPROVALS } from '../constants/agentsData';
 import { LOUNGE_ROOMS, ALL_ROOMS, LOUNGE_MAP, MEETING_ROOM } from '../constants/roomsData';
-import { getCurrentRoutine, getTodaySchedule } from '../constants/scheduleData';
+import { getCurrentRoutine, getTodaySchedule, getRoleTaskForRoutine } from '../constants/scheduleData';
 import { api } from '../services/api';
 
 export function useOfficeState() {
@@ -149,16 +149,28 @@ export function useOfficeState() {
     ALL_ROOMS.forEach(r => { occ[r.id] = []; });
 
     const routine = getCurrentRoutine(clockTime.h, clockTime.m, clockTime.dayIndex);
+    const todaySchedule = getTodaySchedule(clockTime.dayIndex);
+    const todayTheme = todaySchedule?.theme || 'Multimedia & Visual AI';
+
     const isSleep = routine ? routine.category === 'sleep' : (clockTime.h >= 23 || clockTime.h < 7 || activeTimePhase === 'sleep');
     const isBreak = !isSleep && routine && routine.category === 'break';
+    const isScheduledMeeting = !isSleep && !isBreak && routine && (routine.category === 'meeting' || routine.locationId === 'meeting');
+    const meetingParticipants = ['ceo', 'analis', 'ide', 'kamera', 'editor', 'carousel'];
 
     list.forEach((a, i) => {
-      // 1. Agen yang sedang rapat resmi tetap di Ruang Meeting (jika sesi rapat CEO aktif)
-      if (a.at === 'meeting') {
-        const sl = a.slot !== undefined ? a.slot : (a.id === 'ceo' ? 5 : 0);
-        if (occ['meeting'] && !occ['meeting'][sl]) {
-          occ['meeting'][sl] = a.id;
+      // 1. Sesi Rapat Resmi Bersama CEO (Otomatis saat jadwal rapat atau tombol rapat CEO ditekan)
+      if (isScheduledMeeting || a.at === 'meeting') {
+        const idx = meetingParticipants.indexOf(a.id);
+        if (idx !== -1) {
+          const sl = a.id === 'ceo' ? 5 : idx - 1;
+          if (occ['meeting'] && !occ['meeting'][sl]) {
+            occ['meeting'][sl] = a.id;
+          }
+          a.at = 'meeting';
           a.slot = sl;
+          a.status = 'working';
+          a.sLabel = 'Rapat';
+          a.now = getRoleTaskForRoutine(a.id, routine, todayTheme);
           return;
         }
       }
@@ -172,12 +184,15 @@ export function useOfficeState() {
             occ[rId][sl] = a.id;
             a.at = rId;
             a.slot = sl;
+            a.status = 'waiting';
+            a.sLabel = 'Istirahat';
+            a.now = 'Istirahat malam di Asrama Karyawan MMA.';
             return;
           }
         }
       }
 
-      // 3. Jam istirahat resmi sesuai jadwal kantor (misal: 12.00 - 13.00 Makan Siang, 17.30 - 18.00 Rehat Sore)
+      // 3. Jam istirahat resmi sesuai jadwal kantor (misal: 12.00 - 13.00 Makan Siang, 17.30 - 18.30 Rehat Sore)
       if (isBreak) {
         const rId = (a.rest && a.rest !== 'auto' && a.rest !== 'desk' && a.rest !== 'meeting')
           ? a.rest
@@ -188,6 +203,9 @@ export function useOfficeState() {
             occ[rId][sl] = a.id;
             a.at = rId;
             a.slot = sl;
+            a.status = 'waiting';
+            a.sLabel = 'Istirahat';
+            a.now = getRoleTaskForRoutine(a.id, routine, todayTheme);
             return;
           }
         }
@@ -195,17 +213,22 @@ export function useOfficeState() {
 
       // 4. JAM KERJA KANTOR OPERASIONAL (07.00 - 23.00 WIB):
       // SELURUH KARYAWAN AI SECARA OTOMATIS BEKERJA DI MEJA MASING-MASING!
-      // Tidak boleh ada santai di kolam renang atau asrama di luar jam istirahat. Langsung kerja 100% otomatis.
+      // Fokus 100% pada pekerjaan sesuai jadwal operasional jam saat ini (realtime non-looping)
       a.at = 'desk';
       a.slot = 0;
       if (a.id !== 'ceo') {
         a.status = 'working';
         a.sLabel = 'Bekerja';
       }
+      a.now = getRoleTaskForRoutine(a.id, routine, todayTheme);
     });
 
     return list;
-  }, [agents, clockTime.h, clockTime.m, clockTime.isOfficeHours, activeTimePhase]);
+  }, [agents, clockTime.h, clockTime.m, clockTime.dayIndex, clockTime.isOfficeHours, activeTimePhase]);
+
+  const currentRoutine = useMemo(() => {
+    return getCurrentRoutine(clockTime.h, clockTime.m, clockTime.dayIndex);
+  }, [clockTime.h, clockTime.m, clockTime.dayIndex]);
 
   const agentsMap = useMemo(() => {
     return placedAgents.reduce((acc, a) => {
@@ -768,6 +791,7 @@ export function useOfficeState() {
     triggerOfficeRoutine,
     isMeetingActive,
     toggleCeoMeeting,
+    currentRoutine,
     runAgentAI,
     isRunningAI
   };

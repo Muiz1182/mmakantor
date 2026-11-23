@@ -11,15 +11,16 @@ export function Stage3D({
   onWebGLFallback,
   onPipelineEvent,
   clockTime,
-  todayTheme
+  todayTheme,
+  currentRoutine
 }) {
   const canvasRef = useRef(null);
   const sceneRef = useRef(null);
   const agentsRef = useRef(agents);
   agentsRef.current = agents;
 
-  const contextRef = useRef({ clockTime, todayTheme });
-  contextRef.current = { clockTime, todayTheme };
+  const contextRef = useRef({ clockTime, todayTheme, currentRoutine });
+  contextRef.current = { clockTime, todayTheme, currentRoutine };
 
   const getThemeTokens = () => {
     if (typeof window === 'undefined') return {};

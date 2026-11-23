@@ -5,7 +5,7 @@ import { Plan2D } from './components/Plan2D';
 import { AgentPanel } from './components/AgentPanel';
 import { ScheduleModal } from './components/ScheduleModal';
 import { FLOW_STEPS } from './constants/flowData';
-import { WEEKLY_SCHEDULE } from './constants/scheduleData';
+import { WEEKLY_SCHEDULE, getPipelineStepForRoutine } from './constants/scheduleData';
 import './App.css';
 
 export function App() {
@@ -61,6 +61,7 @@ export function App() {
     triggerOfficeRoutine,
     isMeetingActive,
     toggleCeoMeeting,
+    currentRoutine,
     runAgentAI,
     isRunningAI
   } = useOfficeState();
@@ -177,14 +178,14 @@ export function App() {
             💼 Rapat CEO: <b>{isMeetingActive ? 'BERLANGSUNG' : 'MULAI'}</b>
           </button>
 
-          {/* Tombol Estafet Alur Agensi Mandiri (TikTok Agency Concept) */}
+          {/* Tombol Estafet Alur Agensi Mandiri (Realtime Operational Focus) */}
           <button
             type="button"
             className={`status-pill agency-pipeline-pill ${activeAgencyMission ? 'active' : ''}`}
             onClick={() => window.__triggerAgencyStep && window.__triggerAgencyStep('editor')}
-            title="Klik untuk memicu serah terima video atau langkah estafet berikutnya secara langsung (karyawan berdiri dan berjalan antar meja)"
+            title="Klik untuk memicu serah terima video atau langkah estafet berikutnya secara langsung"
           >
-            ⚡ Estafet Agensi: <b>{activeAgencyMission ? activeAgencyMission.title : 'Serah Terima Video'}</b>
+            ⚡ Fokus Realtime: <b>{activeAgencyMission ? activeAgencyMission.title : (currentRoutine?.title ? (currentRoutine.title.length > 28 ? currentRoutine.title.slice(0, 26) + '...' : currentRoutine.title) : 'Produksi & Editing')}</b>
           </button>
         </div>
 
@@ -308,6 +309,7 @@ export function App() {
             onPipelineEvent={handlePipelineEvent}
             clockTime={clockTime}
             todayTheme={WEEKLY_SCHEDULE.find(d => d.dayIndex === clockTime?.dayIndex)?.theme || 'Multimedia & Visual AI'}
+            currentRoutine={currentRoutine}
           />
         ) : (
           <div className="plan2d-fullscreen-wrapper">
@@ -329,6 +331,9 @@ export function App() {
         </div>
         <ol className="flow-steps-scroll">
           {FLOW_STEPS.map((id) => {
+            const routineActiveStep = getPipelineStepForRoutine(currentRoutine);
+            const isRoutineActive = !activeAgencyMission && (routineActiveStep === id);
+
             if (id === 'GATE') {
               const isSelected = selectedAgentId === 'ceo';
               const isAgencyActive = activeAgencyMission && (activeAgencyMission.senderId === 'ceo' || activeAgencyMission.targetId === 'ceo');
@@ -336,7 +341,7 @@ export function App() {
                 <li key="gate-ceo">
                   <button
                     type="button"
-                    className={`step-bubble gate ${isSelected ? 'active' : ''} ${isAgencyActive ? 'agency-active-step' : ''}`}
+                    className={`step-bubble gate ${isSelected ? 'active' : ''} ${isAgencyActive ? 'agency-active-step' : ''} ${isRoutineActive ? 'routine-focused-step' : ''}`}
                     onClick={() => handleSelectAgent('ceo')}
                     title="Titik Persetujuan CEO"
                   >
@@ -357,7 +362,7 @@ export function App() {
               <li key={id}>
                 <button
                   type="button"
-                  className={`step-bubble ${isSelected ? 'active' : ''} ${isAgencyActive ? 'agency-active-step' : ''}`}
+                  className={`step-bubble ${isSelected ? 'active' : ''} ${isAgencyActive ? 'agency-active-step' : ''} ${isRoutineActive ? 'routine-focused-step' : ''}`}
                   onClick={() => {
                     handleSelectAgent(id);
                     if (id === 'editor' || id === 'upload') {
