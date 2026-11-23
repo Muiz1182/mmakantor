@@ -1302,8 +1302,251 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
   }
 
   // =========================================================================
-  // 14. NAVIGASI JALAN LEWAT PINTU & LORONG (Anti Tembus Dinding)
+  // 14. NAVIGASI JALAN LEWAT PINTU & LORONG TERBUKA (Anti Tembus Dinding/Sekat)
+  // Menghubungkan seluruh ruangan strictly lewat kusen pintu & koridor keliling
   // =========================================================================
+  const ZONE_GATES = {
+    ceo: {
+      door: [-14.0, -15.0],
+      inside: [-16.5, -15.0],
+      exterior: [-11.5, -15.0],
+      ringAlley: [[-11.5, -8.0]] // NW
+    },
+    meeting: {
+      door: [-6.0, -10.0],
+      inside: [-6.0, -12.0],
+      exterior: [-6.0, -8.0],
+      ringAlley: []
+    },
+    plan: {
+      door: [7.5, -10.0],
+      inside: [7.5, -12.0],
+      exterior: [7.5, -8.0],
+      ringAlley: []
+    },
+    prod: {
+      door: [15.0, -15.0],
+      inside: [17.0, -15.0],
+      exterior: [13.5, -15.0],
+      ringAlley: [[13.5, -8.0], [11.5, -8.0]] // NE
+    },
+    pub: {
+      door: [0.0, 12.0],
+      inside: [1.0, 13.5],
+      exterior: [0.0, 9.2],
+      ringAlley: []
+    },
+    lunch: {
+      door: [14.0, -2.5],
+      inside: [16.5, -2.5],
+      exterior: [11.5, -2.5],
+      ringAlley: []
+    },
+    ps: {
+      door: [14.0, 8.0],
+      inside: [16.5, 8.0],
+      exterior: [11.5, 8.0],
+      ringAlley: []
+    },
+    gym: {
+      door: [14.0, 18.0],
+      inside: [16.5, 18.0],
+      exterior: [11.5, 18.0],
+      ringAlley: [[11.5, 9.2]] // SE
+    },
+    dorm: {
+      door: [-14.0, -0.5],
+      inside: [-16.0, -0.5],
+      exterior: [-11.5, -0.5],
+      ringAlley: []
+    },
+    musholla: {
+      door: [-14.0, 17.0],
+      inside: [-16.0, 17.0],
+      exterior: [-11.5, 17.0],
+      ringAlley: [[-11.5, 9.2]] // SW
+    },
+    pool: {
+      door: [0.0, -4.0],
+      inside: [0.0, -2.0],
+      exterior: [0.0, -8.0],
+      ringAlley: []
+    }
+  };
+
+  function cleanPath(pts) {
+    const res = [];
+    for (let i = 0; i < pts.length; i++) {
+      const p = pts[i];
+      if (!p || typeof p[0] !== 'number' || typeof p[1] !== 'number') continue;
+      const prev = res[res.length - 1];
+      if (prev) {
+        const dx = p[0] - prev[0];
+        const dz = p[1] - prev[1];
+        if (Math.hypot(dx, dz) < 0.1) continue;
+      }
+      res.push([Number(p[0].toFixed(2)), Number(p[1].toFixed(2))]);
+    }
+    return res;
+  }
+
+  function getRingEdge(p) {
+    const x = p[0];
+    const z = p[1];
+    if (Math.abs(z - (-8.0)) < 0.6) return 'N';
+    if (Math.abs(x - 11.5) < 0.6) return 'E';
+    if (Math.abs(z - 9.2) < 0.6) return 'S';
+    if (Math.abs(x - (-11.5)) < 0.6) return 'W';
+    // Fallback berdasarkan posisi terdekat
+    const dN = Math.abs(z - (-8.0));
+    const dE = Math.abs(x - 11.5);
+    const dS = Math.abs(z - 9.2);
+    const dW = Math.abs(x - (-11.5));
+    const minD = Math.min(dN, dE, dS, dW);
+    if (minD === dN) return 'N';
+    if (minD === dE) return 'E';
+    if (minD === dS) return 'S';
+    return 'W';
+  }
+
+  function routeOnCorridorRing(pA, pB) {
+    const edgeA = getRingEdge(pA);
+    const edgeB = getRingEdge(pB);
+
+    if (edgeA === edgeB) {
+      return [pB];
+    }
+
+    const corners = {
+      NE: [11.5, -8.0],
+      SE: [11.5, 9.2],
+      SW: [-11.5, 9.2],
+      NW: [-11.5, -8.0]
+    };
+
+    // Sisi bersebelahan
+    if ((edgeA === 'N' && edgeB === 'E') || (edgeA === 'E' && edgeB === 'N')) {
+      return [corners.NE, pB];
+    }
+    if ((edgeA === 'E' && edgeB === 'S') || (edgeA === 'S' && edgeB === 'E')) {
+      return [corners.SE, pB];
+    }
+    if ((edgeA === 'S' && edgeB === 'W') || (edgeA === 'W' && edgeB === 'S')) {
+      return [corners.SW, pB];
+    }
+    if ((edgeA === 'W' && edgeB === 'N') || (edgeA === 'N' && edgeB === 'W')) {
+      return [corners.NW, pB];
+    }
+
+    // Sisi berhadapan: North vs South
+    if ((edgeA === 'N' && edgeB === 'S') || (edgeA === 'S' && edgeB === 'N')) {
+      const distEast = Math.abs(11.5 - pA[0]) + 17.2 + Math.abs(11.5 - pB[0]);
+      const distWest = Math.abs(pA[0] - (-11.5)) + 17.2 + Math.abs(pB[0] - (-11.5));
+      if (distEast <= distWest) {
+        return edgeA === 'N' ? [corners.NE, corners.SE, pB] : [corners.SE, corners.NE, pB];
+      } else {
+        return edgeA === 'N' ? [corners.NW, corners.SW, pB] : [corners.SW, corners.NW, pB];
+      }
+    }
+
+    // Sisi berhadapan: East vs West
+    if ((edgeA === 'E' && edgeB === 'W') || (edgeA === 'W' && edgeB === 'E')) {
+      const distNorth = Math.abs(pA[1] - (-8.0)) + 23.0 + Math.abs(pB[1] - (-8.0));
+      const distSouth = Math.abs(9.2 - pA[1]) + 23.0 + Math.abs(9.2 - pB[1]);
+      if (distNorth <= distSouth) {
+        return edgeA === 'E' ? [corners.NE, corners.NW, pB] : [corners.NW, corners.NE, pB];
+      } else {
+        return edgeA === 'E' ? [corners.SE, corners.SW, pB] : [corners.SW, corners.SE, pB];
+      }
+    }
+
+    return [pB];
+  }
+
+  function getRoomExitWaypoints(fromZone, fromX, fromZ) {
+    const gate = ZONE_GATES[fromZone];
+    if (!gate) return [[fromX, fromZ]];
+    const pts = [];
+    pts.push([fromX, fromZ]);
+
+    if (fromZone === 'plan') {
+      pts.push([fromX, -15.0]);
+      pts.push([7.5, -15.0]);
+      pts.push([7.5, -12.0]);
+    } else if (fromZone === 'prod') {
+      pts.push([fromX, -15.0]);
+      pts.push([17.0, -15.0]);
+    } else if (fromZone === 'pub') {
+      const aisleZ = fromZ < 16.5 ? 15.5 : 17.5;
+      pts.push([fromX, aisleZ]);
+      pts.push([1.0, aisleZ]);
+      pts.push([1.0, 13.5]);
+    } else if (fromZone === 'ceo') {
+      pts.push([-16.5, -15.0]);
+    } else if (fromZone === 'meeting') {
+      pts.push([-6.0, fromZ]);
+      pts.push([-6.0, -12.0]);
+    } else if (fromZone === 'dorm') {
+      pts.push([-16.0, -0.5]);
+    } else if (fromZone === 'lunch') {
+      pts.push([16.5, -2.5]);
+    } else if (fromZone === 'ps') {
+      pts.push([16.5, 8.0]);
+    } else if (fromZone === 'gym') {
+      pts.push([16.5, 18.0]);
+    } else if (fromZone === 'musholla') {
+      pts.push([-16.0, 17.0]);
+    } else if (fromZone === 'pool') {
+      pts.push([0.0, -2.0]);
+    }
+
+    pts.push(gate.door);
+    pts.push(gate.exterior);
+    if (gate.ringAlley && gate.ringAlley.length > 0) {
+      gate.ringAlley.forEach(pt => pts.push(pt));
+    }
+    return pts;
+  }
+
+  function buildCollisionFreePath(fromZone, [fromX, fromZ], toZone, [toX, toZ]) {
+    // 1. Jika bergerak di dalam ruangan yang sama
+    if (fromZone && toZone && fromZone === toZone) {
+      const sameRoomPath = [];
+      sameRoomPath.push([fromX, fromZ]);
+      if (fromZone === 'plan') {
+        sameRoomPath.push([fromX, -15.0], [toX, -15.0], [toX, toZ]);
+      } else if (fromZone === 'prod') {
+        sameRoomPath.push([fromX, -15.0], [toX, -15.0], [toX, toZ]);
+      } else if (fromZone === 'pub') {
+        const fromAisleZ = fromZ < 16.5 ? 15.5 : 17.5;
+        const toAisleZ = toZ < 16.5 ? 15.5 : 17.5;
+        sameRoomPath.push([fromX, fromAisleZ], [1.0, fromAisleZ]);
+        if (fromAisleZ !== toAisleZ) sameRoomPath.push([1.0, toAisleZ]);
+        sameRoomPath.push([toX, toAisleZ], [toX, toZ]);
+      } else if (fromZone === 'meeting') {
+        sameRoomPath.push([-6.0, fromZ], [-6.0, toZ], [toX, toZ]);
+      } else {
+        sameRoomPath.push([toX, toZ]);
+      }
+      return cleanPath(sameRoomPath);
+    }
+
+    // 2. Keluar dari ruangan asal melewati pintu & lorong kosong
+    const exitPoints = getRoomExitWaypoints(fromZone, fromX, fromZ);
+    const ringStartPoint = exitPoints[exitPoints.length - 1];
+
+    // 3. Masuk ke ruangan tujuan (kebalikan dari rute keluar ruangan tujuan)
+    const enterPointsReversed = getRoomExitWaypoints(toZone, toX, toZ);
+    enterPointsReversed.reverse();
+    const ringEndPoint = enterPointsReversed[0];
+
+    // 4. Rute di koridor keliling (Highway Ring) mengitari kolam renang tanpa menembus dinding/sekat
+    const ringPath = routeOnCorridorRing(ringStartPoint, ringEndPoint);
+
+    const full = [...exitPoints, ...ringPath, ...enterPointsReversed];
+    return cleanPath(full);
+  }
+
   function snapAgent(o, at, sl, instant) {
     const q = at === 'desk' ? null : ROOM3[at].spots[sl];
     o.at = at;
@@ -1323,49 +1566,22 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
 
   // Generator lintasan jalan antar-ruangan menghindari dinding
   function generateAgentWalkPath(fromX, fromZ, toX, toZ, fromZone, toZone) {
-    const path = [];
-    path.push([fromX, fromZ > 0 ? fromZ - 1.5 : fromZ + 1.5]);
-
-    if (fromZone !== toZone) {
-      if (fromZone === 'plan') {
-        path.push([7.5, -10], [7.5, -6]);
-      } else if (fromZone === 'prod') {
-        path.push([15, -15], [12, -15], [12, -6]);
-      } else if (fromZone === 'pub') {
-        path.push([0, 12], [0, 8]);
-      } else if (fromZone === 'ceo') {
-        path.push([-14, -15], [-11, -15], [-11, -6]);
-      }
-
-      if (toZone === 'plan') {
-        path.push([7.5, -6], [7.5, -10]);
-      } else if (toZone === 'prod') {
-        path.push([12, -6], [12, -15], [15, -15]);
-      } else if (toZone === 'pub') {
-        path.push([0, 8], [0, 12]);
-      } else if (toZone === 'ceo') {
-        path.push([-11, -6], [-11, -15], [-14, -15]);
-      }
-    }
-
-    path.push([toX, toZ]);
-    return path;
+    return buildCollisionFreePath(fromZone, [fromX, fromZ], toZone, [toX, toZ]);
   }
 
   function getWaypoints(o, at, sl) {
+    const fromZone = o.at === 'desk' ? o.zone : o.at;
+    const fromPos = [o.x, o.z];
+    const toZone = at === 'desk' ? o.zone : at;
+    let toPos;
     if (at === 'desk') {
-      const sx = o.sx + 1;
-      const c = [[o.sx, o.sz], [sx, o.sz]];
-      if (o.zone === 'ceo') c.push([-14, -15], [-11, -15], [-11, -6]);
-      else if (o.zone === 'plan') c.push([7.5, -10], [7.5, -6]);
-      else if (o.zone === 'prod') c.push([15, -15], [12, -15], [12, -6]);
-      else if (o.zone === 'pub') c.push([0, 12], [0, 8]);
-      return c;
+      toPos = [o.sx, o.sz];
+    } else {
+      const r = ROOM3[at];
+      const q = r ? (r.spots[sl] || r.spots[0]) : [0, 0];
+      toPos = [q[0], q[1]];
     }
-    const r = ROOM3[at];
-    if (!r) return [[0, 0]];
-    const q = r.spots[sl] || r.spots[0];
-    return [[r.dx, -6], ...r.entry, [q[0], q[1]]];
+    return buildCollisionFreePath(fromZone, fromPos, toZone, toPos);
   }
 
   function steerAgent(o, a, dt) {
@@ -1415,15 +1631,18 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     }
 
     if (o.mode !== 'walk' && o.key !== k && o.rx < 0.2) {
-      const A = getWaypoints(o, o.at, o.sl);
-      const Bc = getWaypoints(o, at, sl);
-      let path;
-      if (o.at !== 'desk' && o.at === at) {
-        path = [...ROOM3[at].entry.slice(-1), Bc[Bc.length - 1]];
+      const fromZone = o.at === 'desk' ? o.zone : o.at;
+      const fromPos = [o.x, o.z];
+      const toZone = at === 'desk' ? o.zone : at;
+      let toPos;
+      if (at === 'desk') {
+        toPos = [o.sx, o.sz];
       } else {
-        path = (o.at === 'desk' ? A : A.slice().reverse()).concat(at === 'desk' ? Bc.slice().reverse() : Bc);
+        const r = ROOM3[at];
+        const q = r ? (r.spots[sl] || r.spots[0]) : [0, 0];
+        toPos = [q[0], q[1]];
       }
-      o.path = path;
+      o.path = buildCollisionFreePath(fromZone, fromPos, toZone, toPos);
       o.mode = 'walk';
       o.pose = 'x';
       o.key = k;
