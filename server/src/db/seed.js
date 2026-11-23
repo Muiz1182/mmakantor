@@ -366,26 +366,26 @@ export const SEED_AGENTS = [
 export const SEED_APPROVALS = [
   {
     agentId: 'naskah',
-    tipe: 'naskah',
-    judul: 'Naskah YouTube 8 menit, draf 2',
-    ringkasan: 'Pembuka 30 detik dan tiga bagian isi. Setelah disetujui, naskah masuk ke shot list.',
-    detail: 'Hook (0-30s): Tiga kesalahan pencahayaan yang merusak hasil rekaman Anda.\nBagian 1: Posisi key light 45 derajat.\nBagian 2: Fill light rasio 2:1.\nBagian 3: Hair light untuk memisahkan subjek dari background.',
+    tipe: 'Multimedia',
+    judul: '[Multimedia] Hook 3s: 3 Trik Lighting Studio Modal 100 Ribuan',
+    ringkasan: 'Edukasi video: membandingkan setup pencahayaan sebelum dan sesudah dalam 3 detik pertama.',
+    detail: 'Hook (0-3s): Jangan beli lampu mahal sebelum tahu trik pantulan dinding ini!\nIsi: Key light diffuser plastik, fill light styrofoam, backlight senter HP.\nSkor FYP: 94/100 (Hook visual rasa penasaran instan).',
     status: 'pending'
   },
   {
     agentId: 'caption',
-    tipe: 'caption',
-    judul: 'Reels: caption dan jadwal Kamis 19.00',
-    ringkasan: 'Tayang di Instagram dan TikTok. Caption dua kalimat dengan ajakan menyimpan.',
-    detail: 'Setup lighting sederhana tapi bikin hasil rekaman naik kelas! Simpan video ini buat referensi syuting berikutnya!\n#videoproduction #filmmaking #contentcreator',
+    tipe: 'Design',
+    judul: '[Design] Carousel 7 Slide: Kesalahan Tipografi yang Bikin Desain Murahan',
+    ringkasan: 'Edukasi desain grafis: 7 slide studi kasus font pairing dan hirarki visual.',
+    detail: 'Slide 1: Desain kamu kelihatan murah? Cek 3 kesalahan font ini!\nSlide 2-6: Studi kasus font gratis vs font premium, leading, tracking.\nSkor FYP: 88/100 (Format carousel edukasi daftar memiliki rasio save tinggi).',
     status: 'pending'
   },
   {
-    agentId: 'dm',
-    tipe: 'dm',
-    judul: 'Draf balasan DM: pertanyaan harga',
-    ringkasan: 'Balasan sopan yang mengarahkan ke daftar layanan. Tidak terkirim sebelum Anda setuju.',
-    detail: 'Terima kasih sudah menghubungi MMA Production! Untuk paket produksi video kami mulai dari paket basic hingga full production, rincian lengkap ada di link profil atau kami bisa jadwalkan sesi konsultasi via Google Meet.',
+    agentId: 'carousel',
+    tipe: 'Web Development',
+    judul: '[Web Dev] Reels 25s: Cara Bikin Animasi 3D di Website Tanpa Lag',
+    ringkasan: 'Edukasi coding: tutorial integrasi Three.js ringan untuk landing page interaktif.',
+    detail: 'Pembuka: Website kamu masih 2D membosankan? Coba tambahkan 3D interaktif ini.\nIsi: Optimasi Three.js mesh polygon rendah, lighting hemat GPU.\nSkor FYP: 68/100 (Pembuka masih agak teknis, perlu hook visual lebih atraktif).',
     status: 'pending'
   }
 ];

@@ -10,6 +10,7 @@ export function App() {
   const [webglError, setWebglError] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [ideaText, setIdeaText] = useState('');
+  const [selectedPilar, setSelectedPilar] = useState('Multimedia'); // 'Multimedia', 'Design', 'Web Development'
 
   const {
     agents,
@@ -53,9 +54,15 @@ export function App() {
   const handleIdeaSubmit = (e) => {
     e.preventDefault();
     if (ideaText.trim()) {
-      submitCeoIdea(ideaText);
+      submitCeoIdea(ideaText, selectedPilar);
       setIdeaText('');
     }
+  };
+
+  const pilarPlaceholders = {
+    Multimedia: 'Ketik ide edukasi Multimedia viral... (cth: Trik pencahayaan video sinematik modal 100 ribu)',
+    Design: 'Ketik ide edukasi Design viral... (cth: 3 Kesalahan tipografi Canva yang bikin desain murahan)',
+    'Web Development': 'Ketik ide edukasi Web Dev viral... (cth: Cara pasang animasi 3D di website tanpa lag)'
   };
 
   let stepNumber = 0;
@@ -176,13 +183,25 @@ export function App() {
       )}
 
       {/* Floating Bar: Masukkan Arahan & Ide Baru dari CEO */}
-      <section className="floating-ceo-idea-bar" aria-label="Arahan dan Ide Baru CEO">
+      <section className="floating-ceo-idea-bar" aria-label="Arahan dan Ide Edukasi Viral CEO">
+        <div className="pilar-selector" role="group" aria-label="Pilih Pilar Edukasi MMA">
+          {['Multimedia', 'Design', 'Web Development'].map((pilar) => (
+            <button
+              key={pilar}
+              type="button"
+              className={`pilar-chip ${selectedPilar === pilar ? 'active' : ''}`}
+              onClick={() => setSelectedPilar(pilar)}
+            >
+              {pilar === 'Multimedia' ? '🎬 Multimedia' : pilar === 'Design' ? '🎨 Design' : '💻 Web Dev'}
+            </button>
+          ))}
+        </div>
         <form onSubmit={handleIdeaSubmit} className="idea-form">
-          <span className="idea-icon" title="Peran CEO: Memberi ide dan arah konten">💡</span>
+          <span className="idea-icon" title="Peran CEO: Memberi ide dan arah konten viral">💡</span>
           <input
             type="text"
             className="idea-input"
-            placeholder="Ketik ide atau arahan konten baru di sini... (Tim AI akan langsung menyusun konsep & alurnya)"
+            placeholder={pilarPlaceholders[selectedPilar] || 'Ketik ide edukasi viral di sini...'}
             value={ideaText}
             onChange={(e) => setIdeaText(e.target.value)}
             aria-label="Ketik ide konten baru"

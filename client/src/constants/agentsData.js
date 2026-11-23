@@ -364,22 +364,34 @@ export const INITIAL_APPROVALS = [
   {
     id: 'a1',
     dari: 'naskah',
-    judul: 'Naskah YouTube 8 menit, draf 2',
-    ringkas: 'Pembuka 30 detik dan tiga bagian isi. Setelah disetujui, naskah masuk ke shot list.',
+    kategori: 'Multimedia',
+    judul: '[Multimedia] Hook 3s: 3 Trik Lighting Studio Modal 100 Ribuan',
+    ringkas: 'Edukasi video: membandingkan setup pencahayaan sebelum dan sesudah dalam 3 detik pertama.',
+    detail: 'Hook (0-3s): "Jangan beli lampu mahal sebelum tahu trik pantulan dinding ini!"\nIsi: Key light diffuser plastik, fill light styrofoam, backlight senter HP.\nTarget: CapCut & Premiere Pro creator.',
+    fypScore: 94,
+    alasanFyp: 'Peluang FYP Sangat Tinggi: Hook rasa penasaran instan, perbandingan visual ekstrem, memicu komentar share.',
     state: 'pending'
   },
   {
     id: 'a2',
     dari: 'caption',
-    judul: 'Reels: caption dan jadwal Kamis 19.00',
-    ringkas: 'Tayang di Instagram dan TikTok. Caption dua kalimat dengan ajakan menyimpan.',
+    kategori: 'Design',
+    judul: '[Design] Carousel 7 Slide: Kesalahan Tipografi yang Bikin Desain Murahan',
+    ringkas: 'Edukasi desain grafis: 7 slide studi kasus font pairing dan hirarki visual.',
+    detail: 'Slide 1: "Desain kamu kelihatan murah? Cek 3 kesalahan font ini!"\nSlide 2-6: Studi kasus font gratis vs font premium, leading, tracking.\nSlide 7: Daftar 5 font gratis Google yang terlihat mewah + ajakan simpan.',
+    fypScore: 88,
+    alasanFyp: 'Peluang FYP Tinggi: Format carousel edukasi daftar memiliki rasio save dan share tertinggi di Instagram.',
     state: 'pending'
   },
   {
     id: 'a3',
-    dari: 'dm',
-    judul: 'Draf balasan DM: pertanyaan harga',
-    ringkas: 'Balasan sopan yang mengarahkan ke daftar layanan. Tidak terkirim sebelum Anda setuju.',
+    dari: 'carousel',
+    kategori: 'Web Development',
+    judul: '[Web Dev] Reels 25s: Cara Bikin Animasi 3D di Website Tanpa Lag',
+    ringkas: 'Edukasi coding: tutorial integrasi Three.js ringan untuk landing page interaktif.',
+    detail: 'Pembuka: "Website kamu masih 2D membosankan? Coba tambahkan 3D interaktif ini."\nIsi: Optimasi Three.js mesh polygon rendah, lighting hemat GPU, lazy loading canvas.',
+    fypScore: 68,
+    alasanFyp: 'Peluang FYP Sedang: Pembuka masih agak teknis, perlu hook visual website 3D yang berputar spektakuler agar memikat audiens umum.',
     state: 'pending'
   }
 ];

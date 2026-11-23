@@ -349,17 +349,29 @@ export function useOfficeState() {
     setLiveMessage('Footage masuk dari lapangan. Editor mulai memotong video.');
   }, []);
 
-  // Efek Auto-Approval AI: Memeriksa dan menyetujui checklist draf secara otomatis
+  // Efek Auto-Approval AI Cerdas: Menilai peluang FYP (bisa Setuju atau Revisi)
   useEffect(() => {
     if (!autoApproval) return;
     const firstPending = approvals.find(x => x.state === 'pending');
     if (!firstPending) return;
 
-    // AI mengevaluasi dan menyetujui secara otomatis dalam 3.5 detik
+    // AI mengevaluasi potensi viral / FYP dalam 3.8 detik
     const timer = setTimeout(() => {
-      decideApproval(firstPending.id, 'ok');
-      setLiveMessage(`🤖 AI Chief Editor menyetujui: "${firstPending.judul}". Alur produksi berlanjut otomatis.`);
-    }, 3500);
+      // Tentukan skor FYP dari item atau kalkulasi otomatis
+      const score = firstPending.fypScore !== undefined ? firstPending.fypScore : 82;
+      const passThreshold = 75;
+
+      if (score >= passThreshold) {
+        // Lolos evaluasi FYP -> Disetujui
+        decideApproval(firstPending.id, 'ok');
+        setLiveMessage(`🤖 AI Chief Editor: DISETUJUI! (Peluang FYP: ${score}%). "${firstPending.judul}" memenuhi standar viral.`);
+      } else {
+        // Di bawah standar FYP -> Minta Revisi dengan catatan perbaikan
+        const revNote = firstPending.alasanFyp || 'Hook pembuka kurang tajam untuk FYP. Buat 3 detik pertama lebih memicu rasa penasaran.';
+        decideApproval(firstPending.id, 'rev', revNote);
+        setLiveMessage(`⚠️ AI Chief Editor: REVISI DIMINTA! (Peluang FYP: ${score}%). "${firstPending.judul}" perlu perbaikan hook agar trending.`);
+      }
+    }, 3800);
 
     return () => clearTimeout(timer);
   }, [autoApproval, approvals, decideApproval]);
@@ -368,38 +380,54 @@ export function useOfficeState() {
     setAutoApproval(prev => !prev);
   }, []);
 
-  // Suntikkan Ide Baru dari CEO ke Tim AI
-  const submitCeoIdea = useCallback(async (ideaText) => {
+  // Suntikkan Ide Baru dari CEO ke Tim AI (Mendukung 3 Pilar: Multimedia, Design, Web Development)
+  const submitCeoIdea = useCallback(async (ideaText, pilar = 'Multimedia') => {
     const text = ideaText.trim();
     if (!text) return;
 
     // 1. Catat ke backend konten jika API aktif
     api.createContent({
-      judul: `Ide CEO: ${text}`,
-      format: 'Reels / TikTok',
+      judul: `[${pilar}] Ide CEO: ${text}`,
+      format: pilar === 'Design' ? 'Carousel' : 'Reels / TikTok',
       platform: 'Instagram',
       status: 'draft'
     });
 
     // 2. Suntikkan ke agen Brainstorming ('ide') & Perencana ('perencana')
+    const conceptsByPilar = {
+      Multimedia: [
+        `Reels 30s: Hook perbandingan visual sebelum vs sesudah tentang "${text}".`,
+        `Carousel 7 Slide: Panduan peralatan & setting kamera/editing untuk "${text}".`,
+        `Shorts/Story: Trik cepat 15 detik yang belum banyak diketahui orang.`
+      ],
+      Design: [
+        `Carousel 7 Slide: Kesalahan visual fatal & solusinya seputar "${text}".`,
+        `Reels 20s: Bedah layout desain brand terkenal dengan topik "${text}".`,
+        `Story: Polling "Mana desain yang lebih menjual? A atau B?"`
+      ],
+      'Web Development': [
+        `Reels 30s: Efek interaktif website yang bikin user terkesima ("${text}").`,
+        `Carousel 7 Slide: Trik CSS & JavaScript modern untuk implementasi "${text}".`,
+        `Story: Kuis coding interaktif "Tebak output dari kode ini!"`
+      ]
+    };
+
+    const concepts = conceptsByPilar[pilar] || conceptsByPilar.Multimedia;
+
     setAgents(prev => prev.map(a => {
       if (a.id === 'ide') {
         return {
           ...a,
           status: 'working',
           sLabel: 'Bekerja',
-          now: `Mengembangkan ide CEO: "${text}" menjadi konsep video.`,
+          now: `Mengembangkan ide edukasi [${pilar}] dari CEO: "${text}" menjadi konten viral.`,
           tugas: [
-            { id: Date.now(), t: `Brainstorming ide CEO: "${text}"`, d: false },
+            { id: Date.now(), t: `Brainstorming ide edukasi viral [${pilar}]: "${text}"`, d: false },
             ...a.tugas
           ],
           out: {
-            t: `Konsep dari Ide CEO: "${text}"`,
-            items: [
-              `Konsep 1 (Reels 30s): Hook punchy membahas "${text}".`,
-              `Konsep 2 (Carousel 7 slide): Panduan visual "${text}".`,
-              `Konsep 3 (Story interaktif): Polling audiens mengenai "${text}".`
-            ]
+            t: `Konsep Edukasi Viral [${pilar}]: "${text}"`,
+            items: concepts
           }
         };
       }
@@ -408,28 +436,31 @@ export function useOfficeState() {
           ...a,
           status: 'working',
           sLabel: 'Bekerja',
-          now: `Menjadwalkan slot tayang untuk ide CEO: "${text}".`
+          now: `Menjadwalkan slot tayang prime time edukasi [${pilar}]: "${text}".`
         };
       }
       return a;
     }));
 
-    // 3. Masukkan ke antrean persetujuan sebagai draf baru yang siap diproses
+    // 3. Masukkan ke antrean persetujuan dengan skor FYP tinggi (berasal langsung dari arahan CEO)
     const newApprovalId = String(Date.now());
     setApprovals(prev => [
       {
         id: newApprovalId,
         dari: 'ide',
-        judul: `Konsep Konten dari Ide CEO: ${text.slice(0, 40)}...`,
-        ringkas: `Konsep turunan telah disiapkan Brainstorming dari arahan Anda: "${text}".`,
-        detail: `Konsep 1: Video pendek 30 detik.\nKonsep 2: Carousel edukasi 7 slide.\nKonsep 3: Story polling interaktif.`,
+        kategori: pilar,
+        judul: `[${pilar}] Ide CEO: ${text.slice(0, 42)}...`,
+        ringkas: `Konsep edukasi viral ${pilar} telah disiapkan Brainstorming dari arahan Anda: "${text}".`,
+        detail: concepts.join('\n'),
+        fypScore: 92,
+        alasanFyp: `Peluang FYP Sangat Tinggi: Ide edukasi spesifik ${pilar} dengan hook rasa penasaran dan nilai bookmark tinggi.`,
         state: 'pending'
       },
       ...prev
     ]);
 
     setSelectedAgentId('ide');
-    setLiveMessage(`💡 Ide CEO diterima! Tim Brainstorming & Perencana mulai menggarap: "${text}".`);
+    setLiveMessage(`💡 Ide edukasi [${pilar}] diterima! Tim Brainstorming mulai merancang materi viral: "${text}".`);
   }, []);
 
   // Tally counts

@@ -105,9 +105,28 @@ export function AgentPanel({
                         {fromAgent.nama}
                       </button>
                     )}
+                    {it.kategori && (
+                      <span className="pilar-badge" title={`Pilar Edukasi: ${it.kategori}`}>
+                        {it.kategori}
+                      </span>
+                    )}
+                    {it.fypScore !== undefined && (
+                      <span
+                        className={`fyp-badge ${it.fypScore >= 75 ? 'high' : 'medium'}`}
+                        title={it.alasanFyp || 'Potensi viral konten'}
+                      >
+                        🔥 FYP: <b>{it.fypScore}%</b>
+                      </span>
+                    )}
                     <strong>{it.judul}</strong>
                   </div>
                   <p>{it.ringkas}</p>
+                  {it.alasanFyp && (
+                    <div className="fyp-analysis-box">
+                      <span className="fyp-analysis-icon">📊</span>
+                      <span className="fyp-analysis-text">{it.alasanFyp}</span>
+                    </div>
+                  )}
 
                   {isPending ? (
                     <div className="ab">
