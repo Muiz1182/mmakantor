@@ -9,11 +9,11 @@ export const ZONES = [
 
 // Ruang Santai Karyawan (TIDAK termasuk Ruang Meeting)
 export const LOUNGE_ROOMS = [
-  { id: 'lunch', label: 'Cafe & Bar', cap: 5, cls: 'r-lunch' },
-  { id: 'ps', label: 'Billiard & Lounge', cap: 5, cls: 'r-ps' },
-  { id: 'pool', label: 'Kolam Renang & Deck', cap: 5, cls: 'r-pool' },
-  { id: 'musholla', label: 'Musholla', cap: 4, cls: 'r-musholla' },
-  { id: 'gym', label: 'Gym & Fitness', cap: 4, cls: 'r-gym' },
+  { id: 'lunch', label: 'Cafe & Bar', cap: 6, cls: 'r-lunch' },
+  { id: 'ps', label: 'Billiard & Lounge', cap: 6, cls: 'r-ps' },
+  { id: 'pool', label: 'Kolam Renang & Deck', cap: 6, cls: 'r-pool' },
+  { id: 'musholla', label: 'Musholla', cap: 6, cls: 'r-musholla' },
+  { id: 'gym', label: 'Gym & Fitness', cap: 5, cls: 'r-gym' },
   { id: 'dorm', label: 'Asrama Karyawan', cap: 4, cls: 'r-dorm' }
 ];
 

@@ -41,53 +41,75 @@ const ROOM3 = {
     dx: 14,
     entry: [[11, -2.5], [16, -2.5]],
     spots: [
-      [17, -1, 's', 17, -4, 0],
-      [21, -1, 's', 21, -4, 0],
-      [17, -4.5, 's', 17, -1, 0],
-      [21, -4.5, 's', 21, -1, 0],
-      [24, -2.5, 's', 20, -2.5, 0]
+      // 5 Kursi Bar Stool Tinggi di sepanjang meja bar (ty = 0.15 agar pas di bantalan kursi bar)
+      [16.5, -4.2, 's', 16.5, -5.5, 0.15],
+      [18.5, -4.2, 's', 18.5, -5.5, 0.15],
+      [20.5, -4.2, 's', 20.5, -5.5, 0.15],
+      [22.5, -4.2, 's', 22.5, -5.5, 0.15],
+      [24.5, -4.2, 's', 24.5, -5.5, 0.15],
+      // 4 Kursi Meja Cafe Santai (2 meja x 2 kursi)
+      [17.5, 0.2, 's', 17.5, -0.8, 0],
+      [17.5, -1.8, 's', 17.5, -0.8, 0],
+      [23.5, 0.2, 's', 23.5, -0.8, 0],
+      [23.5, -1.8, 's', 23.5, -0.8, 0]
     ]
   },
   ps: {
     dx: 14,
     entry: [[11, 8], [16, 8]],
     spots: [
-      [18, 6, 's', 20, 8, 0],
-      [22, 6, 's', 20, 8, 0],
-      [18, 10, 's', 20, 8, 0],
-      [22, 10, 's', 20, 8, 0],
-      [20, 8, 's', 20, 11, 0]
+      // 1 Pemain Biliar Berdiri di samping meja menyodok stik (TIDAK MENDUDUKI MEJA BILIAR!)
+      [20.5, 5.7, 'billiard', 20.5, 7.5, 0],
+      // 3 Duduk di Sofa Panjang Empuk
+      [18.5, 10.8, 's', 18.5, 6.0, 0],
+      [20.5, 10.8, 's', 20.5, 6.0, 0],
+      [22.5, 10.8, 's', 22.5, 6.0, 0],
+      // 4 Kursi Armchair Lounge Kulit
+      [16.5, 6.0, 's', 20.5, 6.0, 0],
+      [16.5, 9.5, 's', 20.5, 9.5, 0],
+      [25.0, 6.0, 's', 20.5, 6.0, 0],
+      [25.0, 9.5, 's', 20.5, 9.5, 0]
     ]
   },
   pool: {
     dx: 0,
     entry: [[0, -6], [0, -3]],
     spots: [
-      [-4.5, -1, 'w', 0, -1, 0.2],
-      [4.5, -1, 'w', 0, -1, 0.2],
-      [-4.5, 4, 'w', 0, 4, 0.2],
-      [4.5, 4, 'w', 0, 4, 0.2],
-      [0, 1.5, 'w', 0, 1.5, 0.2]
+      // 3 Berenang di dalam air kolam renang (pose swim, tenggelam di air, mengayuh gaya renang)
+      [0, 1.5, 'swim', 0, 5.0, -0.32],
+      [-2.5, 2.5, 'swim', -2.5, 6.0, -0.32],
+      [2.5, 0.5, 'swim', 2.5, 5.0, -0.32],
+      // 4 Kursi Berjemur Sun Lounger di deck (berbaring santai di atas kasur lounger)
+      [-4.8, -1.0, 'l', -5.8, -1.0, 0.42],
+      [4.8, -1.0, 'l', 5.8, -1.0, 0.42],
+      [-4.8, 4.0, 'l', -5.8, 4.0, 0.42],
+      [4.8, 4.0, 'l', 5.8, 4.0, 0.42]
     ]
   },
   musholla: {
     dx: -14,
     entry: [[-11, 17], [-16, 17]],
     spots: [
-      [-22, 14.5, 's', -25, 17, 0],
-      [-18, 14.5, 's', -25, 17, 0],
-      [-22, 19.5, 's', -25, 17, 0],
-      [-18, 19.5, 's', -25, 17, 0]
+      // 6 Duduk Bersila di Karpet Lantai Musholla Menghadap Kiblat (Mihrab Barat)
+      [-20.0, 14.5, 'pray', -26.0, 14.5, -0.42],
+      [-17.0, 14.5, 'pray', -26.0, 14.5, -0.42],
+      [-20.0, 17.0, 'pray', -26.0, 17.0, -0.42],
+      [-17.0, 17.0, 'pray', -26.0, 17.0, -0.42],
+      [-20.0, 19.5, 'pray', -26.0, 19.5, -0.42],
+      [-17.0, 19.5, 'pray', -26.0, 19.5, -0.42]
     ]
   },
   gym: {
     dx: 14,
     entry: [[11, 18], [16, 18]],
     spots: [
-      [17, 16, 'w', 17, 21, 0.2],
-      [20, 16, 'w', 20, 21, 0.2],
-      [23, 16, 'w', 23, 21, 0.2],
-      [19, 19.5, 's', 19, 16, 0]
+      // 3 Treadmill Digital: Lari cepat jogging di atas sabuk treadmill
+      [17.0, 16.0, 'gym_run', 17.0, 20.0, 0.18],
+      [20.5, 16.0, 'gym_run', 20.5, 20.0, 0.18],
+      [24.0, 16.0, 'gym_run', 24.0, 20.0, 0.18],
+      // 2 Matras Senam: Angkat beban dumbbell dengan ayunan lengan bicep curl
+      [18.5, 19.5, 'gym_lift', 18.5, 16.0, 0],
+      [22.5, 19.5, 'gym_lift', 22.5, 16.0, 0]
     ]
   },
   dorm: {
@@ -841,70 +863,171 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     B(0.12, 0.2, 0.12, lam(0xfef08a), lx, 0.55, lz + (lz > 1.5 ? 0.9 : -0.9));
   });
 
-  // Cafe & Bar: Meja Bar Kayu Panjang + 3 Kursi Bar Tinggi + Mesin Espresso
+  // Cafe & Bar: Meja Bar Kayu Panjang + 5 Kursi Bar Stool + 2 Meja Cafe & 4 Kursi Santai
   B(7.0, 1.1, 1.2, M.woodDark, 20.5, 0.55, -5.5);
   B(7.0, 0.1, 1.3, M.woodDesk, 20.5, 1.15, -5.5); // Top meja marmer/kayu
-  // Mesin Espresso Chrome & Kulkas Minuman
+  // Mesin Espresso Chrome, Kulkas Minuman & Showcase Pastry
   B(1.0, 0.65, 0.6, M.metalChrome, 18, 1.5, -5.5);
   B(0.9, 2.0, 0.8, lam(0x334155), 23, 1.0, -5.5);
-  // Kursi Bar Tinggi Chrome
-  [17.5, 20.5, 23.5].forEach(bx => {
-    B(0.45, 0.08, 0.45, M.blackLeather, bx, 0.75, -4.2);
-    B(0.08, 0.72, 0.08, M.metalChrome, bx, 0.36, -4.2);
-  });
+  B(1.2, 0.45, 0.6, lam(0xe2e8f0), 20.5, 1.4, -5.5);
+
+  // 5 Kursi Bar Stool Tinggi Chrome & Bantalan Kulit (Semua spot duduk berpusat di atas kursi fisik)
+  function createBarStool(bx, bz) {
+    mk(new THREE.CylinderGeometry(0.32, 0.35, 0.04, 16), M.metalChrome, bx, 0.02, bz, scene);
+    mk(new THREE.CylinderGeometry(0.06, 0.06, 0.72, 12), M.metalChrome, bx, 0.38, bz, scene);
+    const ring = mk(new THREE.TorusGeometry(0.18, 0.02, 8, 16), M.metalChrome, bx, 0.22, bz, scene);
+    ring.rotation.x = Math.PI / 2;
+    mk(new THREE.CylinderGeometry(0.38, 0.38, 0.1, 16), M.blackLeather, bx, 0.78, bz, scene);
+    B(0.42, 0.24, 0.08, M.blackLeather, bx, 0.94, bz + 0.16);
+  }
+  [16.5, 18.5, 20.5, 22.5, 24.5].forEach(bx => createBarStool(bx, -4.2));
+
+  // 2 Meja Cafe Bulat + 4 Kursi Cafe Modern
+  function createCafeTable(cx, cz) {
+    mk(new THREE.CylinderGeometry(0.85, 0.85, 0.05, 24), M.woodDesk, cx, 0.72, cz, scene);
+    mk(new THREE.CylinderGeometry(0.07, 0.07, 0.7, 12), M.metalChrome, cx, 0.35, cz, scene);
+    mk(new THREE.CylinderGeometry(0.4, 0.4, 0.04, 16), M.metalChrome, cx, 0.02, cz, scene);
+    B(0.12, 0.2, 0.12, lam(0x38bdf8), cx, 0.85, cz); // Vas dekorasi
+  }
+  createCafeTable(17.5, -0.8);
+  createCafeTable(23.5, -0.8);
+
+  function createCafeChair(cx, cz, ry) {
+    const cg = new THREE.Group();
+    cg.position.set(cx, 0, cz);
+    cg.rotation.y = ry;
+    scene.add(cg);
+    B(0.55, 0.08, 0.55, M.woodDark, 0, 0.44, 0, cg);
+    B(0.5, 0.06, 0.5, M.blackLeather, 0, 0.5, 0, cg);
+    B(0.52, 0.45, 0.08, M.woodDark, 0, 0.74, 0.24, cg);
+    [[-0.22, -0.22], [0.22, -0.22], [-0.22, 0.22], [0.22, 0.22]].forEach(([lx, lz]) => {
+      mk(new THREE.CylinderGeometry(0.03, 0.03, 0.42, 8), M.metalChrome, lx, 0.21, lz, cg);
+    });
+  }
+  createCafeChair(17.5, 0.2, Math.PI);
+  createCafeChair(17.5, -1.8, 0);
+  createCafeChair(23.5, 0.2, Math.PI);
+  createCafeChair(23.5, -1.8, 0);
 
   // =========================================================================
-  // 6. MUSHOLLA (Ruang Ibadah Karpet Hijau Saf, Mihrab Lengkung & Minbar)
+  // 6. MUSHOLLA (Ruang Ibadah Karpet Hijau Saf, 6 Sajadah Bordir, Mihrab & Minbar)
   // =========================================================================
   // Saf garis emas di atas karpet hijau
   for (let sz = 13.5; sz <= 20.5; sz += 2.2) {
     B(11.5, 0.02, 0.15, lam(0xd4af37), -20, 0.09, sz);
   }
+  // 6 Sajadah Karpet Sholat Bordir Emas (Tempat Duduk Bersila di Lantai)
+  function createSajadah(sx, sz) {
+    B(1.6, 0.025, 0.95, lam(0x064e3b), sx, 0.095, sz);
+    B(1.5, 0.028, 0.05, lam(0xd4af37), sx, 0.1, sz - 0.42);
+    B(1.5, 0.028, 0.05, lam(0xd4af37), sx, 0.1, sz + 0.42);
+    B(0.05, 0.028, 0.85, lam(0xd4af37), sx - 0.72, 0.1, sz);
+    B(0.05, 0.028, 0.85, lam(0xd4af37), sx + 0.72, 0.1, sz);
+  }
+  [[-20.0, 14.5], [-17.0, 14.5], [-20.0, 17.0], [-17.0, 17.0], [-20.0, 19.5], [-17.0, 19.5]].forEach(([sx, sz]) => {
+    createSajadah(sx, sz);
+  });
+
   // Mihrab ceruk lengkung kiblat di dinding barat
   B(0.3, 1.9, 2.6, lam(0xd4af37), -25.8, 1.0, 17);
   B(0.2, 1.8, 2.4, lam(0x0f5132), -25.7, 1.0, 17);
   // Minbar kayu khutbah bertingkat
   B(1.2, 0.5, 1.0, M.woodDark, -24.8, 0.25, 14.5);
   B(1.0, 0.9, 0.8, M.woodDark, -24.8, 0.65, 14.2);
-  // Rak Al-Qur'an dan partisi pembatas sandal di pintu
+  // Rehal Al-Qur'an kayu lipat
+  B(0.5, 0.4, 0.5, M.woodDesk, -24.5, 0.2, 17.0);
+  // Rak Al-Qur'an dan rak sandal di pintu masuk
   B(0.5, 1.2, 2.0, M.woodDark, -25.5, 0.6, 20.5);
   B(0.6, 0.4, 1.8, M.woodDark, -14.5, 0.2, 14.5);
 
   // =========================================================================
-  // 7. GYM & FITNESS (Treadmill Digital, Spin Bike, Matras & Dumbbell)
+  // 7. GYM & FITNESS (3 Treadmill Digital, Dumbbell Rack, Matras & 2 Spin Bike)
   // =========================================================================
   // Matras senam kuning cerah di lantai karet
   B(9.0, 0.02, 3.5, lam(0xeab308), 20.5, 0.09, 19.5);
+  // Matras senam individu untuk latihan beban / dumbbell
+  B(1.8, 0.03, 1.2, lam(0x0284c7), 18.5, 0.1, 19.5);
+  B(1.8, 0.03, 1.2, lam(0x0284c7), 22.5, 0.1, 19.5);
+
   // 3 Unit Treadmill Modern Berlayar Digital
   function createTreadmill(tx, tz) {
-    // Sabuk lari miring
     B(1.1, 0.22, 2.4, lam(0x18181b), tx, 0.15, tz);
-    // Tiang penyangga konsol
+    B(0.9, 0.02, 2.2, lam(0x27272a), tx, 0.27, tz); // Sabuk karet lari
     B(0.08, 1.2, 0.08, M.metalChrome, tx - 0.45, 0.7, tz + 0.9);
     B(0.08, 1.2, 0.08, M.metalChrome, tx + 0.45, 0.7, tz + 0.9);
-    // Pegangan tangan & Layar digital
     B(1.0, 0.08, 0.35, lam(0x334155), tx, 1.28, tz + 0.9);
     B(0.6, 0.35, 0.05, lam(0x38bdf8), tx, 1.48, tz + 0.92);
   }
-  createTreadmill(17, 16);
-  createTreadmill(20.5, 16);
-  createTreadmill(24, 16);
-  // Rak Beban Dumbbell
+  createTreadmill(17.0, 16.0);
+  createTreadmill(20.5, 16.0);
+  createTreadmill(24.0, 16.0);
+
+  // Rak Beban Dumbbell di dinding timur
   B(0.5, 0.85, 3.0, M.metalChrome, 26, 0.45, 19.5);
+  for (let dz = 18.5; dz <= 20.5; dz += 0.5) {
+    B(0.35, 0.12, 0.12, M.metalChrome, 26, 0.92, dz);
+  }
+
+  // 2 Sepeda Statis (Spinning Bike) Modern
+  function createSpinBike(bx, bz) {
+    B(0.4, 0.08, 1.2, lam(0x18181b), bx, 0.04, bz);
+    mk(new THREE.CylinderGeometry(0.04, 0.04, 0.8, 8), M.metalChrome, bx, 0.4, bz - 0.2, scene);
+    mk(new THREE.CylinderGeometry(0.04, 0.04, 0.9, 8), M.metalChrome, bx, 0.45, bz + 0.3, scene);
+    B(0.25, 0.08, 0.35, M.blackLeather, bx, 0.82, bz - 0.2);
+    B(0.55, 0.08, 0.2, lam(0x334155), bx, 0.92, bz + 0.35);
+    const wheel = mk(new THREE.CylinderGeometry(0.35, 0.35, 0.08, 16), M.metalChrome, bx, 0.38, bz + 0.1, scene);
+    wheel.rotation.z = Math.PI / 2;
+  }
+  createSpinBike(15.2, 19.5);
+  createSpinBike(25.5, 19.5);
 
   // =========================================================================
-  // 8. RUANG BILLIARD & LOUNGE (Tournament Billiard, Sofa & 85" OLED)
+  // 8. RUANG BILLIARD & LOUNGE (Tournament Billiard, Sofa Panjang, 4 Armchair, 85" OLED)
   // =========================================================================
-  // Meja Billiard Profesional Karpet Hijau
+  // Meja Billiard Profesional Karpet Hijau (x: 20.5, z: 7.5 - TIDAK DIDUDUKI KARAKTER!)
   B(4.4, 0.75, 2.5, M.woodDark, 20.5, 0.38, 7.5);
   B(4.0, 0.1, 2.1, M.billiard, 20.5, 0.8, 7.5);
-  // Bola-bola billiard & stik
+  // Bola-bola billiard piramid & bola putih
   B(0.25, 0.08, 0.25, lam(0xffffff), 21.2, 0.88, 7.5);
-  B(0.05, 0.05, 2.6, lam(0xd4a373), 20.5, 0.87, 8.8);
-  // Sofa empuk & TV OLED besar
-  B(4.2, 0.65, 1.4, lam(0x1e293b), 20.5, 0.35, 11);
+  B(0.12, 0.08, 0.12, lam(0xef4444), 19.8, 0.88, 7.5);
+  // Rak stik biliar di dinding barat
+  B(0.1, 1.8, 0.8, M.woodDark, 14.15, 1.8, 6.0);
+
+  // TV OLED 85" Besar di Dinding Utara
   B(3.8, 1.8, 0.1, lam(0x0f172a), 20.5, 1.8, 4.2);
   B(3.6, 1.6, 0.04, lam(0x38bdf8), 20.5, 1.8, 4.26);
+
+  // Sofa Panjang Empuk 3-Seater di z = 10.8
+  B(4.8, 0.65, 1.4, lam(0x1e293b), 20.5, 0.35, 11);
+  B(4.8, 0.85, 0.35, lam(0x1e293b), 20.5, 0.75, 11.6);
+  B(0.35, 0.65, 1.4, lam(0x334155), 18.0, 0.55, 11);
+  B(0.35, 0.65, 1.4, lam(0x334155), 23.0, 0.55, 11);
+
+  // Meja Kopi Kayu Kaca di depan sofa
+  B(2.8, 0.38, 1.0, M.woodDark, 20.5, 0.19, 9.6);
+  B(2.6, 0.04, 0.9, lam(0x38bdf8), 20.5, 0.39, 9.6);
+  B(0.3, 0.08, 0.2, lam(0x0f172a), 20.1, 0.44, 9.6);
+  B(0.3, 0.08, 0.2, lam(0xffffff), 20.9, 0.44, 9.6);
+
+  // 4 Kursi Armchair Lounge Mewah (Setiap orang yang duduk memiliki kursi fisik!)
+  function createLoungeArmchair(cx, cz, ry) {
+    const cg = new THREE.Group();
+    cg.position.set(cx, 0, cz);
+    cg.rotation.y = ry;
+    scene.add(cg);
+    B(0.9, 0.45, 0.85, lam(0x1e293b), 0, 0.225, 0, cg);
+    B(0.85, 0.12, 0.8, lam(0x334155), 0, 0.48, 0, cg);
+    B(0.9, 0.7, 0.2, lam(0x1e293b), 0, 0.75, 0.35, cg);
+    B(0.18, 0.5, 0.85, lam(0x334155), -0.45, 0.45, 0, cg);
+    B(0.18, 0.5, 0.85, lam(0x334155), 0.45, 0.45, 0, cg);
+    [[-0.38, -0.35], [0.38, -0.35], [-0.38, 0.35], [0.38, 0.35]].forEach(([lx, lz]) => {
+      mk(new THREE.CylinderGeometry(0.04, 0.03, 0.2, 8), M.woodDark, lx, 0.1, lz, cg);
+    });
+  }
+  createLoungeArmchair(16.5, 6.0, Math.PI / 2);
+  createLoungeArmchair(16.5, 9.5, Math.PI / 2);
+  createLoungeArmchair(25.0, 6.0, -Math.PI / 2);
+  createLoungeArmchair(25.0, 9.5, -Math.PI / 2);
 
   // =========================================================================
   // 9. RUANG MEETING KACA (Meja Rapat Konferensi, 6 Kursi, Layar Smart TV)
@@ -1220,6 +1343,16 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     }
     o.armL = arm(-0.42);
     o.armR = arm(0.42);
+
+    // Props Tambahan untuk Animasi Interaktif Khusus (Stik Biliar & Dumbbell Gym)
+    o.cueStick = mk(new THREE.CylinderGeometry(0.015, 0.032, 2.2, 8), lam(0xd4a373), 0, -0.2, -0.9, o.armR);
+    o.cueStick.rotation.x = Math.PI / 2;
+    o.cueStick.visible = false;
+
+    o.dumbbellL = mk(bxg(0.24, 0.14, 0.14), M.metalChrome, 0, 0, -0.72, o.armL);
+    o.dumbbellL.visible = false;
+    o.dumbbellR = mk(bxg(0.24, 0.14, 0.14), M.metalChrome, 0, 0, -0.72, o.armR);
+    o.dumbbellR.visible = false;
 
     // Penanda Status & Label Melayang
     o.tag = new THREE.Group();
@@ -1666,7 +1799,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
   }
 
   function snapAgent(o, at, sl, instant) {
-    const q = at === 'desk' ? null : ROOM3[at].spots[sl];
+    const q = at === 'desk' ? null : (ROOM3[at] && ROOM3[at].spots[sl] ? ROOM3[at].spots[sl] : (ROOM3[at] ? ROOM3[at].spots[0] : null));
     o.at = at;
     o.sl = sl;
     o.mode = q ? 'rest' : 'seat';
@@ -1678,7 +1811,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       o.z = q ? q[1] : o.sz;
       o.ry = o.fy;
       o.y = o.ty;
-      o.rx = o.pose === 'l' ? Math.PI / 2 : 0;
+      o.rx = o.pose === 'l' ? Math.PI / 2 : (o.pose === 'swim' ? 1.35 : (o.pose === 'billiard' ? 0.55 : 0));
     }
   }
 
@@ -1796,21 +1929,33 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
 
     o.y += (o.ty - o.y) * k1;
     const isLying = o.mode === 'rest' && o.pose === 'l';
-    const targetRx = isLying ? Math.PI / 2 : 0;
+    const isSwimming = o.mode === 'rest' && o.pose === 'swim';
+    const isBilliard = o.mode === 'rest' && o.pose === 'billiard';
+    const isPraying = o.mode === 'rest' && o.pose === 'pray';
+
+    let targetRx = 0;
+    if (isLying) targetRx = Math.PI / 2;
+    else if (isSwimming) targetRx = 1.35;
+    else if (isBilliard) targetRx = 0.55;
     o.rx += (targetRx - o.rx) * Math.min(1, dt * 6);
 
-    const sit = o.mode === 'seat' || (o.mode === 'rest' && o.pose === 's');
+    const sit = o.mode === 'seat' || (o.mode === 'rest' && (o.pose === 's' || o.pose === 'pray'));
     o.seat.visible = sit;
     o.stand.visible = !sit;
 
     o.pg.position.set(o.x, o.y, o.z);
     o.pg.rotation.set(o.rx, o.ry, 0);
 
-    if (isLying) {
-      o.tag.position.set(o.x - 1.0, 0, o.z);
-      if (o.mk) o.mk.position.set(0, 2.0, 0);
-      if (o.sp) o.sp.position.set(0, 2.6, 0);
-      if (o.bubbleSprite) o.bubbleSprite.position.set(0, 3.8, 0);
+    if (isLying || isSwimming) {
+      o.tag.position.set(o.x, o.y + 0.6, o.z);
+      if (o.mk) o.mk.position.set(0, 1.8, 0);
+      if (o.sp) o.sp.position.set(0, 2.4, 0);
+      if (o.bubbleSprite) o.bubbleSprite.position.set(0, 3.4, 0);
+    } else if (isPraying) {
+      o.tag.position.set(o.x, o.y, o.z);
+      if (o.mk) o.mk.position.set(0, 2.4, 0);
+      if (o.sp) o.sp.position.set(0, 3.0, 0);
+      if (o.bubbleSprite) o.bubbleSprite.position.set(0, 4.2, 0);
     } else {
       o.tag.position.set(o.x, o.y, o.z);
       if (o.mk) o.mk.position.set(0, 3.2, 0);
@@ -2334,6 +2479,11 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       const p = o.ph;
       let aL = -0.5, aR = -0.5, bob = 0.06, hr = 0, lg = 0;
 
+      // Props pendukung aktivitas interaktif (Stik biliar & dumbbell gym)
+      if (o.cueStick) o.cueStick.visible = (o.pose === 'billiard');
+      if (o.dumbbellL) o.dumbbellL.visible = (o.pose === 'gym_lift');
+      if (o.dumbbellR) o.dumbbellR.visible = (o.pose === 'gym_lift');
+
       if (o.mode === 'walk') {
         lg = Math.sin(time * 9 + p) * 0.6 * amp;
         aL += lg * 0.8;
@@ -2343,6 +2493,41 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
         bob = 0;
         hr = 0;
         lg = 0;
+      } else if (o.pose === 'swim') {
+        // Berenang di air kolam: mengayuh tangan, kaki flutter kick, mengapung lembut
+        bob = Math.sin(time * 4 + p) * 0.08;
+        aL = Math.sin(time * 5 + p) * 1.5;
+        aR = Math.sin(time * 5 + p + Math.PI) * 1.5;
+        lg = Math.sin(time * 8 + p) * 0.65;
+        hr = Math.sin(time * 2.5 + p) * 0.12;
+      } else if (o.pose === 'pray') {
+        // Duduk bersila/tahiyyat di karpet lantai musholla, tangan bertumpu di paha
+        aL = -1.1;
+        aR = -1.1;
+        bob = 0.02 * Math.sin(time * 1.2 + p);
+        hr = 0.22 + Math.sin(time * 1.2 + p) * 0.04;
+        lg = 0;
+      } else if (o.pose === 'gym_run') {
+        // Lari cepat / jogging di atas treadmill digital gym
+        lg = Math.sin(time * 14 + p) * 0.85 * amp;
+        aL = Math.sin(time * 14 + p) * 1.15 * amp;
+        aR = -aL;
+        bob = Math.abs(Math.sin(time * 14 + p)) * 0.12;
+        hr = Math.sin(time * 14 + p) * 0.05;
+      } else if (o.pose === 'gym_lift') {
+        // Angkat beban dumbbell dengan ayunan bicep curl di gym
+        aL = -0.55 + Math.sin(time * 4.2 + p) * 1.05;
+        aR = -0.55 + Math.sin(time * 4.2 + p) * 1.05;
+        bob = Math.sin(time * 4.2 + p) * 0.04;
+        hr = Math.sin(time * 4.2 + p) * 0.1;
+        lg = 0;
+      } else if (o.pose === 'billiard') {
+        // Berdiri membungkuk di tepi meja biliar, menyodok stik biliar ke arah bola
+        aL = -1.25; // Tangan kiri menumpu di tepi meja
+        aR = -0.65 + Math.sin(time * 4.5 + p) * 0.45; // Tangan kanan stroke cue stick
+        bob = 0.02 * Math.sin(time * 4.5 + p);
+        hr = 0.15;
+        lg = 0.12;
       } else if (o.pose === 'w') {
         aL += Math.sin(time * 3 + p) * 0.9 * amp;
         aR += Math.sin(time * 3 + p + 3) * 0.9 * amp;
