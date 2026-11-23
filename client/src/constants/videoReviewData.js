@@ -38,17 +38,16 @@ export const VIDEO_REVIEW_PRESETS = [
     videographer: 'Rian (Videographer AI)',
     audioProfile: '-14 LUFS (Vokal Jernih + Lo-Fi Beat Ritmis)',
     colorGrade: 'DaVinci Resolve Rec.709 (High Dynamic Range)',
-    hook3sText: 'STOP! Jangan beli lampu mahal sebelum tahu trik pantulan dinding ini!',
+    hook3sText: 'Stop! Jangan buru-buru beli lampu studio mahal kalau video kamu masih kelihatan kusam kayak gini!',
     hookScore: 96,
     fypScore: 94,
     fypVerdict: 'SANGAT LAYAK UNGGAH (Peluang FYP 94%)',
     summary: 'Video perbandingan pencahayaan visual ekstrem modal hemat. Menggunakan trik pantulan styrofoam dan senter HP yang menghasilkan estetika sinematik.',
     subtitles: [
-      { start: 0, end: 3, text: 'STOP! Jangan beli lampu studio mahal dulu...', highlight: 'STOP! Jangan beli' },
-      { start: 3, end: 8, text: 'Ini perbandingan lampu 2 juta vs pantulan styrofoam 15 ribu!', highlight: 'styrofoam 15 ribu!' },
-      { start: 8, end: 15, text: 'Trik 1: Tembakkan senter HP ke tembok putih untuk difusi lembut.', highlight: 'difusi lembut.' },
-      { start: 15, end: 23, text: 'Trik 2: Pakai kantong kresek putih susu jadi softbox darurat.', highlight: 'softbox darurat.' },
-      { start: 23, end: 30, text: 'Simpan video ini biar nggak boncos belanja alat studio!', highlight: 'Simpan video ini!' }
+      { start: 0, end: 4, text: 'Stop! Jangan buru-buru beli lampu studio mahal kalau video kamu masih kelihatan kusam kayak gini!', highlight: 'Jangan buru-buru beli lampu' },
+      { start: 4, end: 11, text: 'Banyak kreator salah fokus beli kamera jutaan, padahal bayangan kasar dari lampu plafon yang bikin muka kamu berminyak dan gelap.', highlight: 'bayangan kasar lampu plafon' },
+      { start: 11, end: 22, text: 'Ambil styrofoam 15 ribuan dari warung, pantulin senter HP kamu ke situ. Lihat, seketika wajahmu dapet soft glow sinematik ala film bioskop!', highlight: 'styrofoam 15 ribuan warung' },
+      { start: 22, end: 30, text: 'Praktekin trik ini sekarang di kamar kamu, dan simpan video ini biar nggak lupa pas mau syuting!', highlight: 'simpan video ini' }
     ],
     beforeAfter: {
       beforeLabel: 'SEBELUM (Lampu Plafon Flat & Bayangan Kasar)',
@@ -169,7 +168,7 @@ export function getVideoReviewPreset(idOrPilar) {
 }
 
 export function generateStoryScript(cleanTitle, pilar, rawDetail = '', naskahStory = null) {
-  // 1. Jika sudah ada naskahStory terstruktur, gunakan langsung
+  // 1. Jika sudah ada naskahStory terstruktur dari Penulis Naskah, gunakan langsung!
   if (naskahStory && naskahStory.hook && naskahStory.solution) {
     return {
       hook: naskahStory.hook,
@@ -179,48 +178,23 @@ export function generateStoryScript(cleanTitle, pilar, rawDetail = '', naskahSto
     };
   }
 
-  // 2. Cek apakah di dalam rawDetail ada baris bertutur narasi / voiceover quotes
-  const lines = (rawDetail || '').split('\n').map(s => s.trim()).filter(Boolean);
-  const voiceoverQuotes = [];
+  // 2. Filter & Deteksi Topik Utama (Lighting, Editing, Design, Web Development)
+  // Story writing narasi harus selalu menceritakan alur cerita yang hidup ke penonton,
+  // BUKAN menampilkan metadata internal seperti "Isi:", "Skor FYP", "Catatan", dsb.
+  const lowerTitle = `${cleanTitle || ''} ${rawDetail || ''}`.toLowerCase();
 
-  for (const line of lines) {
-    const quoteMatch = line.match(/"([^"]+)"/);
-    if (quoteMatch && quoteMatch[1].length > 15) {
-      voiceoverQuotes.push(quoteMatch[1].trim());
-    } else {
-      const cleanLine = line
-        .replace(/^(Hook\s*\(\d+-\d+s?\):?|Masalah\s*\(\d+-\d+s?\):?|Solusi\s*\(\d+-\d+s?\):?|CTA\s*\(\d+-\d+s?\):?|Slide\s*\d+:?|Audio Voiceover:?|\[Visual:[^\]]+\])\s*/gi, '')
-        .replace(/^(Reels|Carousel|Shorts|Story|Edukasi)[^:]*:\s*/gi, '')
-        .trim();
-      if (cleanLine.length > 20 && !cleanLine.startsWith('Menjadwalkan') && !cleanLine.startsWith('Konsep edukasi') && !cleanLine.startsWith('Reels 30s:')) {
-        voiceoverQuotes.push(cleanLine);
-      }
-    }
-  }
-
-  if (voiceoverQuotes.length >= 3) {
-    return {
-      hook: voiceoverQuotes[0],
-      problem: voiceoverQuotes[1],
-      solution: voiceoverQuotes[2],
-      cta: voiceoverQuotes[3] || `Simpan video ini sekarang dan bagikan ke rekan tim kamu!`
-    };
-  }
-
-  // 3. GENERATOR STORY WRITING ADAPTIF BERDASARKAN TOPIK & PILAR (BUKAN METADATA/KONSEP)
-  // Menghasilkan naskah bertutur narasi orang pertama yang mengalir dan ramah penonton
-  const lowerTitle = (cleanTitle || '').toLowerCase();
-
-  if (lowerTitle.includes('light') || lowerTitle.includes('cahaya') || lowerTitle.includes('lampu') || lowerTitle.includes('studio') || lowerTitle.includes('sinematik')) {
+  // A. TOPIK LIGHTING / PENCAHAYAAN STUDIO
+  if (lowerTitle.includes('light') || lowerTitle.includes('cahaya') || lowerTitle.includes('lampu') || lowerTitle.includes('studio') || lowerTitle.includes('sinematik') || pilar === 'Multimedia') {
     return {
       hook: `Stop! Jangan buru-buru beli lampu studio mahal kalau video kamu masih kelihatan kusam kayak gini!`,
-      problem: `Banyak kreator salah fokus beli kamera jutaan, padahal masalah utamanya ada di bayangan kasar lampu plafon kamar.`,
-      solution: `Ambil styrofoam 15 ribuan dari warung, pantulin senter HP kamu ke situ. Seketika wajahmu dapet soft glow sinematik ala film bioskop!`,
-      cta: `Coba praktekin sekarang di kamar kamu, dan simpan video ini biar nggak lupa pas mau syuting!`
+      problem: `Banyak kreator salah fokus beli kamera jutaan, padahal bayangan kasar dari lampu plafon yang bikin muka kamu berminyak dan gelap.`,
+      solution: `Ambil styrofoam 15 ribuan dari warung, pantulin senter HP kamu ke situ. Lihat, seketika wajahmu dapet soft glow sinematik ala film bioskop!`,
+      cta: `Praktekin trik ini sekarang di kamar kamu, dan simpan video ini biar nggak lupa pas mau syuting!`
     };
   }
 
-  if (lowerTitle.includes('edit') || lowerTitle.includes('cut') || lowerTitle.includes('premiere') || lowerTitle.includes('davinci') || lowerTitle.includes('warna') || lowerTitle.includes('grading')) {
+  // B. TOPIK EDITING, TIMELINE, SHORTCUT & COLOR GRADING
+  if (lowerTitle.includes('edit') || lowerTitle.includes('cut') || lowerTitle.includes('premiere') || lowerTitle.includes('davinci') || lowerTitle.includes('warna') || lowerTitle.includes('grading') || lowerTitle.includes('timeline')) {
     return {
       hook: `Ngedit video 30 detik tapi makan waktu 3 jam? Trik timeline ini bakal bikin proses editmu 5 kali lebih cepat!`,
       problem: `Banyak editor pemula masih potong klip manual satu per satu pakai mouse, bikin leher kaku dan deadline keteteran.`,
@@ -229,21 +203,51 @@ export function generateStoryScript(cleanTitle, pilar, rawDetail = '', naskahSto
     };
   }
 
+  // C. TOPIK DESAIN, TIPOGRAFI & CAROUSEL
   if (lowerTitle.includes('font') || lowerTitle.includes('desain') || lowerTitle.includes('tipografi') || lowerTitle.includes('poster') || lowerTitle.includes('canva') || pilar === 'Design') {
     return {
       hook: `Pernah ngerasa desain poster kamu udah rapi, tapi entah kenapa masih kelihatan murahan dan kayak bikinan amatir?`,
-      problem: `Penyebab utamanya ada di font! Memakai lebih dari tiga jenis font berbeda dalam satu poster bikin mata audiens pusing dan gak fokus.`,
+      problem: `Penyebab utamanya ada di font! Memakai lebih dari tiga jenis font berbeda bikin mata audiens pusing dan gak fokus.`,
       solution: `Pakai aturan dua font ini: satu Sans-Serif tegas untuk judul, dan satu Serif elegan untuk isi. Jangan lupa beri ruang bernapas di tepi kanvas!`,
       cta: `Ketik kata 'FONT' di kolom komentar, nanti tim MMA spill 5 kombinasi font gratis terbaik buat kamu!`
     };
   }
 
+  // D. TOPIK WEB DEVELOPMENT, CODING & 3D THREE.JS
   if (lowerTitle.includes('web') || lowerTitle.includes('code') || lowerTitle.includes('3d') || lowerTitle.includes('three') || pilar === 'Web Development') {
     return {
       hook: `Jangan bikin website yang ngebosenin cuma berisi teks dan foto diam kalau kamu mau banjir klien!`,
       problem: `Klien jaman sekarang gampang bosen dalam 3 detik pertama kalau websitemu gak punya interaksi yang memukau mata.`,
       solution: `Cukup tambahkan animasi 3D Three.js ringan dengan teknik instanced mesh: efeknya interaktif, 60 FPS mulus, dan sama sekali gak bikin ngelag!`,
       cta: `Mau dibuatin website kelas dunia kayak gini? Klik link di bio buat konsultasi bareng tim MMA!`
+    };
+  }
+
+  // E. PARSER CADANGAN: JIKA ADA DIALOG KUTIPAN NYATA (Bebas dari kata 'Skor FYP', 'Isi:', dsb)
+  const lines = (rawDetail || '').split('\n').map(s => s.trim()).filter(Boolean);
+  const cleanDialogueLines = [];
+
+  for (const line of lines) {
+    const isMetaOrJargon = /^(skor\s*fyp|isi:|alasan\s*fyp|catatan|target:|status:|reels\s*\d+s:|carousel)/i.test(line);
+    if (!isMetaOrJargon) {
+      const quoteMatch = line.match(/"([^"]+)"/);
+      if (quoteMatch && quoteMatch[1].length > 15 && !quoteMatch[1].toLowerCase().includes('skor')) {
+        cleanDialogueLines.push(quoteMatch[1].trim());
+      } else {
+        const cleaned = line.replace(/^(Hook\s*\(\d+-\d+s?\):?|Masalah\s*\(\d+-\d+s?\):?|Solusi\s*\(\d+-\d+s?\):?|CTA\s*\(\d+-\d+s?\):?)\s*/gi, '').trim();
+        if (cleaned.length > 20 && !cleaned.toLowerCase().includes('skor fyp')) {
+          cleanDialogueLines.push(cleaned);
+        }
+      }
+    }
+  }
+
+  if (cleanDialogueLines.length >= 3) {
+    return {
+      hook: cleanDialogueLines[0],
+      problem: cleanDialogueLines[1],
+      solution: cleanDialogueLines[2],
+      cta: cleanDialogueLines[3] || `Simpan video ini sekarang dan bagikan ke rekan tim kamu!`
     };
   }
 

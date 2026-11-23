@@ -369,7 +369,7 @@ export const SEED_APPROVALS = [
     tipe: 'Multimedia',
     judul: '[Multimedia] Hook 3s: 3 Trik Lighting Studio Modal 100 Ribuan',
     ringkasan: 'Edukasi video: membandingkan setup pencahayaan sebelum dan sesudah dalam 3 detik pertama.',
-    detail: 'Hook (0-3s): Jangan beli lampu mahal sebelum tahu trik pantulan dinding ini!\nIsi: Key light diffuser plastik, fill light styrofoam, backlight senter HP.\nSkor FYP: 94/100 (Hook visual rasa penasaran instan).',
+    detail: 'Hook (0-4s): "Stop! Jangan buru-buru beli lampu studio mahal kalau video kamu masih kelihatan kusam kayak gini!"\nMasalah (4-11s): "Banyak kreator salah fokus beli kamera jutaan, padahal bayangan kasar dari lampu plafon yang bikin muka kamu berminyak dan gelap."\nSolusi (11-22s): "Ambil styrofoam 15 ribuan dari warung, pantulin senter HP kamu ke situ. Lihat, seketika wajahmu dapet soft glow sinematik ala film bioskop!"\nCTA (22-30s): "Praktekin trik ini sekarang di kamar kamu, dan simpan video ini biar nggak lupa pas mau syuting!"',
     status: 'pending'
   },
   {
@@ -377,7 +377,7 @@ export const SEED_APPROVALS = [
     tipe: 'Design',
     judul: '[Design] Carousel 7 Slide: Kesalahan Tipografi yang Bikin Desain Murahan',
     ringkasan: 'Edukasi desain grafis: 7 slide studi kasus font pairing dan hirarki visual.',
-    detail: 'Slide 1: Desain kamu kelihatan murah? Cek 3 kesalahan font ini!\nSlide 2-6: Studi kasus font gratis vs font premium, leading, tracking.\nSkor FYP: 88/100 (Format carousel edukasi daftar memiliki rasio save tinggi).',
+    detail: 'Hook (0-4s): "Pernah ngerasa desain poster kamu udah rapi, tapi entah kenapa masih kelihatan murahan dan kayak bikinan amatir?"\nMasalah (4-11s): "Penyebab utamanya ada di font! Memakai lebih dari tiga jenis font berbeda bikin mata audiens pusing dan gak fokus."\nSolusi (11-22s): "Pakai aturan dua font ini: satu Sans-Serif tegas untuk judul, dan satu Serif elegan untuk isi. Jangan lupa beri ruang bernapas di tepi kanvas!"\nCTA (22-30s): "Ketik kata FONT di kolom komentar, nanti tim MMA spill 5 kombinasi font gratis terbaik buat kamu!"',
     status: 'pending'
   },
   {
@@ -385,7 +385,7 @@ export const SEED_APPROVALS = [
     tipe: 'Web Development',
     judul: '[Web Dev] Reels 25s: Cara Bikin Animasi 3D di Website Tanpa Lag',
     ringkasan: 'Edukasi coding: tutorial integrasi Three.js ringan untuk landing page interaktif.',
-    detail: 'Pembuka: Website kamu masih 2D membosankan? Coba tambahkan 3D interaktif ini.\nIsi: Optimasi Three.js mesh polygon rendah, lighting hemat GPU.\nSkor FYP: 68/100 (Pembuka masih agak teknis, perlu hook visual lebih atraktif).',
+    detail: 'Hook (0-4s): "Jangan bikin website yang ngebosenin cuma berisi teks dan foto diam kalau kamu mau banjir klien!"\nMasalah (4-11s): "Klien jaman sekarang gampang bosen dalam 3 detik pertama kalau websitemu gak punya interaksi yang memukau mata."\nSolusi (11-22s): "Cukup tambahkan animasi 3D Three.js ringan dengan teknik instanced mesh: efeknya interaktif, 60 FPS mulus, dan sama sekali gak bikin ngelag!"\nCTA (22-30s): "Mau dibuatin website kelas dunia kayak gini? Klik link di bio buat konsultasi bareng tim MMA!"',
     status: 'pending'
   }
 ];
