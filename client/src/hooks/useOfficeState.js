@@ -678,6 +678,65 @@ export function useOfficeState() {
     };
   }, [placedAgents, pendingApprovals]);
 
+  // Eksekusi AI per Agen (Tahap 4)
+  const [isRunningAI, setIsRunningAI] = useState(false);
+
+  const runAgentAI = useCallback(async (agentId, promptText, customPilar) => {
+    setIsRunningAI(true);
+    const targetAgent = agents.find(a => a.id === agentId);
+    const agentName = targetAgent ? targetAgent.nama : agentId;
+    setLiveMessage(`⚡ Menjalankan model AI untuk ${agentName}...`);
+
+    try {
+      const res = await api.runAgent(agentId, {
+        prompt: promptText,
+        pilar: customPilar || 'Multimedia'
+      });
+
+      if (res && res.success) {
+        // Refresh antrean persetujuan dari backend
+        const appsRes = await api.getApprovals();
+        if (appsRes && appsRes.success && Array.isArray(appsRes.data)) {
+          setApprovals(appsRes.data.map(item => ({
+            id: String(item.id),
+            dari: item.agentId,
+            judul: item.judul,
+            ringkas: item.ringkasan,
+            detail: item.detail,
+            state: item.status === 'approved' ? 'ok' : (item.status === 'rejected' ? 'rev' : 'pending'),
+          })));
+        }
+
+        // Refresh data agen dan outputs
+        const agRes = await api.getAgents();
+        if (agRes && agRes.success && Array.isArray(agRes.data)) {
+          setAgents(prev => prev.map(localA => {
+            const dbA = agRes.data.find(x => x.id === localA.id);
+            if (!dbA) return localA;
+            return {
+              ...localA,
+              status: dbA.status || localA.status,
+              sLabel: dbA.status === 'working' ? 'Bekerja' : (dbA.status === 'waiting' ? 'Menunggu' : 'Perlu tindakan'),
+              now: dbA.sedangKerja || localA.now,
+              out: dbA.outputs && dbA.outputs.length > 0
+                ? { t: dbA.outputs[0].judul, items: [dbA.outputs[0].isi] }
+                : localA.out
+            };
+          }));
+        }
+
+        setLiveMessage(`✅ Draf AI dari ${res.data.agentNama} berhasil dibuat! Otomatis masuk ke Antrean Persetujuan CEO.`);
+        return res.data;
+      }
+    } catch (err) {
+      console.warn('Gagal menjalankan AI agen:', err);
+      setLiveMessage(`⚠️ Gagal menjalankan AI agen: ${err.message}`);
+    } finally {
+      setIsRunningAI(false);
+    }
+    return null;
+  }, [agents]);
+
   return {
     agents: placedAgents,
     agentsMap,
@@ -708,6 +767,8 @@ export function useOfficeState() {
     triggerPublishSlot,
     triggerOfficeRoutine,
     isMeetingActive,
-    toggleCeoMeeting
+    toggleCeoMeeting,
+    runAgentAI,
+    isRunningAI
   };
 }

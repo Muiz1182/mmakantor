@@ -60,7 +60,9 @@ export function App() {
     triggerPublishSlot,
     triggerOfficeRoutine,
     isMeetingActive,
-    toggleCeoMeeting
+    toggleCeoMeeting,
+    runAgentAI,
+    isRunningAI
   } = useOfficeState();
 
   const handleWebGLFallback = useCallback(() => {
@@ -399,6 +401,9 @@ export function App() {
             pendingApprovals={pendingApprovals}
             onDecideApproval={decideApproval}
             pendingApprovalsCount={pendingApprovals.length}
+            onRunAgentAI={runAgentAI}
+            isRunningAI={isRunningAI}
+            activePilar={WEEKLY_SCHEDULE.find(d => d.dayIndex === clockTime?.dayIndex)?.theme?.split(' ')[0] || 'Multimedia'}
           />
         </div>
       </div>

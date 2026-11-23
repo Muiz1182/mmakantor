@@ -98,5 +98,32 @@ export const api = {
     } catch (err) {
       return null;
     }
+  },
+
+  // Jalankan AI Agen untuk memproduksi draf kerja
+  async runAgent(id, { prompt, pilar, contentId, context } = {}) {
+    try {
+      const res = await fetch(`${API_BASE}/agents/${id}/run`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, pilar, contentId, context }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn('⚠️ Gagal menjalankan AI agen di backend:', err.message);
+      return null;
+    }
+  },
+
+  // Ambil riwayat log eksekusi AI dan token
+  async getAiRuns(limit = 20) {
+    try {
+      const res = await fetch(`${API_BASE}/agents/ai/runs?limit=${limit}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      return null;
+    }
   }
 };

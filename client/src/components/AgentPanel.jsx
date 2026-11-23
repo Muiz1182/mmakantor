@@ -13,9 +13,15 @@ export function AgentPanel({
   approvals,
   pendingApprovals,
   onDecideApproval,
-  pendingApprovalsCount
+  pendingApprovalsCount,
+  onRunAgentAI,
+  isRunningAI,
+  activePilar = 'Multimedia'
 }) {
   const [taskInput, setTaskInput] = useState('');
+  const [selectedPilar, setSelectedPilar] = useState(activePilar);
+  const [customAiPrompt, setCustomAiPrompt] = useState('');
+  const [expandedApprovalId, setExpandedApprovalId] = useState(null);
 
   if (!agent) return null;
 
@@ -39,6 +45,12 @@ export function AgentPanel({
     if (!taskInput.trim()) return;
     onAddTask(agent.id, taskInput);
     setTaskInput('');
+  };
+
+  const handleAiRun = () => {
+    if (onRunAgentAI) {
+      onRunAgentAI(agent.id, customAiPrompt, selectedPilar);
+    }
   };
 
   const restRoomsOptions = [
@@ -79,6 +91,62 @@ export function AgentPanel({
         )}
       </section>
 
+      {/* TAHAP 4: KARTU RUNNER AI PER AGEN (SISTEM PROMPT & GENERATOR DRAF KE CEO) */}
+      <section className="ai-agent-runner-card">
+        <div className="ai-runner-head">
+          <span className="ai-runner-title">⚡ Integrasi Model AI ({isCeo ? 'CEO System' : agent.nama})</span>
+          <span className="ai-model-tag">Gemini / OpenAI API</span>
+        </div>
+
+        <p className="ai-runner-sub">
+          {isCeo
+            ? 'Picu produksi konten edukasi viral lintas divisi dan pantau hasilnya langsung di Antrean Persetujuan.'
+            : `Jalankan model AI dengan System Prompt khusus ${agent.nama}. Draf otomatis masuk ke antrean CEO.`}
+        </p>
+
+        <div className="pilar-select-row">
+          <span className="pilar-select-label">Pilar Edukasi:</span>
+          {['Multimedia', 'Design', 'Web Development'].map(p => (
+            <button
+              key={p}
+              type="button"
+              className={`pilar-chip ${selectedPilar === p ? 'active' : ''}`}
+              onClick={() => setSelectedPilar(p)}
+              disabled={isRunningAI}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+
+        <div className="ai-prompt-input-group">
+          <input
+            type="text"
+            className="ai-task-input"
+            placeholder={
+              isCeo
+                ? 'Instruksi arahan strategis CEO (misal: "Topik arsitektur React 60 FPS")...'
+                : `Instruksi khusus tugas ${agent.nama} (kosongkan untuk default)...`
+            }
+            value={customAiPrompt}
+            onChange={(e) => setCustomAiPrompt(e.target.value)}
+            disabled={isRunningAI}
+          />
+          <button
+            type="button"
+            className="ai-run-btn"
+            disabled={isRunningAI}
+            onClick={handleAiRun}
+          >
+            {isRunningAI ? (
+              <>⏳ Memproses AI...</>
+            ) : (
+              <>{isCeo ? '⚡ Eksekusi AI Arahan CEO' : `⚡ Jalankan AI ${agent.nama}`}</>
+            )}
+          </button>
+        </div>
+      </section>
+
       {/* Antrean Persetujuan khusus CEO */}
       {isCeo && (
         <section>
@@ -91,6 +159,7 @@ export function AgentPanel({
             {approvals.map(it => {
               const fromAgent = agentsMap[it.dari];
               const isPending = it.state === 'pending';
+              const isExpanded = expandedApprovalId === it.id;
 
               return (
                 <li key={it.id} className={`appr ${it.state}`}>
@@ -105,26 +174,36 @@ export function AgentPanel({
                         {fromAgent.nama}
                       </button>
                     )}
+                    {it.tipe && (
+                      <span className="pilar-badge" title={`Kategori: ${it.tipe}`}>
+                        {it.tipe.toUpperCase()}
+                      </span>
+                    )}
                     {it.kategori && (
                       <span className="pilar-badge" title={`Pilar Edukasi: ${it.kategori}`}>
                         {it.kategori}
                       </span>
                     )}
-                    {it.fypScore !== undefined && (
-                      <span
-                        className={`fyp-badge ${it.fypScore >= 75 ? 'high' : 'medium'}`}
-                        title={it.alasanFyp || 'Potensi viral konten'}
-                      >
-                        🔥 FYP: <b>{it.fypScore}%</b>
-                      </span>
-                    )}
                     <strong>{it.judul}</strong>
                   </div>
+
                   <p>{it.ringkas}</p>
-                  {it.alasanFyp && (
-                    <div className="fyp-analysis-box">
-                      <span className="fyp-analysis-icon">📊</span>
-                      <span className="fyp-analysis-text">{it.alasanFyp}</span>
+
+                  {/* Tombol Baca Draf Lengkap */}
+                  {it.detail && (
+                    <div className="approval-detail-toggle-box">
+                      <button
+                        type="button"
+                        className="detail-toggle-btn"
+                        onClick={() => setExpandedApprovalId(isExpanded ? null : it.id)}
+                      >
+                        {isExpanded ? '▲ Tutup Draf Lengkap' : '▼ Baca Draf Dokumen AI Lengkap'}
+                      </button>
+                      {isExpanded && (
+                        <div className="approval-full-detail">
+                          <pre>{it.detail}</pre>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -135,19 +214,19 @@ export function AgentPanel({
                         className="primary"
                         onClick={() => onDecideApproval(it.id, 'ok')}
                       >
-                        Setujui
+                        ✓ Setujui Draf
                       </button>
                       <button
                         type="button"
                         className="ghost"
                         onClick={() => onDecideApproval(it.id, 'rev')}
                       >
-                        Minta revisi
+                        ✕ Minta Revisi
                       </button>
                     </div>
                   ) : (
                     <span className="state">
-                      {it.state === 'ok' ? 'Disetujui' : 'Revisi diminta'}
+                      {it.state === 'ok' ? '✓ Disetujui CEO' : '✕ Revisi diminta'}
                     </span>
                   )}
                 </li>
@@ -163,10 +242,10 @@ export function AgentPanel({
           <p className="label">Lokasi</p>
           <p className="text-body">
             {agent.at === 'desk'
-              ? 'Di meja kerja. Saat menunggu revisi atau materi, karyawan berpindah ke fasilitas santai.'
+              ? 'Di meja kerja. Jam operasional kantor MMA aktif, seluruh karyawan bekerja otomatis.'
               : agent.at === 'meeting'
               ? 'Sedang di Ruang Meeting Kaca, mengikuti agenda rapat koordinasi resmi bersama CEO.'
-              : `Sedang di ${LOUNGE_MAP[agent.at]?.label || 'Ruang Santai'}, istirahat santai menunggu tugas berikutnya.`}
+              : `Sedang di ${LOUNGE_MAP[agent.at]?.label || 'Ruang Santai'}, istirahat santai.`}
           </p>
 
           <div className="chips">
@@ -188,7 +267,7 @@ export function AgentPanel({
             })}
           </div>
           <p className="hint-text" style={{ fontSize: '0.78rem', color: 'var(--ink2)', marginTop: '6px' }}>
-            Catatan: Ruang Meeting Kaca bukan area santai. Akses dibuka khusus saat jadwal rapat resmi bersama CEO.
+            Catatan: Ruang Meeting Kaca khusus sesi rapat resmi bersama CEO, bukan area santai.
           </p>
         </section>
       )}
@@ -222,7 +301,11 @@ export function AgentPanel({
             <strong>{agent.out.t}</strong>
             <ul>
               {agent.out.items.map((item, idx) => (
-                <li key={idx}>{item}</li>
+                <li key={idx}>
+                  <pre style={{ whiteSpace: 'pre-wrap', font: 'inherit', margin: 0 }}>
+                    {item}
+                  </pre>
+                </li>
               ))}
             </ul>
           </div>

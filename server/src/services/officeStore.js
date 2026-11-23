@@ -323,3 +323,124 @@ export async function createContent(contentData) {
   memContents.unshift(newC);
   return newC;
 }
+
+// ----------------------------------------------------------------------------
+// TAHAP 4: FUNGSI STORE UNTUK PENYAMBUNGAN AI PER AGEN
+// ----------------------------------------------------------------------------
+
+export async function addAgentOutput(agentId, judul, isi, contentId = null, meta = {}) {
+  const dbStatus = await checkDatabaseConnection();
+  if (dbStatus.connected) {
+    try {
+      const client = await pool.connect();
+      try {
+        const res = await client.query(
+          `INSERT INTO outputs (agent_id, content_id, judul, isi, meta, dibuat)
+           VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *`,
+          [agentId, contentId, judul, isi, JSON.stringify(meta)]
+        );
+        return res.rows[0];
+      } finally {
+        client.release();
+      }
+    } catch (err) {
+      console.warn('⚠️ Gagal simpan output di PostgreSQL:', err.message);
+    }
+  }
+
+  // In-memory
+  const ag = memAgents.find(a => a.id === agentId);
+  if (ag) {
+    if (!ag.outputs) ag.outputs = [];
+    const newOut = { id: Date.now(), judul, isi, meta, dibuat: new Date().toISOString() };
+    ag.outputs.unshift(newOut);
+    return newOut;
+  }
+  return { id: Date.now(), agentId, judul, isi, meta };
+}
+
+export async function createApproval({ agentId, contentId = null, tipe = 'konten', judul, ringkasan, detail = '', status = 'pending' }) {
+  const dbStatus = await checkDatabaseConnection();
+  if (dbStatus.connected) {
+    try {
+      const client = await pool.connect();
+      try {
+        const res = await client.query(
+          `INSERT INTO approvals (agent_id, content_id, tipe, judul, ringkasan, detail, status, dibuat)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING *`,
+          [agentId, contentId, tipe, judul, ringkasan, detail, status]
+        );
+        return res.rows[0];
+      } finally {
+        client.release();
+      }
+    } catch (err) {
+      console.warn('⚠️ Gagal simpan approval di PostgreSQL:', err.message);
+    }
+  }
+
+  // In-memory
+  const newApp = {
+    id: memApprovals.length + 1,
+    agentId,
+    contentId,
+    tipe,
+    judul,
+    ringkasan,
+    detail,
+    status,
+    catatanRevisi: null,
+    dibuat: new Date().toISOString(),
+    diputuskan: null
+  };
+  memApprovals.unshift(newApp);
+  return newApp;
+}
+
+export async function logAgentRun({ agentId, input, output, model, tokenPakai = 0 }) {
+  const dbStatus = await checkDatabaseConnection();
+  if (dbStatus.connected) {
+    try {
+      const client = await pool.connect();
+      try {
+        const res = await client.query(
+          `INSERT INTO agent_runs (agent_id, input, output, model, token_pakai, dibuat)
+           VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *`,
+          [agentId, input, output, model || 'gemini-1.5-flash', tokenPakai]
+        );
+        return res.rows[0];
+      } finally {
+        client.release();
+      }
+    } catch (err) {
+      console.warn('⚠️ Gagal simpan agent_runs di PostgreSQL:', err.message);
+    }
+  }
+
+  return { id: Date.now(), agentId, input, output, model, tokenPakai, dibuat: new Date().toISOString() };
+}
+
+export async function getAgentRuns(limit = 25) {
+  const dbStatus = await checkDatabaseConnection();
+  if (dbStatus.connected) {
+    try {
+      const client = await pool.connect();
+      try {
+        const res = await client.query(
+          `SELECT r.*, a.nama as agent_nama, a.peran as agent_peran 
+           FROM agent_runs r 
+           LEFT JOIN agents a ON r.agent_id = a.id 
+           ORDER BY r.id DESC LIMIT $1`,
+          [limit]
+        );
+        return { source: 'postgresql', data: res.rows };
+      } finally {
+        client.release();
+      }
+    } catch (err) {
+      console.warn('⚠️ Gagal ambil agent_runs dari PostgreSQL:', err.message);
+    }
+  }
+
+  return { source: 'memory', data: [] };
+}
