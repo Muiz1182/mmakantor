@@ -4,6 +4,7 @@ import { Stage3D } from './components/Stage3D';
 import { Plan2D } from './components/Plan2D';
 import { AgentPanel } from './components/AgentPanel';
 import { ScheduleModal } from './components/ScheduleModal';
+import { VideoReviewModal } from './components/VideoReviewModal';
 import { FLOW_STEPS } from './constants/flowData';
 import { WEEKLY_SCHEDULE, getPipelineStepForRoutine } from './constants/scheduleData';
 import './App.css';
@@ -12,6 +13,8 @@ export function App() {
   const [webglError, setWebglError] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
+  const [isVideoReviewOpen, setIsVideoReviewOpen] = useState(false);
+  const [videoReviewItem, setVideoReviewItem] = useState(null);
   const [ideaText, setIdeaText] = useState('');
   const [selectedPilar, setSelectedPilar] = useState('Multimedia'); // 'Multimedia', 'Design', 'Web Development'
   const [chatActive, setChatActive] = useState(true);
@@ -77,6 +80,19 @@ export function App() {
     selectAgent(id);
     setIsDrawerOpen(true);
   }, [selectAgent]);
+
+  const handleOpenVideoReview = useCallback((item = null) => {
+    setVideoReviewItem(item);
+    setIsVideoReviewOpen(true);
+  }, []);
+
+  const handleVerifyApproval = useCallback((id, decision, notes) => {
+    decideApproval(id, decision, notes);
+    if (decision === 'ok') {
+      window.__triggerAgencyStep && window.__triggerAgencyStep('upload');
+      // Update pesan live
+    }
+  }, [decideApproval]);
 
   const handleIdeaSubmit = (e) => {
     e.preventDefault();
@@ -148,6 +164,17 @@ export function App() {
             title="Buka Jadwal Publikasi Harian (Senin - Minggu)"
           >
             📅 <b>Jadwal Tayang</b>
+          </button>
+
+          {/* Tombol Review & Verifikasi Video Pre-Upload (Reels & TikTok) */}
+          <button
+            type="button"
+            className="status-pill video-review-pill"
+            onClick={() => handleOpenVideoReview()}
+            title="Review & Verifikasi Hasil Video Pre-Upload 9:16 (QC, Hook, Audio, Safe Zone)"
+          >
+            🎬 <b>Review Video</b>
+            <span className="review-badge-count">{pendingApprovals.length}</span>
           </button>
 
           {/* Toggle Auto-Review AI */}
@@ -478,6 +505,7 @@ export function App() {
             onRunAgentAI={runAgentAI}
             isRunningAI={isRunningAI}
             activePilar={WEEKLY_SCHEDULE.find(d => d.dayIndex === clockTime?.dayIndex)?.theme?.split(' ')[0] || 'Multimedia'}
+            onOpenVideoReview={handleOpenVideoReview}
           />
         </div>
       </div>
@@ -502,6 +530,15 @@ export function App() {
         currentMinute={clockTime?.m}
         onTriggerPublish={triggerPublishSlot}
         onTriggerRoutine={triggerOfficeRoutine}
+      />
+
+      {/* Modal Review Hasil Video 9:16 (QC & Verifikasi Kelayakan Pre-Upload) */}
+      <VideoReviewModal
+        isOpen={isVideoReviewOpen}
+        onClose={() => setIsVideoReviewOpen(false)}
+        approvalItem={videoReviewItem}
+        onVerifyApproval={handleVerifyApproval}
+        activePilar={WEEKLY_SCHEDULE.find(d => d.dayIndex === clockTime?.dayIndex)?.theme?.split(' ')[0] || 'Multimedia'}
       />
     </div>
   );

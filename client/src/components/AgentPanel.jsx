@@ -16,7 +16,8 @@ export function AgentPanel({
   pendingApprovalsCount,
   onRunAgentAI,
   isRunningAI,
-  activePilar = 'Multimedia'
+  activePilar = 'Multimedia',
+  onOpenVideoReview
 }) {
   const [taskInput, setTaskInput] = useState('');
   const [selectedPilar, setSelectedPilar] = useState(activePilar);
@@ -207,6 +208,18 @@ export function AgentPanel({
                     </div>
                   )}
 
+                  {/* Tombol Khusus: Review Hasil Video Pre-Upload (9:16) */}
+                  <div className="approval-video-review-action">
+                    <button
+                      type="button"
+                      className="video-review-open-btn"
+                      onClick={() => onOpenVideoReview && onOpenVideoReview(it)}
+                      title="Buka simulator pemutar 9:16 untuk memverifikasi kualitas video sebelum diupload"
+                    >
+                      🎬 Putar & Review Kelayakan Video (9:16)
+                    </button>
+                  </div>
+
                   {isPending ? (
                     <div className="ab">
                       <button
@@ -308,6 +321,18 @@ export function AgentPanel({
                 </li>
               ))}
             </ul>
+            {(agent.id === 'editor' || agent.id === 'kamera') && (
+              <div style={{ marginTop: '10px' }}>
+                <button
+                  type="button"
+                  className="video-review-open-btn full-width"
+                  onClick={() => onOpenVideoReview && onOpenVideoReview()}
+                  title="Buka simulator pemutar 9:16 untuk memverifikasi kualitas video sebelum diupload"
+                >
+                  🎬 Putar & Review Master Video 4K (9:16)
+                </button>
+              </div>
+            )}
           </div>
         </section>
       )}
