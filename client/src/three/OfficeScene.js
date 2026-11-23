@@ -860,7 +860,9 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     return new THREE.CanvasTexture(c);
   }
 
-  const meetingScreenMat = new THREE.MeshBasicMaterial({ map: createMeetingScreenTexture(false) });
+  const meetingScreenTexIdle = createMeetingScreenTexture(false);
+  const meetingScreenTexActive = createMeetingScreenTexture(true);
+  const meetingScreenMat = new THREE.MeshBasicMaterial({ map: meetingScreenTexIdle });
   const meetingScreenMesh = new THREE.Mesh(new THREE.PlaneGeometry(4.3, 2.1), meetingScreenMat);
   meetingScreenMesh.position.set(-6, 2.2, -20.82);
   scene.add(meetingScreenMesh);
@@ -932,7 +934,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
   // =========================================================================
   // 13. MEJA DAN KARAKTER 14 ORANG (CEO + 13 AI DENGAN BALON OBROLAN 3D)
   // =========================================================================
-  function getScreenTexture(kind) {
+  function createStaticScreenTexture(kind) {
     const c = document.createElement('canvas');
     c.width = 128; c.height = 80;
     const x = c.getContext('2d');
@@ -947,13 +949,19 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     return new THREE.CanvasTexture(c);
   }
 
-  // Pembuat Sprite Balon Obrolan 3D Interaktif
-  function createBubbleTexture(text, speakerName, colorHex = '#38bdf8') {
-    const c = document.createElement('canvas');
-    c.width = 512;
-    c.height = 180;
-    const ctx = c.getContext('2d');
+  const SCREEN_TEXTURES = {
+    working: createStaticScreenTexture('working'),
+    waiting: createStaticScreenTexture('waiting'),
+    attention: createStaticScreenTexture('attention')
+  };
 
+  function getScreenTexture(kind) {
+    return SCREEN_TEXTURES[kind] || SCREEN_TEXTURES.waiting;
+  }
+
+  // Penggambar Balon Obrolan 3D Reusable pada Canvas Tetap (Bebas Alokasi & Anti Memory-Leak)
+  function drawBubbleOnCanvas(canvas, text, speakerName, colorHex = '#38bdf8') {
+    const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, 512, 180);
 
     // Bayangan balon
@@ -1008,8 +1016,6 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       }
     }
     ctx.fillText(line, 36, y);
-
-    return new THREE.CanvasTexture(c);
   }
 
   function buildAgent(a, x, z, idx) {
@@ -1130,8 +1136,12 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     o.sp = sp;
     reg(sp);
 
-    // BALON OBROLAN 3D (Speech Bubble Sprite)
-    o.bubbleSprite = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true, depthTest: false }));
+    // BALON OBROLAN 3D (Speech Bubble Sprite) - Reusable Canvas & Texture Anti Memory Leak
+    o.bc = document.createElement('canvas');
+    o.bc.width = 512;
+    o.bc.height = 180;
+    o.bt = new THREE.CanvasTexture(o.bc);
+    o.bubbleSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: o.bt, transparent: true, depthTest: false }));
     o.bubbleSprite.position.set(0, 5.2, 0);
     o.bubbleSprite.scale.set(0.001, 0.001, 1);
     o.bubbleSprite.renderOrder = 15;
@@ -1144,11 +1154,8 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       if (!chatActive) return;
       const speaker = a.id === 'ceo' ? 'Anda (CEO)' : (a.nama === 'Videographer / Fotografer' ? 'Videographer' : a.nama);
       const col = a.id === 'ceo' ? '#f59e0b' : (a.hue > 180 ? '#38bdf8' : '#10b981');
-      if (o.bubbleSprite.material.map) {
-        o.bubbleSprite.material.map.dispose();
-      }
-      o.bubbleSprite.material.map = createBubbleTexture(text, speaker, col);
-      o.bubbleSprite.material.needsUpdate = true;
+      drawBubbleOnCanvas(o.bc, text, speaker, col);
+      o.bt.needsUpdate = true;
       o.bubbleSprite.visible = true;
       o.bubbleSprite.scale.set(5.2, 1.8, 1);
       o.chatTimer = duration;
@@ -1813,6 +1820,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
 
   function runAgencyStep(stepIdx) {
     if (isAgencyStepRunning) return;
+    agencyStepTimer = 18.0;
     const meetingAgents = Object.values(nodes).filter(o => o.at === 'meeting');
     if (meetingAgents.length > 0) return;
 
@@ -2094,6 +2102,21 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
   canvas.addEventListener('pointermove', onPointerMove);
   canvas.addEventListener('pointerleave', onPointerLeave);
 
+  function onContextLost(e) {
+    e.preventDefault();
+    console.warn('WebGL Context Lost: Menahan loop render untuk pemulihan GPU otomatis.');
+    isRunning = false;
+  }
+
+  function onContextRestored() {
+    console.info('WebGL Context Restored: GPU dipulihkan, melanjutkan animasi Three.js tanpa refresh halaman.');
+    isRunning = true;
+    requestAnimationFrame(animate);
+  }
+
+  canvas.addEventListener('webglcontextlost', onContextLost, false);
+  canvas.addEventListener('webglcontextrestored', onContextRestored, false);
+
   function resize() {
     const w = canvas.parentElement ? canvas.parentElement.clientWidth : canvas.clientWidth;
     const h = canvas.parentElement ? canvas.parentElement.clientHeight : canvas.clientHeight;
@@ -2113,9 +2136,10 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     if (!isRunning) return;
     requestAnimationFrame(animate);
 
-    const time = (performance.now() - t0) / 1000;
-    const dt = Math.min(0.1, time - last);
-    last = time;
+    try {
+      const time = (performance.now() - t0) / 1000;
+      const dt = Math.min(0.1, time - last);
+      last = time;
 
     // Simulasi obrolan & interaksi mandiri
     tickSocialSimulation(dt);
@@ -2186,6 +2210,9 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     controls.update();
 
     renderer.render(scene, camera);
+    } catch (err) {
+      console.warn('Three.js frame render skipped:', err);
+    }
   }
 
   let lastMeetingState = null;
@@ -2201,8 +2228,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     if (isMeetingNow !== lastMeetingState) {
       lastMeetingState = isMeetingNow;
       if (meetingScreenMat) {
-        if (meetingScreenMat.map) meetingScreenMat.map.dispose();
-        meetingScreenMat.map = createMeetingScreenTexture(isMeetingNow);
+        meetingScreenMat.map = isMeetingNow ? meetingScreenTexActive : meetingScreenTexIdle;
         meetingScreenMat.needsUpdate = true;
       }
     }
@@ -2256,8 +2282,14 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       canvas.removeEventListener('pointerup', onPointerUp);
       canvas.removeEventListener('pointermove', onPointerMove);
       canvas.removeEventListener('pointerleave', onPointerLeave);
+      canvas.removeEventListener('webglcontextlost', onContextLost);
+      canvas.removeEventListener('webglcontextrestored', onContextRestored);
       controls.dispose();
       renderer.dispose();
     }
   };
+}
+
+if (typeof import.meta !== 'undefined' && import.meta.hot) {
+  import.meta.hot.accept();
 }
