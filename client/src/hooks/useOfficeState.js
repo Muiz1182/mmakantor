@@ -1,7 +1,7 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { INITIAL_AGENTS, INITIAL_APPROVALS } from '../constants/agentsData';
 import { LOUNGE_ROOMS, ALL_ROOMS, LOUNGE_MAP, MEETING_ROOM } from '../constants/roomsData';
-import { getCurrentRoutine } from '../constants/scheduleData';
+import { getCurrentRoutine, getTodaySchedule } from '../constants/scheduleData';
 import { api } from '../services/api';
 
 export function useOfficeState() {
@@ -148,8 +148,8 @@ export function useOfficeState() {
     const occ = {};
     ALL_ROOMS.forEach(r => { occ[r.id] = []; });
 
-    const isSleep = clockTime.h >= 23 || clockTime.h < 7 || activeTimePhase === 'sleep';
-    const routine = getCurrentRoutine(clockTime.h, clockTime.m);
+    const routine = getCurrentRoutine(clockTime.h, clockTime.m, clockTime.dayIndex);
+    const isSleep = routine ? routine.category === 'sleep' : (clockTime.h >= 23 || clockTime.h < 7 || activeTimePhase === 'sleep');
     const isBreak = !isSleep && routine && routine.category === 'break';
 
     list.forEach((a, i) => {
@@ -528,6 +528,25 @@ export function useOfficeState() {
 
     setLiveMessage(`🚀 KONTEN TAYANG OTOMATIS: "${slot.title}" berhasil dipublikasikan ke ${slot.platform}!`);
   }, []);
+
+  // Otomasi Publikasi Medsos Selaras Jadwal Operasional Harian
+  const publishedSlotsRef = useRef(new Set());
+  useEffect(() => {
+    if (!clockTime) return;
+    const today = getTodaySchedule(clockTime.dayIndex);
+    if (!today || !Array.isArray(today.slots)) return;
+
+    const timeStr = `${String(clockTime.h).padStart(2, '0')}:${String(clockTime.m).padStart(2, '0')}`;
+    const slotToPublish = today.slots.find(s => s.time === timeStr);
+
+    if (slotToPublish) {
+      const slotKey = `${clockTime.dayIndex}-${slotToPublish.id}-${timeStr}`;
+      if (!publishedSlotsRef.current.has(slotKey)) {
+        publishedSlotsRef.current.add(slotKey);
+        triggerPublishSlot(slotToPublish);
+      }
+    }
+  }, [clockTime, triggerPublishSlot]);
 
   // Status apakah sesi rapat dengan CEO sedang berlangsung
   const isMeetingActive = useMemo(() => {

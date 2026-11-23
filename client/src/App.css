@@ -1427,6 +1427,15 @@ button:focus-visible, input:focus-visible {
   color: var(--ink2);
 }
 
+.routine-linked-slot-pill {
+  font: 600 10.5px var(--f-mono);
+  color: #f43f5e;
+  background: rgba(244, 63, 94, 0.12);
+  padding: 1px 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(244, 63, 94, 0.3);
+}
+
 .current-live-badge {
   font: 700 9.5px var(--f-mono);
   color: #10b981;
@@ -1702,6 +1711,17 @@ button:focus-visible, input:focus-visible {
   color: var(--ink2);
   margin: 0;
   line-height: 1.45;
+}
+
+.slot-operational-phase {
+  font: 500 11.5px var(--f-body);
+  color: #0284c7;
+  margin: 6px 0 0 0;
+  line-height: 1.4;
+  background: color-mix(in srgb, #0284c7 10%, var(--surface));
+  padding: 5px 8px;
+  border-radius: 6px;
+  border-left: 3px solid #0284c7;
 }
 
 .slot-card-actions {
