@@ -284,8 +284,52 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       return lines[Math.floor(Math.random() * lines.length)];
     }
 
-    // 4. Tanggapan Rekan Kerja di Meja (Desk Reply)
+    // 4. Tanggapan Rekan Kerja (Reply)
     if (contextType === 'desk_reply') {
+      const partner = targetAgent;
+      // Jika rekan yang diajak bicara sedang berada di ruang istirahat yang sama!
+      if (partner && ['lunch', 'ps', 'pool', 'musholla', 'gym', 'dorm'].includes(partner.at)) {
+        const breakRepliesByRoom = {
+          lunch: [
+            `Wah bener, tadi gue liat pudingnya masih ada di kulkas cafe, ambil gih mumpung belum abis!`,
+            `Gue tadi udah nambah es teh manis dua kali, saking segernya abis makan pedes.`,
+            `Sini duduk bareng satu meja, cobain keripik pangsitnya renyah banget buat camilan.`,
+            `Roti bakar keju susu di meja ujung barusan matang tuh, aromanya semerbak banget.`,
+            `Mantap, abis kenyang gini stamina langsung full lagi buat lanjut agenda nanti.`
+          ],
+          ps: [
+            `Haha siap! Kali ini gue pake formasi 4-3-3 counter attack, jangan nangis kalau kebobolan ya!`,
+            `Halah itu tadi bola biliar cuma hoki doang mantul dua kali! Sini giliran gue tusuk bola solid.`,
+            `Boleh, jangan lupa taruhan es teh lemon di cafe ya, siapa takut!`,
+            `Gaya main lu makin rapi aja, tapi tunggu jurus pamungkas gue di babak kedua ya!`,
+            `Emang paling asik rehat di ruang game lounge ini, kepala langsung fresh lagi!`
+          ],
+          pool: [
+            `Haha awas ketiduran bro, nanti malah gelundung nyebur ke kolam beneran!`,
+            `Bener banget, istirahat mata dari layar monitor itu wajib biar pas syuting nanti nggak perih.`,
+            `Duduk santai di sini emang spot terbaik buat ngelamun nyari inspirasi kreatif.`,
+            `Seger kan? Angin sorenya pas banget, nggak panas tapi tetep adem semilir.`
+          ],
+          musholla: [
+            `Siap, gue ambil wudhu di kran sebelah kanan ya, tungguin biar bisa takbir bareng.`,
+            `Alhamdulillah, sholat berjamaah bareng tim kantor emang bikin hati adem.`,
+            `Iya, karpet mushollanya bersih dan wangi banget, nyaman buat ibadah.`
+          ],
+          gym: [
+            `Bagus tuh, jangan lupa atur nafas dan minum air putih biar nggak dehidrasi.`,
+            `Gue ikutan stretching ah, otot leher gue juga berasa kaku banget tadi abis syuting.`,
+            `Mantap, olahraga ringan 10 menit emang ampuh banget ngusir rasa ngantuk siang.`
+          ],
+          dorm: [
+            `Tenang, alarm udah gue set, istirahat yang nyenyak ya biar nanti pas produksi fokus lagi.`,
+            `Sip, lurusin badan dulu, jangan lupa tarik selimutnya biar nggak masuk angin.`
+          ]
+        };
+
+        const roomReplies = breakRepliesByRoom[partner.at] || breakRepliesByRoom.lunch;
+        return roomReplies[Math.floor(Math.random() * roomReplies.length)];
+      }
+
       const replies = [
         `Bener banget, formula itu terbukti paling konsisten performanya di akun kita.`,
         `Setuju, nanti kita sinkronkan lagi pas review materi sebelum rilis malam.`,
@@ -298,20 +342,60 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
 
     // 5. Obrolan Spontan Nyata Sesuai Pekerjaan Karyawan Saat Ini (Desk Chat)
     if (agent) {
-      // Jika agen sedang istirahat (cafe / musholla / lounge)
-      if (agent.at === 'lunch' || agent.at === 'ps' || agent.at === 'pool') {
-        const breakQuotes = [
-          `Santap siang dan rehat dulu di area Cafe, menu makanannya enak buat isi energi.`,
-          `Rehat sejenak sambil ngobrol santai sebelum sesi kerja berikutnya dimulai.`,
-          `Waktu istirahat resmi kantor: santai dulu agar pikiran segar kembali.`,
-          `Segelas kopi hangat dulu di cafe biar fokus kerja sore nanti maksimal.`
-        ];
-        return breakQuotes[Math.floor(Math.random() * breakQuotes.length)];
-      }
+      // Obrolan REALTIME Khusus Jam Istirahat Sesuai Ruangan (Cafe, PS, Pool, Musholla, Gym, Dorm)
+      const currentLoc = agent.at;
+      if (['lunch', 'ps', 'pool', 'musholla', 'gym', 'dorm'].includes(currentLoc)) {
+        const breakQuotesByRoom = {
+          lunch: [
+            `Ayam bakar madu di cafe hari ini gurih banget, bumbunya meresap sampai ke tulang.`,
+            `Segelas es kopi susu gula aren dulu, perpaduan manisnya pas bikin mata melek lagi.`,
+            `Ada yang mau nitip siomay kukus atau dimsum nggak? Mumpung masih panas mengepul nih.`,
+            `Nasi padang rendang emang nggak ada tandingannya buat nge-charge energi siang-siang.`,
+            `Duduk santai di cafe sambil dengerin musik lofi emang paling bener buat nurunin penat.`,
+            `Bentar ya, habisin sambal korek dulu, pedesnya nagih parah tapi bikin keringetan seger!`,
+            `Kopi espresso double shot di sini aromanya wangi banget, beans lokal rasa internasional.`,
+            `Puding cokelat sama buah potong di kulkas cafe masih ada nggak ya? Mau buat pencuci mulut.`
+          ],
+          ps: [
+            `Ayo rematch FIFA / FC 25! Kemarin gol sundulan menit 90 belum gue terima ya!`,
+            `Gue pegang stik 1 ya, yang kalah push-up 10 kali atau traktir es kopi di cafe!`,
+            `Lihat nih, pukulan biliar bola 8 gue barusan masuk ke lubang sudut mulus banget!`,
+            `Main Tekken atau Street Fighter bentar yuk, mau pamer kombo juggling baru.`,
+            `Break biliar kenceng banget barusan sampai bolanya buyar semua, giliran lu tusuk bola strip!`,
+            `Kompakan main bola santai gini seru banget, stress syuting studio langsung ilang seketika.`,
+            `Bentar, stik controller lu getar nggak? Kayaknya baterainya mau abis deh.`
+          ],
+          pool: [
+            `Angin di tepi kolam sepoi-sepoi adem banget, bikin mata auto merem kalau nggak ditahan.`,
+            `Duduk selonjoran di sun lounger sambil liatin pantulan air kolam tenang banget rasanya.`,
+            `Cuci muka dulu pake air dingin pinggir kolam, segarnya langsung bikin pikiran jernih.`,
+            `Ngadem dulu di sini 10 menit, ngistirahatin mata abis berjam-jam mantengin monitor editing 4K.`,
+            `Suasana kolam kantor MMA beneran berasa kayak lagi staycation di villa Ubud Bali.`,
+            `Gemericik airnya nenangin banget ya, rasanya pengen nyebur kalau bawa celana ganti.`
+          ],
+          musholla: [
+            `Alhamdulillah sudah masuk waktu sholat, wudhu dulu yuk biar sejuk lahir batin.`,
+            `Ayo sholat berjamaah di musholla, mumpung masih di awal waktu.`,
+            `Seger banget abis kena basuhan air wudhu, hati jadi tenang dan pikiran lebih fokus.`,
+            `Rehat sejenak di karpet musholla sambil dzikir dan doa, bener-bener nenangkan jiwa.`,
+            `Yuk yang ikhwan gantian adzan dan iqomah, kita rapikan shaf sholat bareng-bareng.`
+          ],
+          gym: [
+            `Peregangan otot punggung dulu di gym, pundak kaku banget kelamaan duduk mantengin timeline.`,
+            `Jalan santai di treadmill 15 menit buat bakar kalori makan siang tadi.`,
+            `Angkat dumbbell 5 kg ringan dulu biar postur tegap dan badan nggak gampang bungkuk.`,
+            `Foam roller di sini ngebantu banget ngeregangin otot pinggang yang pegal sehabis syuting.`,
+            `Gerak badan dikit biar sirkulasi darah lancar, stamina pas produksi malam tetap prima!`
+          ],
+          dorm: [
+            `Power nap 15 menit dulu di kasur asrama, nanti bangun dijamin badan seger bertenaga.`,
+            `Rebahan lurusin punggung sejenak di kasur empuk, nikmatnya luar biasa.`,
+            `Tolong pasang alarm 15 menit ya, jangan sampe kebablasan jam kerja berikutnya dimulai.`
+          ]
+        };
 
-      // Jika agen sedang tidur di asrama
-      if (agent.at === 'dorm') {
-        return 'Istirahat malam di Asrama Karyawan MMA.';
+        const roomQuotes = breakQuotesByRoom[currentLoc] || breakQuotesByRoom.lunch;
+        return roomQuotes[Math.floor(Math.random() * roomQuotes.length)];
       }
 
       // Prioritas Utama: Bicara langsung mengenai pekerjaan yang sedang dikerjakan saat ini (realtime)
@@ -2040,23 +2124,68 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     // Pemicu dinamis karyawan mengobrol kontekstual sesuai pekerjaan riil mereka
     wanderCountdown -= dt;
     if (wanderCountdown <= 0) {
-      wanderCountdown = 12.0 + Math.random() * 8.0;
+      wanderCountdown = 9.0 + Math.random() * 6.0;
 
-      const randomKey = roamingAgentKeys[Math.floor(Math.random() * roamingAgentKeys.length)];
-      const speaker = nodes[randomKey];
-      if (speaker && speaker.mode !== 'walk') {
-        const text = getDynamicDialogue(randomKey, 'desk_chat');
-        speaker.say(text, 6.0);
+      const ctx = getOfficeContext ? getOfficeContext() : {};
+      const routine = ctx.currentRoutine;
+      const isBreak = routine && routine.category === 'break';
 
-        // Rekan kerja merespon secara kontekstual 2.5 detik kemudian
-        setTimeout(() => {
-          const partnerKey = roamingAgentKeys.find(k => k !== randomKey);
-          const partner = nodes[partnerKey];
-          if (partner && partner.mode !== 'walk') {
-            const replyText = getDynamicDialogue(partnerKey, 'desk_reply', randomKey);
-            partner.say(replyText, 5.5);
+      // JIKA SEDANG JAM ISTIRAHAT KANTOR: Obrolan 100% kontekstual di ruangan santai!
+      if (isBreak) {
+        const restingAgents = Object.values(nodes).filter(
+          o => o.at && ['lunch', 'ps', 'pool', 'musholla', 'gym', 'dorm'].includes(o.at) && o.mode !== 'walk'
+        );
+
+        if (restingAgents.length > 0) {
+          // Kelompokkan agen berdasarkan ruangan santai saat ini
+          const byRoom = {};
+          restingAgents.forEach(o => {
+            if (!byRoom[o.at]) byRoom[o.at] = [];
+            byRoom[o.at].push(o);
+          });
+
+          const occupiedRooms = Object.keys(byRoom);
+          const chosenRoom = occupiedRooms[Math.floor(Math.random() * occupiedRooms.length)];
+          const roomGroup = byRoom[chosenRoom];
+
+          if (roomGroup && roomGroup.length > 0) {
+            const speaker = roomGroup[Math.floor(Math.random() * roomGroup.length)];
+            const text = getDynamicDialogue(speaker.id, 'desk_chat');
+            speaker.say(text, 5.5);
+
+            // Jika ada teman di ruangan santai yang sama, ajak ngobrol / reply!
+            const peers = roomGroup.filter(o => o.id !== speaker.id);
+            if (peers.length > 0) {
+              setTimeout(() => {
+                if (!isRunning) return;
+                const responder = peers[Math.floor(Math.random() * peers.length)];
+                if (responder && responder.mode !== 'walk') {
+                  const replyText = getDynamicDialogue(responder.id, 'desk_reply', speaker.id);
+                  responder.say(replyText, 5.2);
+                }
+              }, 2600);
+            }
           }
-        }, 2800);
+        }
+      } else {
+        // JAM KERJA NORMAL DI MEJA: Obrolan seputar target konten & pekerjaan
+        const randomKey = roamingAgentKeys[Math.floor(Math.random() * roamingAgentKeys.length)];
+        const speaker = nodes[randomKey];
+        if (speaker && speaker.mode !== 'walk') {
+          const text = getDynamicDialogue(randomKey, 'desk_chat');
+          speaker.say(text, 6.0);
+
+          // Rekan kerja merespon secara kontekstual 2.5 detik kemudian
+          setTimeout(() => {
+            if (!isRunning) return;
+            const partnerKey = roamingAgentKeys.find(k => k !== randomKey);
+            const partner = nodes[partnerKey];
+            if (partner && partner.mode !== 'walk') {
+              const replyText = getDynamicDialogue(partnerKey, 'desk_reply', randomKey);
+              partner.say(replyText, 5.5);
+            }
+          }, 2800);
+        }
       }
     }
   }

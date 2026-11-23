@@ -194,19 +194,49 @@ export function useOfficeState() {
 
       // 3. Jam istirahat resmi sesuai jadwal kantor (misal: 12.00 - 13.00 Makan Siang, 17.30 - 18.30 Rehat Sore)
       if (isBreak) {
-        const rId = (a.rest && a.rest !== 'auto' && a.rest !== 'desk' && a.rest !== 'meeting')
+        const breakRoomActivities = {
+          lunch: 'Santap siang & ngopi santai di Cafe & Kantin.',
+          ps: 'Main biliar & game PS5 di Game Lounge.',
+          pool: 'Duduk santai di sun lounger tepi Kolam Renang.',
+          musholla: 'Wudhu dan sholat berjamaah di Musholla.',
+          gym: 'Peregangan otot dan treadmill di Gym & Fitness.',
+          dorm: 'Rehat sejenak power nap di Asrama Karyawan.'
+        };
+
+        const targetRoom = (a.rest && a.rest !== 'auto' && a.rest !== 'desk' && a.rest !== 'meeting')
           ? a.rest
           : LOUNGE_ROOMS[i % LOUNGE_ROOMS.length].id;
-        const cap = LOUNGE_MAP[rId]?.cap || 4;
+        const cap = LOUNGE_MAP[targetRoom]?.cap || 4;
+        let assigned = false;
+
         for (let sl = 0; sl < cap; sl++) {
-          if (!occ[rId][sl]) {
-            occ[rId][sl] = a.id;
-            a.at = rId;
+          if (!occ[targetRoom][sl]) {
+            occ[targetRoom][sl] = a.id;
+            a.at = targetRoom;
             a.slot = sl;
             a.status = 'waiting';
             a.sLabel = 'Istirahat';
-            a.now = getRoleTaskForRoutine(a.id, routine, todayTheme);
+            a.now = breakRoomActivities[targetRoom] || getRoleTaskForRoutine(a.id, routine, todayTheme);
+            assigned = true;
             return;
+          }
+        }
+
+        // Jika ruangan target penuh, cari ruangan santai lain yang masih memiliki slot
+        if (!assigned) {
+          for (const lr of LOUNGE_ROOMS) {
+            const cap2 = LOUNGE_MAP[lr.id]?.cap || 4;
+            for (let sl = 0; sl < cap2; sl++) {
+              if (!occ[lr.id][sl]) {
+                occ[lr.id][sl] = a.id;
+                a.at = lr.id;
+                a.slot = sl;
+                a.status = 'waiting';
+                a.sLabel = 'Istirahat';
+                a.now = breakRoomActivities[lr.id] || getRoleTaskForRoutine(a.id, routine, todayTheme);
+                return;
+              }
+            }
           }
         }
       }
@@ -268,6 +298,41 @@ export function useOfficeState() {
     }
     lastRoutineIdRef.current = currentRoutine.id;
   }, [currentRoutine, clockTime.dayIndex]);
+
+  // Rotasi Ruang Istirahat Dinamis: Karakter berpindah-pindah tempat santai saat jam istirahat
+  useEffect(() => {
+    const isBreak = currentRoutine && currentRoutine.category === 'break';
+    if (!isBreak) return;
+
+    // Karyawan berganti-ganti tempat santai setiap 24 detik secara berkala
+    const timer = setInterval(() => {
+      setAgents(prev => {
+        const eligible = prev.filter(a => a.id !== 'ceo');
+        if (eligible.length === 0) return prev;
+
+        // Pilih 1 karyawan acak untuk berpindah ruangan
+        const candidate = eligible[Math.floor(Math.random() * eligible.length)];
+        const currentRoom = candidate.rest && candidate.rest !== 'auto' ? candidate.rest : candidate.at;
+
+        // Pilihan ruangan istirahat yang berbeda dari ruangan saat ini
+        const loungeIds = ['lunch', 'ps', 'pool', 'musholla', 'gym'];
+        const otherLounges = loungeIds.filter(id => id !== currentRoom);
+        const nextRoom = otherLounges[Math.floor(Math.random() * otherLounges.length)];
+
+        return prev.map(a => {
+          if (a.id === candidate.id) {
+            return {
+              ...a,
+              rest: nextRoom
+            };
+          }
+          return a;
+        });
+      });
+    }, 24000);
+
+    return () => clearInterval(timer);
+  }, [currentRoutine]);
 
   // Auto-dismiss pengumuman setelah 12 detik
   useEffect(() => {
