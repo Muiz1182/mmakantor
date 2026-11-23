@@ -53,14 +53,15 @@ const ROOM3 = {
     ]
   },
   dorm: {
-    // 4 Tempat Tidur Lengkap di Asrama
+    // 4 Tempat Tidur Lengkap di Asrama (Pusat ranjang di bx: -19.5 & -14.5, bz: 5 & 9)
+    // Posisi tidur: kaki di bx + 1.0, kepala di bx - 1.05 (di atas bantal)
     dx: -11,
-    entry: [[-8, 7], [-13, 7]],
+    entry: [[-8, 7], [-12, 7]],
     spots: [
-      [-20, 5, 'l', -20, 8, 0.65],
-      [-15, 5, 'l', -15, 8, 0.65],
-      [-20, 9, 'l', -20, 6, 0.65],
-      [-15, 9, 'l', -15, 6, 0.65]
+      [-18.5, 5, 'l', -19.5, 5, 0.78],
+      [-13.5, 5, 'l', -14.5, 5, 0.78],
+      [-18.5, 9, 'l', -19.5, 9, 0.78],
+      [-13.5, 9, 'l', -14.5, 9, 0.78]
     ]
   }
 };
@@ -279,27 +280,29 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
   // =========================================================================
   // 4. FURNITUR ASRAMA (4 TEMPAT TIDUR LENGKAP DENGAN KASUR & BANTAL)
   // =========================================================================
-  function createBed(x, z, label) {
-    // Rangka ranjang kayu
-    B(3.4, 0.45, 2.0, M.woodDark, x, 0.225, z);
-    // Sandaran kepala ranjang (Headboard)
-    B(0.2, 1.2, 2.0, M.woodDark, x - 1.6, 0.6, z);
+  function createBed(bx, bz, label) {
+    // Rangka ranjang kayu kokoh
+    B(3.4, 0.42, 1.9, M.woodDark, bx, 0.21, bz);
+    // Sandaran kepala ranjang (Headboard) di sebelah kiri (X negatif)
+    B(0.18, 1.15, 1.9, M.woodDark, bx - 1.6, 0.58, bz);
+    // Sandaran kaki ranjang (Footboard) di sebelah kanan (X positif)
+    B(0.18, 0.55, 1.9, M.woodDark, bx + 1.6, 0.28, bz);
     // Kasur empuk putih
-    B(3.0, 0.25, 1.8, M.bedSheet, x + 0.1, 0.55, z);
-    // Selimut biru muda
-    B(1.6, 0.26, 1.82, lam(0x38bdf8), x + 0.8, 0.56, z);
-    // Bantal
-    B(0.55, 0.16, 1.2, M.pillow, x - 1.0, 0.72, z);
+    B(3.0, 0.26, 1.75, M.bedSheet, bx, 0.52, bz);
+    // Selimut biru rapi menutupi setengah badan (dari tengah ke kaki)
+    B(1.6, 0.28, 1.78, lam(0x38bdf8), bx + 0.65, 0.54, bz);
+    // Bantal empuk di posisi kepala
+    B(0.65, 0.16, 1.2, M.pillow, bx - 1.05, 0.7, bz);
     // Meja samping ranjang & lampu tidur kecil
-    B(0.7, 0.5, 0.7, M.woodDesk, x - 1.6, 0.25, z + 1.35);
-    B(0.3, 0.4, 0.3, lam(0xfef08a), x - 1.6, 0.7, z + 1.35);
+    B(0.6, 0.5, 0.6, M.woodDesk, bx - 1.6, 0.25, bz + 1.25);
+    B(0.25, 0.35, 0.25, lam(0xfef08a), bx - 1.6, 0.68, bz + 1.25);
   }
 
-  // Pasang 4 Tempat Tidur di Asrama
-  createBed(-20, 5, 'Bed 1');
-  createBed(-15, 5, 'Bed 2');
-  createBed(-20, 9, 'Bed 3');
-  createBed(-15, 9, 'Bed 4');
+  // Pasang 4 Tempat Tidur di Asrama (Pusat ranjang di X: -19.5 dan -14.5, Z: 5 dan 9)
+  createBed(-19.5, 5, 'Bed 1');
+  createBed(-14.5, 5, 'Bed 2');
+  createBed(-19.5, 9, 'Bed 3');
+  createBed(-14.5, 9, 'Bed 4');
   // Lemari pakaian asrama di dinding barat
   B(0.8, 2.0, 3.6, M.woodDark, -23.5, 1.0, 7);
 
@@ -510,6 +513,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     sp.scale.set(4.8, 1.05, 1);
     sp.renderOrder = 10;
     o.tag.add(sp);
+    o.sp = sp;
     reg(sp);
 
     // Cincin Seleksi & Hover
@@ -660,14 +664,15 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     o.sl = sl;
     o.mode = q ? 'rest' : 'seat';
     o.pose = q ? q[2] : 'd';
-    o.fy = q ? Math.atan2(-(q[3] - q[0]), -(q[4] - q[1])) : 0;
+    // Untuk pose tidur telentang di ranjang asrama: ry harus -Math.PI / 2 agar kepala ke -X (bantal) dan dada ke +Y (langit-langit)
+    o.fy = q ? (q[2] === 'l' ? -Math.PI / 2 : Math.atan2(-(q[3] - q[0]), -(q[4] - q[1]))) : 0;
     o.ty = q ? q[5] : 0;
     if (instant) {
       o.x = q ? q[0] : o.sx;
       o.z = q ? q[1] : o.sz;
       o.ry = o.fy;
       o.y = o.ty;
-      o.rx = o.pose === 'l' ? 1.5708 : 0;
+      o.rx = o.pose === 'l' ? Math.PI / 2 : 0;
     }
   }
 
@@ -741,7 +746,9 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     }
 
     o.y += (o.ty - o.y) * k1;
-    o.rx += ((o.mode === 'rest' && o.pose === 'l' ? 1.5708 : 0) - o.rx) * Math.min(1, dt * 5);
+    const isLying = o.mode === 'rest' && o.pose === 'l';
+    const targetRx = isLying ? Math.PI / 2 : 0;
+    o.rx += (targetRx - o.rx) * Math.min(1, dt * 6);
 
     const sit = o.mode === 'seat' || (o.mode === 'rest' && o.pose === 's');
     o.seat.visible = sit;
@@ -749,7 +756,17 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
 
     o.pg.position.set(o.x, o.y, o.z);
     o.pg.rotation.set(o.rx, o.ry, 0);
-    o.tag.position.set(o.x, o.y, o.z + (o.pose === 'l' ? 1 : 0));
+
+    if (isLying) {
+      // Posisi label dan cincin pas di tengah ranjang (bx) dengan ketinggian nyaman
+      o.tag.position.set(o.x - 1.0, 0, o.z);
+      if (o.mk) o.mk.position.set(0, 2.0, 0);
+      if (o.sp) o.sp.position.set(0, 2.6, 0);
+    } else {
+      o.tag.position.set(o.x, o.y, o.z);
+      if (o.mk) o.mk.position.set(0, 3.2, 0);
+      if (o.sp) o.sp.position.set(0, 4.0, 0);
+    }
 
     const off = o.mode !== 'seat';
     o.ring.position.z = o.hov.position.z = off ? 0 : -0.7;
@@ -877,7 +894,10 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
         aL += lg * 0.8;
         aR -= lg * 0.8;
       } else if (o.pose === 'l') {
-        aL = aR = -1.35;
+        aL = aR = -Math.PI / 2; // Lengan lurus santai di samping badan
+        bob = 0;
+        hr = 0;
+        lg = 0;
       } else if (o.pose === 'w') {
         aL += Math.sin(time * 3 + p) * 0.9 * amp;
         aR += Math.sin(time * 3 + p + 3) * 0.9 * amp;
