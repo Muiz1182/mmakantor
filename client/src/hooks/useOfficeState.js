@@ -30,6 +30,7 @@ export function useOfficeState() {
     const wib = new Date(utc + (7 * 3600000));
     const h = wib.getHours();
     const m = wib.getMinutes();
+    const dayIndex = wib.getDay();
     const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')} WIB`;
     
     // Jam kerja kantor MMA: 07.00 - 23.00 WIB
@@ -51,7 +52,7 @@ export function useOfficeState() {
       phaseLabel = 'Malam (Jam Kerja)';
     }
 
-    return { h, m, timeStr, phase, phaseLabel, isOfficeHours };
+    return { h, m, dayIndex, timeStr, phase, phaseLabel, isOfficeHours };
   }
 
   // Update jam realtime setiap 10 detik
@@ -463,6 +464,50 @@ export function useOfficeState() {
     setLiveMessage(`💡 Ide edukasi [${pilar}] diterima! Tim Brainstorming mulai merancang materi viral: "${text}".`);
   }, []);
 
+  // Eksekusi Tayang Otomatis Berdasarkan Jadwal Harian
+  const triggerPublishSlot = useCallback((slot) => {
+    // 1. Update agen Upload, Story, dan Komentar agar mengeksekusi konten
+    setAgents(prev => prev.map(a => {
+      if (a.id === 'upload') {
+        return {
+          ...a,
+          status: 'working',
+          sLabel: 'Mengunggah',
+          now: `Mengunggah konten jadwal ${slot.time}: "${slot.title}" ke ${slot.platform}.`,
+          tugas: a.tugas.map((t, idx) => (idx === 0 ? { ...t, d: true } : t))
+        };
+      }
+      if (a.id === 'story') {
+        return {
+          ...a,
+          status: 'working',
+          sLabel: 'Bekerja',
+          now: `Menyiapkan story teaser & tautan untuk: "${slot.title}".`
+        };
+      }
+      if (a.id === 'komentar') {
+        return {
+          ...a,
+          status: 'working',
+          sLabel: 'Memantau',
+          now: `Memantau komentar masuk pada konten baru: "${slot.title}".`
+        };
+      }
+      return a;
+    }));
+
+    // 2. Simpan status published ke backend jika API aktif
+    api.createContent({
+      judul: slot.title,
+      format: slot.format,
+      platform: slot.platform,
+      status: 'published',
+      jadwalTayang: new Date().toISOString()
+    });
+
+    setLiveMessage(`🚀 KONTEN TAYANG OTOMATIS: "${slot.title}" berhasil dipublikasikan ke ${slot.platform}!`);
+  }, []);
+
   // Tally counts
   const tally = useMemo(() => {
     const nonCeo = placedAgents.filter(a => a.id !== 'ceo');
@@ -502,6 +547,7 @@ export function useOfficeState() {
     activeTimePhase,
     autoApproval,
     toggleAutoApproval,
-    submitCeoIdea
+    submitCeoIdea,
+    triggerPublishSlot
   };
 }

@@ -5,8 +5,9 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 const ROOM_DEFS = {
   // Ruang Kerja
   ceo:      { id: 'ceo',      label: 'Ruang CEO',            x0: -24, x1: -13, z0: -19, z1: -9, floor: 'wood',   door: { x: -13, z: -14, axis: 'x' } },
-  plan:     { id: 'plan',     label: 'Ruang Strategi',       x0: -11, x1: 7,   z0: -19, z1: -9, floor: 'wood',   door: { x: -2,  z: -9,  axis: 'z' } },
-  prod:     { id: 'prod',     label: 'Studio Produksi',      x0: 9,   x1: 24,  z0: -19, z1: -9, floor: 'studio', door: { x: 9,   z: -14, axis: 'x' } },
+  plan:     { id: 'plan',     label: 'Ruang Strategi',       x0: -11, x1: -2,  z0: -19, z1: -9, floor: 'wood',   door: { x: -6.5, z: -9,  axis: 'z' } },
+  meeting:  { id: 'meeting',  label: 'Ruang Meeting',        x0: 0,   x1: 9,   z0: -19, z1: -9, floor: 'wood',   door: { x: 4.5, z: -9,  axis: 'z' }, isGlass: true },
+  prod:     { id: 'prod',     label: 'Studio Produksi',      x0: 11,  x1: 24,  z0: -19, z1: -9, floor: 'studio', door: { x: 11,  z: -14, axis: 'x' } },
   write:    { id: 'write',    label: 'Meja Naskah',          x0: -24, x1: -11, z0: -7,  z1: 1,  floor: 'wood',   door: { x: -11, z: -3,  axis: 'x' } },
   pub:      { id: 'pub',      label: 'Meja Publikasi',       x0: -16, x1: 16,  z0: 12,  z1: 21, floor: 'wood',   door: { x: 0,   z: 12,  axis: 'z' } },
 
@@ -19,6 +20,18 @@ const ROOM_DEFS = {
 
 // Spot posisi istirahat per ruang santai
 const ROOM3 = {
+  meeting: {
+    dx: 4.5,
+    entry: [[4.5, -6], [4.5, -11]],
+    spots: [
+      [2.6, -13, 's', 4.5, -14, 0],
+      [2.6, -15, 's', 4.5, -14, 0],
+      [6.4, -13, 's', 4.5, -14, 0],
+      [6.4, -15, 's', 4.5, -14, 0],
+      [4.5, -11.8, 's', 4.5, -14, 0],
+      [4.5, -16.2, 's', 4.5, -14, 0]
+    ]
+  },
   lunch: {
     dx: 11,
     entry: [[8, -3], [13, -3]],
@@ -378,7 +391,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
 
   // Bangun sekat seluruh ruangan
   Object.values(ROOM_DEFS).forEach(r => {
-    buildWalledRoom(r, r.id === 'ceo');
+    buildWalledRoom(r, r.id === 'ceo' || r.isGlass);
   });
 
   // =========================================================================
@@ -420,17 +433,60 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
   B(6.0, 2.6, 0.5, M.woodDark, -18.5, 1.3, -18.6);
 
   // =========================================================================
-  // 6. FURNITUR RUANG STRATEGI (Whiteboard & Meeting Table)
+  // 6. FURNITUR RUANG STRATEGI & ANALIS (Whiteboard & Kubikel)
   // =========================================================================
-  B(8.0, 2.2, 0.1, lam(0xf8fafc), -2, 2.0, -18.8);
+  B(6.5, 2.2, 0.1, lam(0xf8fafc), -6.5, 2.0, -18.8);
   const noteColors = [0xffd166, 0xef8354, 0x8ecae6, 0xb7e4c7];
   for (let r = 0; r < 2; r++) {
-    for (let c = 0; c < 6; c++) {
-      const np = mk(new THREE.PlaneGeometry(0.75, 0.75), lam(noteColors[(r * 3 + c) % noteColors.length]));
-      np.position.set(-4.5 + c * 1.2, 2.4 - r * 0.8, -18.74);
+    for (let c = 0; c < 5; c++) {
+      const np = mk(new THREE.PlaneGeometry(0.7, 0.7), lam(noteColors[(r * 3 + c) % noteColors.length]));
+      np.position.set(-8.5 + c * 1.0, 2.3 - r * 0.75, -18.74);
       scene.add(np);
     }
   }
+
+  // Meja kerja kubikel Ruang Strategi
+  function createDeskCubicle(x, z) {
+    B(2.2, 0.12, 1.2, M.woodDesk, x, 0.78, z);
+    B(0.12, 0.78, 1.2, M.metalChrome, x - 1.0, 0.39, z);
+    B(0.12, 0.78, 1.2, M.metalChrome, x + 1.0, 0.39, z);
+    // Laptop tipis
+    B(0.6, 0.03, 0.45, lam(0x334155), x, 0.86, z);
+    B(0.6, 0.4, 0.03, lam(0x0f172a), x, 1.05, z - 0.2);
+  }
+  createDeskCubicle(-8.5, -15.5);
+  createDeskCubicle(-4.5, -15.5);
+  createDeskCubicle(-8.5, -12.5);
+  createDeskCubicle(-4.5, -12.5);
+
+  // =========================================================================
+  // 6B. FURNITUR RUANG MEETING (Meja Konferensi, 6 Kursi, Smart Screen)
+  // =========================================================================
+  // Meja Konferensi Besar Kayu Walnut
+  B(5.2, 0.76, 2.4, M.woodDark, 4.5, 0.38, -14);
+  B(4.4, 0.04, 1.8, M.blackLeather, 4.5, 0.77, -14); // Inlay kulit hitam meja meeting
+  B(0.35, 0.74, 1.6, M.metalChrome, 2.6, 0.37, -14);  // Kaki meja chrome
+  B(0.35, 0.74, 1.6, M.metalChrome, 6.4, 0.37, -14);  // Kaki meja chrome
+  // Smart TV Presentasi di Dinding Utara
+  B(4.6, 2.4, 0.1, lam(0x0f172a), 4.5, 2.2, -18.88);
+  B(4.3, 2.1, 0.04, lam(0x0284c7), 4.5, 2.2, -18.82); // Layar presentasi biru menyala
+  // 6 Kursi Rapat Eksekutif di Sekeliling Meja
+  function createMeetingChair(x, z, ry) {
+    const cg = new THREE.Group();
+    cg.position.set(x, 0, z);
+    cg.rotation.y = ry;
+    scene.add(cg);
+    B(0.75, 0.1, 0.75, M.blackLeather, 0, 0.45, 0, cg); // Dudukan
+    B(0.75, 0.8, 0.1, M.blackLeather, 0, 0.85, 0.35, cg); // Sandaran
+    B(0.1, 0.45, 0.1, M.metalChrome, 0, 0.22, 0, cg);   // Tiang
+    B(0.6, 0.05, 0.6, M.metalChrome, 0, 0.02, 0, cg);   // Roda dasar
+  }
+  createMeetingChair(2.4, -13, Math.PI / 2);
+  createMeetingChair(2.4, -15, Math.PI / 2);
+  createMeetingChair(6.6, -13, -Math.PI / 2);
+  createMeetingChair(6.6, -15, -Math.PI / 2);
+  createMeetingChair(4.5, -11.6, Math.PI);
+  createMeetingChair(4.5, -16.4, 0);
 
   // =========================================================================
   // 7. STUDIO PRODUKSI (Green Screen & Kamera)
@@ -650,13 +706,20 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
   nodes['ceo'].zone = 'ceo';
   nodes['ceo'].lane = -13.5;
 
-  // 2. Ruang Strategi & Analis (4 orang)
+  // 2. Ruang Strategi & Analis (4 orang di meja kubikel Ruang Strategi)
   const stratAgents = ['auditor', 'analis', 'ide', 'perencana'];
+  const stratCoords = [
+    { x: -8.5, z: -14.2 },
+    { x: -4.5, z: -14.2 },
+    { x: -8.5, z: -11.2 },
+    { x: -4.5, z: -11.2 }
+  ];
   stratAgents.forEach((id, i) => {
     const ag = initialAgents.find(a => a.id === id);
-    nodes[id] = buildAgent(ag, -8 + i * 4.2, -14, i + 1);
+    const pos = stratCoords[i] || { x: -6.5, z: -13 };
+    nodes[id] = buildAgent(ag, pos.x, pos.z, i + 1);
     nodes[id].zone = 'plan';
-    nodes[id].lane = -14;
+    nodes[id].lane = pos.z;
   });
 
   // 3. Meja Naskah (1 orang)
@@ -786,8 +849,8 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       const c = [[o.sx, o.sz], [sx, o.sz]];
       // Keluar lewat pintu zona masing-masing ke lorong
       if (o.zone === 'ceo') c.push([-13, -14], [-9, -14], [-9, -6]);
-      else if (o.zone === 'plan') c.push([-2, -9], [-2, -6]);
-      else if (o.zone === 'prod') c.push([9, -14], [9, -6]);
+      else if (o.zone === 'plan') c.push([-6.5, -9], [-6.5, -6]);
+      else if (o.zone === 'prod') c.push([11, -14], [11, -6]);
       else if (o.zone === 'write') c.push([-11, -3], [-9, -3], [-9, -6]);
       else if (o.zone === 'pub') c.push([0, 12], [0, 8]);
       return c;

@@ -3,12 +3,14 @@ import { useOfficeState } from './hooks/useOfficeState';
 import { Stage3D } from './components/Stage3D';
 import { Plan2D } from './components/Plan2D';
 import { AgentPanel } from './components/AgentPanel';
+import { ScheduleModal } from './components/ScheduleModal';
 import { FLOW_STEPS } from './constants/flowData';
 import './App.css';
 
 export function App() {
   const [webglError, setWebglError] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
+  const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const [ideaText, setIdeaText] = useState('');
   const [selectedPilar, setSelectedPilar] = useState('Multimedia'); // 'Multimedia', 'Design', 'Web Development'
 
@@ -38,7 +40,8 @@ export function App() {
     activeTimePhase,
     autoApproval,
     toggleAutoApproval,
-    submitCeoIdea
+    submitCeoIdea,
+    triggerPublishSlot
   } = useOfficeState();
 
   const handleWebGLFallback = useCallback(() => {
@@ -112,6 +115,16 @@ export function App() {
               🔔 <b>{tally.pendingApprovals}</b> Persetujuan
             </button>
           )}
+
+          {/* Tombol Kalender Jadwal Tayang Harian */}
+          <button
+            type="button"
+            className="status-pill schedule-pill"
+            onClick={() => setIsScheduleOpen(true)}
+            title="Buka Jadwal Publikasi Harian (Senin - Minggu)"
+          >
+            📅 <b>Jadwal Tayang</b>
+          </button>
 
           {/* Toggle Auto-Review AI */}
           <button
@@ -335,6 +348,15 @@ export function App() {
           📋 Panel Karyawan: <b>{selectedAgent?.id === 'ceo' ? 'CEO' : selectedAgent?.nama}</b>
         </button>
       )}
+      {/* Modal Kalender Jadwal Publikasi Harian */}
+      <ScheduleModal
+        isOpen={isScheduleOpen}
+        onClose={() => setIsScheduleOpen(false)}
+        currentDayIndex={clockTime?.dayIndex}
+        currentHour={clockTime?.h}
+        currentMinute={clockTime?.m}
+        onTriggerPublish={triggerPublishSlot}
+      />
     </div>
   );
 }
