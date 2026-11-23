@@ -65,9 +65,9 @@ export const WEEKLY_SCHEDULE = [
         time: '13:00',
         pilar: 'Web Development',
         platform: 'Instagram Reels & TikTok',
-        format: 'Reels 33s',
-        title: 'Tutorial Bikin Kantor AI: 1-Command Installer Langsung Jadi',
-        hook: 'Beli VPS → Paste 1 command → Isi wizard divisi → Kantor AI langsung jalan! Komen KIT buat coba.',
+        format: 'Reels 30s',
+        title: 'Full-Stack Web Dev: Arsitektur React + Express + PostgreSQL Zero Latency',
+        hook: 'Bikin web app bisnis yang responsif dan scalable dalam waktu singkat!',
         status: 'scheduled'
       },
       {
