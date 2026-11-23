@@ -6,6 +6,7 @@ export function Stage3D({
   selectedAgentId,
   onSelectAgent,
   theme,
+  timePhase = 'morning',
   onWebGLFallback
 }) {
   const canvasRef = useRef(null);
@@ -73,9 +74,16 @@ export function Stage3D({
   // Sync state changes with 3D scene
   useEffect(() => {
     if (sceneRef.current) {
-      sceneRef.current.sync(agents, selectedAgentId);
+      sceneRef.current.sync(agents, selectedAgentId, timePhase);
     }
-  }, [agents, selectedAgentId]);
+  }, [agents, selectedAgentId, timePhase]);
+
+  // Sync time phase changes (Pagi, Siang, Sore, Malam, Tidur)
+  useEffect(() => {
+    if (sceneRef.current && timePhase) {
+      sceneRef.current.setTimePhase(timePhase);
+    }
+  }, [timePhase]);
 
   // Focus on selected agent
   useEffect(() => {

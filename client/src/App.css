@@ -237,6 +237,115 @@ button:focus-visible, input:focus-visible {
   color: var(--ink);
 }
 
+.status-pill.auto-ai-pill {
+  cursor: pointer;
+  background: color-mix(in srgb, #6366f1 18%, var(--surface));
+  border-color: #6366f1;
+  color: #818cf8;
+}
+
+.status-pill.auto-ai-pill.active {
+  background: color-mix(in srgb, #10b981 18%, var(--surface));
+  border-color: #10b981;
+  color: #34d49a;
+}
+
+.time-hud-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--line-hud);
+  border-radius: 8px;
+  padding: 3px 8px;
+  font: 500 11.5px var(--f-mono);
+  color: var(--ink);
+}
+
+.time-phase-select {
+  background: transparent;
+  border: none;
+  font: 600 11.5px var(--f-body);
+  color: var(--accent);
+  cursor: pointer;
+  outline: none;
+  padding-left: 4px;
+}
+
+.time-phase-select option {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+/* Floating Bar: Masukkan Arahan & Ide Baru dari CEO */
+.floating-ceo-idea-bar {
+  position: absolute;
+  top: 74px;
+  right: 20px;
+  z-index: 45;
+  width: min(580px, calc(100vw - 40px));
+}
+
+.idea-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-hud);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--line-hud);
+  border-radius: 12px;
+  padding: 6px 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.idea-form:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.25);
+}
+
+.idea-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.idea-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font: 500 12.5px var(--f-body);
+  color: var(--ink);
+  min-width: 0;
+}
+
+.idea-input::placeholder {
+  color: var(--ink2);
+  opacity: 0.75;
+}
+
+.idea-btn {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #ffffff;
+  font: 600 11.5px var(--f-body);
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+.idea-btn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.idea-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .status-pill.approval-alert {
   background: color-mix(in srgb, var(--signal) 20%, var(--surface));
   border-color: var(--signal);

@@ -18,6 +18,55 @@ export function useOfficeState() {
   const [liveMessage, setLiveMessage] = useState('Selamat datang di Kantor MMA Production. Anda berperan sebagai CEO.');
   const [viewMode, setViewMode] = useState('3d');
   const [dbStatus, setDbStatus] = useState({ connected: false, source: 'offline' });
+  const [autoApproval, setAutoApproval] = useState(true);
+
+  // Sistem Waktu 24 Jam & Jam Kerja Kantor (07.00 - 23.00 WIB)
+  const [timeMode, setTimeMode] = useState('auto'); // 'auto', 'morning', 'day', 'dusk', 'night', 'sleep'
+  const [clockTime, setClockTime] = useState(() => getWibInfo());
+
+  function getWibInfo() {
+    const now = new Date();
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const wib = new Date(utc + (7 * 3600000));
+    const h = wib.getHours();
+    const m = wib.getMinutes();
+    const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')} WIB`;
+    
+    // Jam kerja kantor MMA: 07.00 - 23.00 WIB
+    const isOfficeHours = h >= 7 && h < 23;
+    let phase = 'sleep';
+    let phaseLabel = 'Tutup / Istirahat Malam';
+
+    if (h >= 7 && h < 11) {
+      phase = 'morning';
+      phaseLabel = 'Pagi (Jam Kerja)';
+    } else if (h >= 11 && h < 15.5) {
+      phase = 'day';
+      phaseLabel = 'Siang (Jam Kerja)';
+    } else if (h >= 15.5 && h < 19) {
+      phase = 'dusk';
+      phaseLabel = 'Sore (Jam Kerja)';
+    } else if (h >= 19 && h < 23) {
+      phase = 'night';
+      phaseLabel = 'Malam (Jam Kerja)';
+    }
+
+    return { h, m, timeStr, phase, phaseLabel, isOfficeHours };
+  }
+
+  // Update jam realtime setiap 10 detik
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setClockTime(getWibInfo());
+    }, 10000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Tentukan fase pencahayaan 3D (otomatis atau pilihan simulasi manual)
+  const activeTimePhase = useMemo(() => {
+    if (timeMode !== 'auto') return timeMode;
+    return clockTime.phase;
+  }, [timeMode, clockTime.phase]);
   
   // Theme state
   const [theme, setTheme] = useState(() => {
@@ -300,6 +349,89 @@ export function useOfficeState() {
     setLiveMessage('Footage masuk dari lapangan. Editor mulai memotong video.');
   }, []);
 
+  // Efek Auto-Approval AI: Memeriksa dan menyetujui checklist draf secara otomatis
+  useEffect(() => {
+    if (!autoApproval) return;
+    const firstPending = approvals.find(x => x.state === 'pending');
+    if (!firstPending) return;
+
+    // AI mengevaluasi dan menyetujui secara otomatis dalam 3.5 detik
+    const timer = setTimeout(() => {
+      decideApproval(firstPending.id, 'ok');
+      setLiveMessage(`🤖 AI Chief Editor menyetujui: "${firstPending.judul}". Alur produksi berlanjut otomatis.`);
+    }, 3500);
+
+    return () => clearTimeout(timer);
+  }, [autoApproval, approvals, decideApproval]);
+
+  const toggleAutoApproval = useCallback(() => {
+    setAutoApproval(prev => !prev);
+  }, []);
+
+  // Suntikkan Ide Baru dari CEO ke Tim AI
+  const submitCeoIdea = useCallback(async (ideaText) => {
+    const text = ideaText.trim();
+    if (!text) return;
+
+    // 1. Catat ke backend konten jika API aktif
+    api.createContent({
+      judul: `Ide CEO: ${text}`,
+      format: 'Reels / TikTok',
+      platform: 'Instagram',
+      status: 'draft'
+    });
+
+    // 2. Suntikkan ke agen Brainstorming ('ide') & Perencana ('perencana')
+    setAgents(prev => prev.map(a => {
+      if (a.id === 'ide') {
+        return {
+          ...a,
+          status: 'working',
+          sLabel: 'Bekerja',
+          now: `Mengembangkan ide CEO: "${text}" menjadi konsep video.`,
+          tugas: [
+            { id: Date.now(), t: `Brainstorming ide CEO: "${text}"`, d: false },
+            ...a.tugas
+          ],
+          out: {
+            t: `Konsep dari Ide CEO: "${text}"`,
+            items: [
+              `Konsep 1 (Reels 30s): Hook punchy membahas "${text}".`,
+              `Konsep 2 (Carousel 7 slide): Panduan visual "${text}".`,
+              `Konsep 3 (Story interaktif): Polling audiens mengenai "${text}".`
+            ]
+          }
+        };
+      }
+      if (a.id === 'perencana') {
+        return {
+          ...a,
+          status: 'working',
+          sLabel: 'Bekerja',
+          now: `Menjadwalkan slot tayang untuk ide CEO: "${text}".`
+        };
+      }
+      return a;
+    }));
+
+    // 3. Masukkan ke antrean persetujuan sebagai draf baru yang siap diproses
+    const newApprovalId = String(Date.now());
+    setApprovals(prev => [
+      {
+        id: newApprovalId,
+        dari: 'ide',
+        judul: `Konsep Konten dari Ide CEO: ${text.slice(0, 40)}...`,
+        ringkas: `Konsep turunan telah disiapkan Brainstorming dari arahan Anda: "${text}".`,
+        detail: `Konsep 1: Video pendek 30 detik.\nKonsep 2: Carousel edukasi 7 slide.\nKonsep 3: Story polling interaktif.`,
+        state: 'pending'
+      },
+      ...prev
+    ]);
+
+    setSelectedAgentId('ide');
+    setLiveMessage(`💡 Ide CEO diterima! Tim Brainstorming & Perencana mulai menggarap: "${text}".`);
+  }, []);
+
   // Tally counts
   const tally = useMemo(() => {
     const nonCeo = placedAgents.filter(a => a.id !== 'ceo');
@@ -332,6 +464,13 @@ export function useOfficeState() {
     setViewMode,
     theme,
     toggleTheme,
-    dbStatus
+    dbStatus,
+    clockTime,
+    timeMode,
+    setTimeMode,
+    activeTimePhase,
+    autoApproval,
+    toggleAutoApproval,
+    submitCeoIdea
   };
 }

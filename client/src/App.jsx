@@ -9,6 +9,7 @@ import './App.css';
 export function App() {
   const [webglError, setWebglError] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
+  const [ideaText, setIdeaText] = useState('');
 
   const {
     agents,
@@ -29,7 +30,14 @@ export function App() {
     setViewMode,
     theme,
     toggleTheme,
-    dbStatus
+    dbStatus,
+    clockTime,
+    timeMode,
+    setTimeMode,
+    activeTimePhase,
+    autoApproval,
+    toggleAutoApproval,
+    submitCeoIdea
   } = useOfficeState();
 
   const handleWebGLFallback = useCallback(() => {
@@ -41,6 +49,14 @@ export function App() {
     selectAgent(id);
     setIsDrawerOpen(true);
   }, [selectAgent]);
+
+  const handleIdeaSubmit = (e) => {
+    e.preventDefault();
+    if (ideaText.trim()) {
+      submitCeoIdea(ideaText);
+      setIdeaText('');
+    }
+  };
 
   let stepNumber = 0;
 
@@ -89,10 +105,39 @@ export function App() {
               🔔 <b>{tally.pendingApprovals}</b> Persetujuan
             </button>
           )}
+
+          {/* Toggle Auto-Review AI */}
+          <button
+            type="button"
+            className={`status-pill auto-ai-pill ${autoApproval ? 'active' : ''}`}
+            onClick={toggleAutoApproval}
+            title={autoApproval ? 'Auto-Review AI Aktif: AI memeriksa dan menyetujui checklist draf secara otomatis' : 'Auto-Review AI Nonaktif: Review manual oleh CEO'}
+          >
+            🤖 AI Review: <b>{autoApproval ? 'OTOMATIS' : 'MANUAL'}</b>
+          </button>
         </div>
 
-        {/* Tombol Kontrol (Tema, Reset Kamera, 2D/3D) */}
+        {/* Waktu Operasional WIB & Kontrol */}
         <div className="control-group">
+          {/* Jam Digital WIB & Shift Kerja (07.00 - 23.00) */}
+          <div className="time-hud-badge" title="Jam Operasional Kantor MMA: 07.00 - 23.00 WIB">
+            <span className="time-icon">⏰</span>
+            <span className="time-text">{clockTime?.timeStr || '08:00 WIB'}</span>
+            <select
+              className="time-phase-select"
+              value={timeMode}
+              onChange={(e) => setTimeMode(e.target.value)}
+              aria-label="Pilih Suasana Waktu Kantor"
+            >
+              <option value="auto">WIB Nyata ({clockTime?.phaseLabel})</option>
+              <option value="morning">Pagi (07.00 - 11.00)</option>
+              <option value="day">Siang (11.00 - 15.30)</option>
+              <option value="dusk">Sore (15.30 - 19.00)</option>
+              <option value="night">Malam (19.00 - 23.00)</option>
+              <option value="sleep">Tidur (23.00 - 07.00)</option>
+            </select>
+          </div>
+
           <div className="view-toggle" role="group" aria-label="Mode Tampilan">
             <button
               type="button"
@@ -130,6 +175,24 @@ export function App() {
         </div>
       )}
 
+      {/* Floating Bar: Masukkan Arahan & Ide Baru dari CEO */}
+      <section className="floating-ceo-idea-bar" aria-label="Arahan dan Ide Baru CEO">
+        <form onSubmit={handleIdeaSubmit} className="idea-form">
+          <span className="idea-icon" title="Peran CEO: Memberi ide dan arah konten">💡</span>
+          <input
+            type="text"
+            className="idea-input"
+            placeholder="Ketik ide atau arahan konten baru di sini... (Tim AI akan langsung menyusun konsep & alurnya)"
+            value={ideaText}
+            onChange={(e) => setIdeaText(e.target.value)}
+            aria-label="Ketik ide konten baru"
+          />
+          <button type="submit" className="idea-btn" disabled={!ideaText.trim()}>
+            Kirim Ide
+          </button>
+        </form>
+      </section>
+
       {/* Peringatan jika WebGL tidak aktif */}
       {webglError && (
         <div className="webgl-alert-floating" role="alert">
@@ -145,6 +208,7 @@ export function App() {
             selectedAgentId={selectedAgentId}
             onSelectAgent={handleSelectAgent}
             theme={theme}
+            timePhase={activeTimePhase}
             onWebGLFallback={handleWebGLFallback}
           />
         ) : (

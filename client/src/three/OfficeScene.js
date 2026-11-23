@@ -132,6 +132,110 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
   fillLight.position.set(30, 40, -30);
   scene.add(fillLight);
 
+  // Lampu Interior Ruangan (Menyala saat sore/malam dan redup saat tidur)
+  const interiorLights = [];
+  function addRoomLight(color, intensity, x, y, z, dist = 24) {
+    const pl = new THREE.PointLight(color, intensity, dist, 1.8);
+    pl.position.set(x, y, z);
+    scene.add(pl);
+    interiorLights.push({ light: pl, baseIntensity: intensity });
+    return pl;
+  }
+
+  addRoomLight(0xfef08a, 0.85, -18.5, 4.5, -15, 22); // Ruang CEO hangat
+  addRoomLight(0xf8fafc, 0.75, -2, 4.5, -14, 24);    // Ruang Strategi
+  addRoomLight(0x38bdf8, 0.85, 17, 4.5, -13, 24);    // Studio Produksi
+  addRoomLight(0xfef08a, 0.75, 17, 4.0, 7, 22);      // Ruang Lunch & Cafe
+  addRoomLight(0xc084fc, 0.95, -17, 4.0, -2, 20);    // Ruang PlayStation neon
+  addRoomLight(0xfef08a, 0.65, -17, 3.8, 7, 20);     // Asrama tidur
+  addRoomLight(0x06b6d4, 0.85, 0, 1.8, 2.5, 22);     // Kolam renang glow
+
+  // Konfigurasi Siklus Waktu (Pagi, Siang, Sore, Malam, Jam Tidur)
+  const TIME_CONFIGS = {
+    morning: {
+      clearColor: 0x0c253d,
+      hemiSky: 0xdbeafe,
+      hemiGround: 0x1e293b,
+      hemiInt: 0.75,
+      sunCol: 0xffeedb,
+      sunInt: 1.05,
+      sunPos: [-42, 48, 38],
+      fillCol: 0xfef08a,
+      fillInt: 0.35,
+      roomIntMul: 0.35
+    },
+    day: {
+      clearColor: 0x0a192f,
+      hemiSky: 0xffffff,
+      hemiGround: 0x334155,
+      hemiInt: 0.85,
+      sunCol: 0xffffff,
+      sunInt: 1.15,
+      sunPos: [-20, 65, 20],
+      fillCol: 0x93c5fd,
+      fillInt: 0.4,
+      roomIntMul: 0.25
+    },
+    dusk: {
+      clearColor: 0x1e152a,
+      hemiSky: 0xf472b6,
+      hemiGround: 0x1e1b4b,
+      hemiInt: 0.6,
+      sunCol: 0xfb923c,
+      sunInt: 0.95,
+      sunPos: [45, 28, -20],
+      fillCol: 0xfdba74,
+      fillInt: 0.45,
+      roomIntMul: 0.95
+    },
+    night: {
+      clearColor: 0x060913,
+      hemiSky: 0x1e293b,
+      hemiGround: 0x030712,
+      hemiInt: 0.35,
+      sunCol: 0x60a5fa,
+      sunInt: 0.35,
+      sunPos: [-30, 45, -30],
+      fillCol: 0x3b82f6,
+      fillInt: 0.2,
+      roomIntMul: 1.35
+    },
+    sleep: {
+      clearColor: 0x020408,
+      hemiSky: 0x0f172a,
+      hemiGround: 0x020617,
+      hemiInt: 0.18,
+      sunCol: 0x1e3a8a,
+      sunInt: 0.15,
+      sunPos: [-20, 40, -20],
+      fillCol: 0x172554,
+      fillInt: 0.1,
+      roomIntMul: 0.18
+    }
+  };
+
+  let currentPhase = 'morning';
+
+  function setTimePhase(phase) {
+    const cfg = TIME_CONFIGS[phase] || TIME_CONFIGS.morning;
+    currentPhase = phase;
+    renderer.setClearColor(cfg.clearColor, 1);
+    hemi.color.setHex(cfg.hemiSky);
+    hemi.groundColor.setHex(cfg.hemiGround);
+    hemi.intensity = cfg.hemiInt;
+
+    sun.color.setHex(cfg.sunCol);
+    sun.intensity = cfg.sunInt;
+    sun.position.set(cfg.sunPos[0], cfg.sunPos[1], cfg.sunPos[2]);
+
+    fillLight.color.setHex(cfg.fillCol);
+    fillLight.intensity = cfg.fillInt;
+
+    interiorLights.forEach(({ light, baseIntensity }) => {
+      light.intensity = baseIntensity * cfg.roomIntMul;
+    });
+  }
+
   const lam = (color, opts = {}) => new THREE.MeshLambertMaterial({ color, ...opts });
   const bxg = (w, h, d) => new THREE.BoxGeometry(w, h, d);
 
@@ -936,8 +1040,11 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     renderer.render(scene, camera);
   }
 
-  function sync(currentAgents, selId) {
+  function sync(currentAgents, selId, timePhase) {
     selectedId = selId;
+    if (timePhase && timePhase !== currentPhase) {
+      setTimePhase(timePhase);
+    }
     const T = getThemeTokens();
     currentAgents.forEach(a => {
       const o = nodes[a.id];
@@ -949,6 +1056,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
   }
 
   applyTheme();
+  setTimePhase('morning');
   resize();
   resetCamera();
   requestAnimationFrame(animate);
@@ -958,6 +1066,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     focus: focusAgent,
     resetCamera,
     applyTheme,
+    setTimePhase,
     resize,
     destroy: () => {
       isRunning = false;
