@@ -1661,7 +1661,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       snapAgent(o, at, sl, true);
     }
 
-    if (o.mode !== 'walk' && o.key !== k && o.rx < 0.2) {
+    if (o.key !== k && o.mode !== 'walk') {
       const fromZone = o.at === 'desk' ? o.zone : o.at;
       const fromPos = [o.x, o.z];
       const toZone = at === 'desk' ? o.zone : at;
@@ -1676,10 +1676,12 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       o.path = buildCollisionFreePath(fromZone, fromPos, toZone, toPos);
       o.mode = 'walk';
       o.pose = 'x';
+      o.rx = 0;
+      o.ty = 0;
       o.key = k;
       o.to = { at, sl };
-      o.ty = 0;
-      o.fy = o.ry;
+      o.stand.visible = true;
+      o.seat.visible = false;
     }
 
     if (o.mode === 'walk') {

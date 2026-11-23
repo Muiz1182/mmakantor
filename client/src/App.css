@@ -546,6 +546,238 @@ button:focus-visible, input:focus-visible {
   max-width: calc(100vw - 40px);
 }
 
+/* ==========================================================================
+   BANNER PENGUMUMAN PERGANTIAN JADWAL OPERASIONAL & REALTIME WALKING
+   ========================================================================== */
+.routine-change-banner {
+  position: absolute;
+  top: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 95;
+  width: min(94vw, 700px);
+  background: var(--surface-hud);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--accent);
+  border-radius: 14px;
+  padding: 14px 18px;
+  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.6), 0 0 20px color-mix(in srgb, var(--accent) 25%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: routineBannerIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes routineBannerIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+.banner-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.banner-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.banner-cat-tag {
+  font: 700 10.5px var(--f-mono);
+  padding: 3px 9px;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.banner-cat-tag.work {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.banner-cat-tag.meeting {
+  background: color-mix(in srgb, var(--gold) 20%, transparent);
+  color: var(--gold);
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+}
+
+.banner-cat-tag.break {
+  background: color-mix(in srgb, var(--signal) 20%, transparent);
+  color: var(--signal);
+  border: 1px solid color-mix(in srgb, var(--signal) 40%, transparent);
+}
+
+.banner-cat-tag.sleep {
+  background: color-mix(in srgb, var(--idle) 20%, transparent);
+  color: var(--idle);
+  border: 1px solid color-mix(in srgb, var(--idle) 40%, transparent);
+}
+
+.banner-time-badge {
+  font: 600 11.5px var(--f-mono);
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line-hud);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.banner-loc-badge {
+  font: 500 11.5px var(--f-body);
+  color: var(--ink2);
+}
+
+.banner-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.banner-cal-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line-hud);
+  color: var(--ink);
+  font: 600 11.5px var(--f-body);
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.banner-cal-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.banner-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--ink2);
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.banner-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--ink);
+}
+
+.banner-body-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.banner-icon {
+  font-size: 26px;
+  line-height: 1;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.banner-body-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.banner-current-title {
+  font: 700 14.5px var(--f-display);
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.banner-current-desc {
+  font: 400 12px var(--f-body);
+  color: var(--ink2);
+  line-height: 1.45;
+}
+
+/* Kotak Sorotan Jadwal Selanjutnya Sesuai Jadwal */
+.banner-next-box {
+  background: color-mix(in srgb, var(--accent) 8%, rgba(20, 29, 38, 0.6));
+  border: 1px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+
+.next-indicator-label {
+  font: 700 10.5px var(--f-mono);
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.next-time-val {
+  font: 600 11.5px var(--f-mono);
+  color: var(--gold);
+}
+
+.next-title-val {
+  font: 600 12px var(--f-body);
+  color: var(--ink);
+}
+
+.next-loc-val {
+  font: 400 11.5px var(--f-body);
+  color: var(--ink2);
+}
+
+.banner-realtime-walk-footer {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font: 500 11px var(--f-mono);
+  color: var(--ok);
+  padding-top: 2px;
+}
+
+.walk-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 8px var(--ok);
+  animation: pulseDot 1.4s infinite ease-in-out;
+  flex-shrink: 0;
+}
+
+@keyframes pulseDot {
+  0%, 100% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
+}
+
 .toast-icon {
   font-size: 13px;
 }

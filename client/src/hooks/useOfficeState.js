@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { INITIAL_AGENTS, INITIAL_APPROVALS } from '../constants/agentsData';
 import { LOUNGE_ROOMS, ALL_ROOMS, LOUNGE_MAP, MEETING_ROOM } from '../constants/roomsData';
-import { getCurrentRoutine, getTodaySchedule, getRoleTaskForRoutine } from '../constants/scheduleData';
+import { getCurrentRoutine, getTodaySchedule, getRoleTaskForRoutine, getRoutinesForDay } from '../constants/scheduleData';
 import { api } from '../services/api';
 
 export function useOfficeState() {
@@ -229,6 +229,54 @@ export function useOfficeState() {
   const currentRoutine = useMemo(() => {
     return getCurrentRoutine(clockTime.h, clockTime.m, clockTime.dayIndex);
   }, [clockTime.h, clockTime.m, clockTime.dayIndex]);
+
+  // Notifikasi Pergantian Jam & Rutinitas Operasional Realtime
+  const [routineAnnouncement, setRoutineAnnouncement] = useState(null);
+  const lastRoutineIdRef = useRef(null);
+
+  useEffect(() => {
+    if (!currentRoutine) return;
+    
+    // Jika rutinitas operasional berganti ke jam berikutnya
+    if (lastRoutineIdRef.current && lastRoutineIdRef.current !== currentRoutine.id) {
+      const dayRoutines = getRoutinesForDay(clockTime.dayIndex);
+      const currentIdx = dayRoutines.findIndex(r => r.id === currentRoutine.id);
+      const nextRoutine = currentIdx !== -1 && currentIdx + 1 < dayRoutines.length
+        ? dayRoutines[currentIdx + 1]
+        : dayRoutines[0];
+
+      const nextText = nextRoutine
+        ? `${nextRoutine.timeStart} - ${nextRoutine.timeEnd} WIB: ${nextRoutine.title} (${nextRoutine.locationLabel})`
+        : 'Menunggu jadwal operasional berikutnya';
+
+      setRoutineAnnouncement({
+        id: currentRoutine.id,
+        timeStart: currentRoutine.timeStart,
+        timeEnd: currentRoutine.timeEnd,
+        title: currentRoutine.title,
+        locationLabel: currentRoutine.locationLabel,
+        category: currentRoutine.category,
+        desc: currentRoutine.desc,
+        icon: currentRoutine.icon || '⏰',
+        nextRoutineTitle: nextRoutine?.title,
+        nextRoutineTime: nextRoutine ? `${nextRoutine.timeStart} - ${nextRoutine.timeEnd} WIB` : '',
+        nextRoutineLoc: nextRoutine?.locationLabel,
+        nextText
+      });
+
+      setLiveMessage(`⏰ PERGANTIAN JADWAL: [${currentRoutine.timeStart} - ${currentRoutine.timeEnd} WIB] ${currentRoutine.title}. Tim bergerak ke lokasi secara realtime.`);
+    }
+    lastRoutineIdRef.current = currentRoutine.id;
+  }, [currentRoutine, clockTime.dayIndex]);
+
+  // Auto-dismiss pengumuman setelah 12 detik
+  useEffect(() => {
+    if (!routineAnnouncement) return;
+    const timer = setTimeout(() => {
+      setRoutineAnnouncement(null);
+    }, 12000);
+    return () => clearTimeout(timer);
+  }, [routineAnnouncement]);
 
   const agentsMap = useMemo(() => {
     return placedAgents.reduce((acc, a) => {
@@ -629,9 +677,38 @@ export function useOfficeState() {
   const triggerOfficeRoutine = useCallback((routine) => {
     const loc = routine.locationId; // 'meeting', 'lunch', 'ps', 'dorm', 'desk', 'musholla', 'gym'
     const isMeeting = routine.category === 'meeting' || loc === 'meeting';
+    const isSleep = routine.category === 'sleep' || loc === 'dorm';
     const meetingParticipants = ['ceo', 'analis', 'ide', 'kamera', 'editor', 'carousel'];
+    const todaySchedule = getTodaySchedule(clockTime.dayIndex);
+    const todayTheme = todaySchedule?.theme || 'Multimedia';
 
-    setAgents(prev => prev.map(a => {
+    // Munculkan notifikasi pengumuman jadwal saat ini & jadwal berikutnya
+    const dayRoutines = getRoutinesForDay(clockTime.dayIndex);
+    const currentIdx = dayRoutines.findIndex(r => r.id === routine.id);
+    const nextRoutine = currentIdx !== -1 && currentIdx + 1 < dayRoutines.length
+      ? dayRoutines[currentIdx + 1]
+      : dayRoutines[0];
+
+    const nextText = nextRoutine
+      ? `${nextRoutine.timeStart} - ${nextRoutine.timeEnd} WIB: ${nextRoutine.title} (${nextRoutine.locationLabel})`
+      : 'Menunggu jadwal operasional berikutnya';
+
+    setRoutineAnnouncement({
+      id: routine.id,
+      timeStart: routine.timeStart,
+      timeEnd: routine.timeEnd,
+      title: routine.title,
+      locationLabel: routine.locationLabel,
+      category: routine.category,
+      desc: routine.desc,
+      icon: routine.icon || '⏰',
+      nextRoutineTitle: nextRoutine?.title,
+      nextRoutineTime: nextRoutine ? `${nextRoutine.timeStart} - ${nextRoutine.timeEnd} WIB` : '',
+      nextRoutineLoc: nextRoutine?.locationLabel,
+      nextText
+    });
+
+    setAgents(prev => prev.map((a, i) => {
       if (isMeeting) {
         const idx = meetingParticipants.indexOf(a.id);
         if (idx !== -1) {
@@ -663,7 +740,19 @@ export function useOfficeState() {
         };
       }
 
-      if (loc === 'desk') {
+      if (isSleep) {
+        return {
+          ...a,
+          status: 'waiting',
+          sLabel: 'Istirahat',
+          rest: 'dorm',
+          at: 'dorm',
+          slot: i % 4,
+          now: 'Istirahat malam di Asrama Karyawan MMA.'
+        };
+      }
+
+      if (loc === 'desk' || routine.category === 'work') {
         return {
           ...a,
           status: 'working',
@@ -671,22 +760,25 @@ export function useOfficeState() {
           at: 'desk',
           slot: 0,
           rest: 'auto',
-          now: `Fokus bekerja pada target edukasi hari ini: ${routine.title}.`
+          now: getRoleTaskForRoutine(a.id, routine, todayTheme)
         };
       } else {
+        const targetRoom = LOUNGE_MAP[loc] ? loc : LOUNGE_ROOMS[i % LOUNGE_ROOMS.length].id;
+        const cap = LOUNGE_MAP[targetRoom]?.cap || 4;
         return {
           ...a,
           status: 'waiting',
           sLabel: 'Istirahat',
-          rest: loc,
-          at: null,
-          now: `Sedang mengikuti ${routine.title} di ${routine.locationLabel}.`
+          rest: targetRoom,
+          at: targetRoom,
+          slot: i % cap,
+          now: getRoleTaskForRoutine(a.id, routine, todayTheme)
         };
       }
     }));
 
-    setLiveMessage(`🏢 [${routine.timeStart} WIB] ${routine.title} dimulai di ${routine.locationLabel}.`);
-  }, []);
+    setLiveMessage(`🏢 [${routine.timeStart} WIB] ${routine.title} dimulai di ${routine.locationLabel}. Tim berjalan ke lokasi.`);
+  }, [clockTime.dayIndex]);
 
   // Tally counts
   const tally = useMemo(() => {
@@ -792,6 +884,8 @@ export function useOfficeState() {
     isMeetingActive,
     toggleCeoMeeting,
     currentRoutine,
+    routineAnnouncement,
+    setRoutineAnnouncement,
     runAgentAI,
     isRunningAI
   };

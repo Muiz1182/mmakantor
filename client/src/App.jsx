@@ -62,6 +62,8 @@ export function App() {
     isMeetingActive,
     toggleCeoMeeting,
     currentRoutine,
+    routineAnnouncement,
+    setRoutineAnnouncement,
     runAgentAI,
     isRunningAI
   } = useOfficeState();
@@ -238,6 +240,68 @@ export function App() {
           </button>
         </div>
       </header>
+
+      {/* Notifikasi Pergantian Jam Operasional Kantor & Jadwal Selanjutnya */}
+      {routineAnnouncement && (
+        <aside className="routine-change-banner" role="alert" aria-live="polite">
+          <div className="banner-top-row">
+            <div className="banner-badge-group">
+              <span className={`banner-cat-tag ${routineAnnouncement.category}`}>
+                {routineAnnouncement.category === 'meeting' ? '💼 Sesi Rapat CEO' : routineAnnouncement.category === 'break' ? '🍱 Jam Istirahat' : routineAnnouncement.category === 'sleep' ? '🛏️ Istirahat Malam' : '💻 Jam Kerja Fokus'}
+              </span>
+              <span className="banner-time-badge">
+                ⏰ {routineAnnouncement.timeStart} - {routineAnnouncement.timeEnd} WIB
+              </span>
+              <span className="banner-loc-badge">
+                📍 {routineAnnouncement.locationLabel}
+              </span>
+            </div>
+            <div className="banner-controls">
+              <button
+                type="button"
+                className="banner-cal-btn"
+                onClick={() => setIsScheduleOpen(true)}
+                title="Buka Kalender Operasional Lengkap"
+              >
+                📅 Kalender
+              </button>
+              <button
+                type="button"
+                className="banner-close-btn"
+                onClick={() => setRoutineAnnouncement(null)}
+                aria-label="Tutup Notifikasi"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          <div className="banner-body-row">
+            <span className="banner-icon">{routineAnnouncement.icon || '⏰'}</span>
+            <div className="banner-body-text">
+              <h3 className="banner-current-title">{routineAnnouncement.title}</h3>
+              <p className="banner-current-desc">{routineAnnouncement.desc}</p>
+            </div>
+          </div>
+
+          {/* Bagian Jadwal Selanjutnya sesuai Jadwal Operasional */}
+          {routineAnnouncement.nextRoutineTitle && (
+            <div className="banner-next-box">
+              <span className="next-indicator-label">🗓️ JADWAL SELANJUTNYA:</span>
+              <span className="next-time-val">{routineAnnouncement.nextRoutineTime}</span>
+              <span className="next-title-val">{routineAnnouncement.nextRoutineTitle}</span>
+              {routineAnnouncement.nextRoutineLoc && (
+                <span className="next-loc-val">({routineAnnouncement.nextRoutineLoc})</span>
+              )}
+            </div>
+          )}
+
+          <div className="banner-realtime-walk-footer">
+            <span className="walk-pulse-dot" />
+            <span>Karyawan bergerak menuju lokasi secara realtime (berjalan melewati koridor & pintu).</span>
+          </div>
+        </aside>
+      )}
 
       {/* Pesan Notifikasi Terkini Melayang */}
       {liveMessage && (
