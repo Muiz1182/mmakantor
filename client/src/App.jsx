@@ -43,7 +43,9 @@ export function App() {
     toggleAutoApproval,
     submitCeoIdea,
     triggerPublishSlot,
-    triggerOfficeRoutine
+    triggerOfficeRoutine,
+    isMeetingActive,
+    toggleCeoMeeting
   } = useOfficeState();
 
   const handleWebGLFallback = useCallback(() => {
@@ -146,6 +148,16 @@ export function App() {
             title={chatActive ? 'Obrolan AI Aktif: Karyawan jalan & ngobrol interaktif tentang Multimedia, Design, Web Dev' : 'Obrolan AI Nonaktif'}
           >
             💬 Obrolan: <b>{chatActive ? 'AKTIF' : 'SENYAP'}</b>
+          </button>
+
+          {/* Tombol Rapat Khusus dengan CEO */}
+          <button
+            type="button"
+            className={`status-pill meeting-toggle-pill ${isMeetingActive ? 'active' : ''}`}
+            onClick={toggleCeoMeeting}
+            title={isMeetingActive ? 'Selesaikan Rapat Resmi dengan CEO di Ruang Meeting' : 'Ruang meeting bukan tempat santai: Panggil tim untuk sesi rapat khusus bersama CEO'}
+          >
+            💼 Rapat CEO: <b>{isMeetingActive ? 'BERLANGSUNG' : 'MULAI'}</b>
           </button>
         </div>
 

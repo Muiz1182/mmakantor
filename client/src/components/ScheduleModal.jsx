@@ -47,7 +47,7 @@ export function ScheduleModal({
             </h2>
             <p className="schedule-sub">
               {activeTab === 'routines'
-                ? 'Mengatur jadwal meeting koordinasi, jam kerja fokus, istirahat makan siang, coffee break sore, hingga jam tidur.'
+                ? 'Mengatur jadwal meeting resmi bersama CEO, jam kerja fokus, makan siang, hingga istirahat. Perhatian: Ruang Meeting Kaca khusus sesi rapat koordinasi dengan CEO, bukan area santai.'
                 : 'Konten edukasi viral (Multimedia, Design, Web Development) terbit otomatis setiap hari di jam prime time.'}
             </p>
           </div>
@@ -104,11 +104,11 @@ export function ScheduleModal({
                     <div className="routine-card-actions">
                       <button
                         type="button"
-                        className="routine-action-btn"
+                        className={`routine-action-btn ${routine.category === 'meeting' ? 'meeting-action' : ''}`}
                         onClick={() => onTriggerRoutine && onTriggerRoutine(routine)}
-                        title={`Arahkan tim ke ${routine.locationLabel}`}
+                        title={routine.category === 'meeting' ? 'Mulai sesi rapat koordinasi bersama CEO di Ruang Meeting' : `Arahkan tim ke ${routine.locationLabel}`}
                       >
-                        👥 Arahkan Tim ke Sini
+                        {routine.category === 'meeting' ? '💼 Mulai Rapat dengan CEO' : '👥 Arahkan Tim ke Sini'}
                       </button>
                     </div>
                   </article>

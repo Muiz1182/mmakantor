@@ -605,9 +605,68 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
   B(4.6, 0.04, 1.8, M.blackLeather, -6, 0.77, -15.5);
   B(0.35, 0.74, 1.6, M.metalChrome, -8, 0.37, -15.5);
   B(0.35, 0.74, 1.6, M.metalChrome, -4, 0.37, -15.5);
-  // Layar Smart TV Presentasi KPI Edukasi & Jadwal
+  // Layar Smart TV Presentasi KPI Edukasi & Jadwal Rapat CEO
   B(4.6, 2.4, 0.1, lam(0x0f172a), -6, 2.2, -20.88);
-  B(4.3, 2.1, 0.04, lam(0x0284c7), -6, 2.2, -20.82);
+  
+  function createMeetingScreenTexture(isMeetingActive) {
+    const c = document.createElement('canvas');
+    c.width = 512;
+    c.height = 256;
+    const ctx = c.getContext('2d');
+
+    if (isMeetingActive) {
+      ctx.fillStyle = '#0369a1';
+      ctx.fillRect(0, 0, 512, 256);
+      ctx.fillStyle = '#0c4a6e';
+      ctx.fillRect(12, 12, 488, 232);
+
+      ctx.font = '700 24px "Space Grotesk", sans-serif';
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillText('RAPAT KOORDINASI DENGAN CEO', 30, 48);
+
+      ctx.font = '600 16px "Inter", sans-serif';
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillText('EVALUASI VIRAL: MULTIMEDIA, DESIGN, WEB DEV', 30, 78);
+
+      const bars = [
+        { label: 'Multimedia', val: 180, col: '#38bdf8' },
+        { label: 'Design', val: 210, col: '#a855f7' },
+        { label: 'Web Dev', val: 155, col: '#34d399' }
+      ];
+      bars.forEach((b, i) => {
+        const x = 30 + i * 160;
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(x, 105, 130, 105);
+        ctx.fillStyle = b.col;
+        const h = (b.val / 250) * 80;
+        ctx.fillRect(x + 10, 195 - h, 110, h);
+        ctx.font = '700 14px "Space Grotesk", sans-serif';
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillText(b.label, x + 20, 222);
+      });
+    } else {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, 512, 256);
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(16, 16, 480, 224);
+
+      ctx.font = '700 22px "Space Grotesk", sans-serif';
+      ctx.fillStyle = '#94a3b8';
+      ctx.textAlign = 'center';
+      ctx.fillText('RUANG MEETING KACA (STANDBY)', 256, 105);
+
+      ctx.font = '500 15px "Inter", sans-serif';
+      ctx.fillStyle = '#64748b';
+      ctx.fillText('Khusus Agenda Rapat Resmi Bersama CEO', 256, 140);
+      ctx.fillText('Bukan Area Santai Karyawan', 256, 168);
+    }
+    return new THREE.CanvasTexture(c);
+  }
+
+  const meetingScreenMat = new THREE.MeshBasicMaterial({ map: createMeetingScreenTexture(false) });
+  const meetingScreenMesh = new THREE.Mesh(new THREE.PlaneGeometry(4.3, 2.1), meetingScreenMat);
+  meetingScreenMesh.position.set(-6, 2.2, -20.82);
+  scene.add(meetingScreenMesh);
   // 6 Kursi Eksekutif di Sekeliling Meja Rapat
   function createMeetingChair(x, z, ry) {
     const cg = new THREE.Group();
@@ -1169,6 +1228,15 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
   let wanderCountdown = 9.0;
   const roamingAgentKeys = ['editor', 'kamera', 'carousel', 'ide', 'analis', 'caption'];
 
+  const MEETING_DIALOGUES = [
+    { id: 'ceo', text: 'Bagaimana evaluasi konten edukasi pilar Multimedia, Design, dan Web Dev hari ini?' },
+    { id: 'analis', text: 'Retensi video edukasi 30 detik naik 42%, hook di 3 detik pertama terbukti paling efektif!' },
+    { id: 'ide', text: 'Kami siapkan 3 ide viral: lighting studio murah, hierarki visual, dan Three.js 60 FPS!' },
+    { id: 'kamera', text: 'Shooting studio green screen sudah terjadwal, lighting & audio siap dieksekusi!' },
+    { id: 'editor', text: 'Editing video reels 4K 60fps dengan ritme potongan cepat siap rilis jam 19.00 WIB!' },
+    { id: 'carousel', text: 'Desain carousel 7 slide dengan negative space rapi siap tayang prime time!' }
+  ];
+
   function tickSocialSimulation(dt) {
     if (!chatActive) return;
 
@@ -1182,7 +1250,23 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
       }
     });
 
-    // Pemicu acak karyawan berdiri, berjalan, dan mengobrol
+    // Cek apakah sesi rapat resmi dengan CEO sedang berlangsung di Ruang Meeting
+    const meetingAgents = Object.values(nodes).filter(o => o.at === 'meeting');
+    if (meetingAgents.length > 0) {
+      wanderCountdown -= dt;
+      if (wanderCountdown <= 0) {
+        wanderCountdown = 7.0 + Math.random() * 4.0;
+        const meetingItem = MEETING_DIALOGUES[Math.floor(Math.random() * MEETING_DIALOGUES.length)];
+        const speaker = nodes[meetingItem.id] || meetingAgents[Math.floor(Math.random() * meetingAgents.length)];
+        if (speaker && speaker.say) {
+          speaker.say(meetingItem.text, 6.0);
+        }
+      }
+      return;
+    }
+
+    // Jika di luar jam rapat: Ruang meeting formal tertutup, bukan tempat santai!
+    // Pemicu acak karyawan berdiri, berjalan, dan mengobrol di fasilitas santai / antar meja
     wanderCountdown -= dt;
     if (wanderCountdown <= 0) {
       wanderCountdown = 12.0 + Math.random() * 8.0;
@@ -1193,7 +1277,7 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
         const text = getRandomDialogue(randomKey);
         speaker.say(text, 6.0);
 
-        // Jika dekat dengan teman, buat teman merespons 2.5 detik kemudian
+        // Jika dekat dengan rekan kerja, respon 2.5 detik kemudian
         setTimeout(() => {
           const partnerKey = roamingAgentKeys.find(k => k !== randomKey);
           const partner = nodes[partnerKey];
@@ -1385,11 +1469,25 @@ export function initOfficeScene(canvas, { onSelectAgent, getAgentsData, getTheme
     renderer.render(scene, camera);
   }
 
+  let lastMeetingState = null;
+
   function sync(currentAgents, selId, timePhase) {
     selectedId = selId;
     if (timePhase && timePhase !== currentPhase) {
       setTimePhase(timePhase);
     }
+
+    // Perbarui layar presentasi Ruang Meeting Kaca secara dinamis sesuai status rapat
+    const isMeetingNow = currentAgents.some(a => a.at === 'meeting');
+    if (isMeetingNow !== lastMeetingState) {
+      lastMeetingState = isMeetingNow;
+      if (meetingScreenMat) {
+        if (meetingScreenMat.map) meetingScreenMat.map.dispose();
+        meetingScreenMat.map = createMeetingScreenTexture(isMeetingNow);
+        meetingScreenMat.needsUpdate = true;
+      }
+    }
+
     const T = getThemeTokens();
     currentAgents.forEach(a => {
       const o = nodes[a.id];

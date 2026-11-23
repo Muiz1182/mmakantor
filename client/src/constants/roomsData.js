@@ -7,17 +7,29 @@ export const ZONES = [
   { id: 'pub', label: 'Meja Publikasi', cls: 'r-pub' }
 ];
 
+// Ruang Santai Karyawan (TIDAK termasuk Ruang Meeting)
 export const LOUNGE_ROOMS = [
   { id: 'lunch', label: 'Cafe & Bar', cap: 5, cls: 'r-lunch' },
   { id: 'ps', label: 'Billiard & Lounge', cap: 5, cls: 'r-ps' },
   { id: 'pool', label: 'Kolam Renang & Deck', cap: 5, cls: 'r-pool' },
   { id: 'musholla', label: 'Musholla', cap: 4, cls: 'r-musholla' },
   { id: 'gym', label: 'Gym & Fitness', cap: 4, cls: 'r-gym' },
-  { id: 'dorm', label: 'Asrama Karyawan', cap: 4, cls: 'r-dorm' },
-  { id: 'meeting', label: 'Ruang Meeting Kaca', cap: 6, cls: 'r-meeting' }
+  { id: 'dorm', label: 'Asrama Karyawan', cap: 4, cls: 'r-dorm' }
 ];
 
-export const LOUNGE_MAP = LOUNGE_ROOMS.reduce((acc, r) => {
+// Ruang Khusus Rapat Formal (Bukan tempat santai, hanya dibuka saat sesi rapat dengan CEO)
+export const MEETING_ROOM = {
+  id: 'meeting',
+  label: 'Ruang Meeting Kaca',
+  cap: 6,
+  cls: 'r-meeting',
+  isFormal: true,
+  desc: 'Khusus agenda rapat koordinasi resmi dengan CEO. Bukan tempat santai karyawan.'
+};
+
+export const ALL_ROOMS = [...LOUNGE_ROOMS, MEETING_ROOM];
+
+export const LOUNGE_MAP = ALL_ROOMS.reduce((acc, r) => {
   acc[r.id] = r;
   return acc;
 }, {});

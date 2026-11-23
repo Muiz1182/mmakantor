@@ -163,8 +163,10 @@ export function AgentPanel({
           <p className="label">Lokasi</p>
           <p className="text-body">
             {agent.at === 'desk'
-              ? 'Di meja kerja. Saat menunggu revisi atau materi, karyawan berpindah ke ruang santai.'
-              : `Sedang di ${LOUNGE_MAP[agent.at]?.label || 'Ruang Santai'}, menunggu revisi atau project.`}
+              ? 'Di meja kerja. Saat menunggu revisi atau materi, karyawan berpindah ke fasilitas santai.'
+              : agent.at === 'meeting'
+              ? 'Sedang di Ruang Meeting Kaca, mengikuti agenda rapat koordinasi resmi bersama CEO.'
+              : `Sedang di ${LOUNGE_MAP[agent.at]?.label || 'Ruang Santai'}, istirahat santai menunggu tugas berikutnya.`}
           </p>
 
           <div className="chips">
@@ -185,6 +187,9 @@ export function AgentPanel({
               );
             })}
           </div>
+          <p className="hint-text" style={{ fontSize: '0.78rem', color: 'var(--ink2)', marginTop: '6px' }}>
+            Catatan: Ruang Meeting Kaca bukan area santai. Akses dibuka khusus saat jadwal rapat resmi bersama CEO.
+          </p>
         </section>
       )}
 

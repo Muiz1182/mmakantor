@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { INITIAL_AGENTS, INITIAL_APPROVALS } from '../constants/agentsData';
-import { LOUNGE_ROOMS, LOUNGE_MAP } from '../constants/roomsData';
+import { LOUNGE_ROOMS, ALL_ROOMS, LOUNGE_MAP, MEETING_ROOM } from '../constants/roomsData';
 import { api } from '../services/api';
 
 export function useOfficeState() {
@@ -145,33 +145,43 @@ export function useOfficeState() {
   const placedAgents = useMemo(() => {
     const list = agents.map(a => ({ ...a }));
     const occ = {};
-    LOUNGE_ROOMS.forEach(r => { occ[r.id] = []; });
+    ALL_ROOMS.forEach(r => { occ[r.id] = []; });
 
-    // Step 1: keep working agents at desk, keep valid existing rest
+    // Step 1: keep working agents at desk (kecuali sedang rapat aktif dengan CEO), pertahankan posisi valid
     list.forEach(a => {
+      // Jika agen sedang dalam agenda rapat di Ruang Meeting
+      if (a.at === 'meeting') {
+        const sl = a.slot !== undefined ? a.slot : (a.id === 'ceo' ? 5 : 0);
+        if (occ['meeting'] && !occ['meeting'][sl]) {
+          occ['meeting'][sl] = a.id;
+          a.slot = sl;
+          return;
+        }
+      }
+
       if (a.id === 'ceo' || a.status === 'working') {
         a.at = 'desk';
         a.slot = 0;
         return;
       }
-      const keep = a.at && a.at !== 'desk' && (!a.rest || a.rest === 'auto' || a.rest === a.at);
-      if (keep && !occ[a.at][a.slot]) {
+      const keep = a.at && a.at !== 'desk' && a.at !== 'meeting' && (!a.rest || a.rest === 'auto' || a.rest === a.at);
+      if (keep && occ[a.at] && !occ[a.at][a.slot]) {
         occ[a.at][a.slot] = a.id;
       } else {
         a.at = null;
       }
     });
 
-    // Step 2: assign any waiting/attention agent who has no spot
+    // Step 2: assign any waiting/attention agent who has no spot HANYA ke LOUNGE_ROOMS (ruang santai, BUKAN ruang meeting!)
     list.forEach((a, i) => {
       if (a.id === 'ceo' || a.status === 'working' || a.at) return;
-      const order = a.rest && a.rest !== 'auto' ? [a.rest] : [];
+      const order = a.rest && a.rest !== 'auto' && a.rest !== 'meeting' ? [a.rest] : [];
       for (let k = 0; k < LOUNGE_ROOMS.length; k++) {
         order.push(LOUNGE_ROOMS[(i + k) % LOUNGE_ROOMS.length].id);
       }
       for (let j = 0; j < order.length && !a.at; j++) {
         const rId = order[j];
-        const cap = LOUNGE_MAP[rId].cap;
+        const cap = LOUNGE_MAP[rId]?.cap || 4;
         for (let sl = 0; sl < cap; sl++) {
           if (!occ[rId][sl]) {
             occ[rId][sl] = a.id;
@@ -508,12 +518,97 @@ export function useOfficeState() {
     setLiveMessage(`🚀 KONTEN TAYANG OTOMATIS: "${slot.title}" berhasil dipublikasikan ke ${slot.platform}!`);
   }, []);
 
+  // Status apakah sesi rapat dengan CEO sedang berlangsung
+  const isMeetingActive = useMemo(() => {
+    return agents.some(a => a.at === 'meeting');
+  }, [agents]);
+
+  // Tombol aksi cepat: Mulai / Selesaikan Rapat Resmi dengan CEO di Ruang Meeting Kaca
+  const toggleCeoMeeting = useCallback(() => {
+    const meetingParticipants = ['ceo', 'analis', 'ide', 'kamera', 'editor', 'carousel'];
+
+    setAgents(prev => {
+      const currentlyInMeeting = prev.some(a => a.at === 'meeting');
+
+      if (currentlyInMeeting) {
+        // Selesaikan rapat, kembalikan CEO dan semua tim ke meja kerja masing-masing
+        setLiveMessage('Sesi rapat dengan CEO selesai. Karyawan kembali ke meja kerja masing-masing.');
+        return prev.map(a => ({
+          ...a,
+          status: a.id === 'ceo' ? 'waiting' : 'working',
+          sLabel: a.id === 'ceo' ? 'CEO' : 'Bekerja',
+          at: 'desk',
+          slot: 0,
+          rest: 'auto',
+          now: a.id === 'ceo'
+            ? 'Memeriksa antrean persetujuan dan menentukan fokus konten.'
+            : 'Fokus bekerja di meja mengeksekusi arahan hasil rapat bersama CEO.'
+        }));
+      } else {
+        // Mulai rapat koordinasi resmi di Ruang Meeting Kaca bersama CEO
+        setLiveMessage('💼 Sesi Rapat Resmi dengan CEO dimulai di Ruang Meeting Kaca.');
+        return prev.map(a => {
+          const idx = meetingParticipants.indexOf(a.id);
+          if (idx !== -1) {
+            return {
+              ...a,
+              status: 'working',
+              sLabel: 'Rapat',
+              at: 'meeting',
+              slot: a.id === 'ceo' ? 5 : idx - 1, // CEO di kepala meja (slot 5), peserta di slot 0-4
+              now: a.id === 'ceo'
+                ? 'Memimpin rapat koordinasi konten viral dan strategi pilar edukasi bersama tim di Ruang Meeting.'
+                : 'Mengikuti rapat koordinasi dan evaluasi konten viral bersama CEO di Ruang Meeting.'
+            };
+          }
+          return {
+            ...a,
+            at: 'desk',
+            slot: 0,
+            now: 'Fokus bekerja mandiri di meja saat tim inti sedang meeting bersama CEO.'
+          };
+        });
+      }
+    });
+  }, []);
+
   // Mengarahkan Karyawan ke Lokasi Rutinitas (Meeting, Lunch, Gaming, Tidur, dll.)
   const triggerOfficeRoutine = useCallback((routine) => {
-    const loc = routine.locationId; // 'meeting', 'lunch', 'ps', 'dorm', 'desk'
+    const loc = routine.locationId; // 'meeting', 'lunch', 'ps', 'dorm', 'desk', 'musholla', 'gym'
+    const isMeeting = routine.category === 'meeting' || loc === 'meeting';
+    const meetingParticipants = ['ceo', 'analis', 'ide', 'kamera', 'editor', 'carousel'];
 
     setAgents(prev => prev.map(a => {
-      if (a.id === 'ceo') return a;
+      if (isMeeting) {
+        const idx = meetingParticipants.indexOf(a.id);
+        if (idx !== -1) {
+          return {
+            ...a,
+            status: 'working',
+            sLabel: 'Rapat',
+            at: 'meeting',
+            slot: a.id === 'ceo' ? 5 : idx - 1,
+            now: a.id === 'ceo'
+              ? `Memimpin rapat resmi "${routine.title}" di Ruang Meeting Kaca.`
+              : `Mengikuti rapat resmi "${routine.title}" bersama CEO di Ruang Meeting Kaca.`
+          };
+        }
+        return {
+          ...a,
+          at: 'desk',
+          slot: 0,
+          now: 'Fokus bekerja mandiri di meja saat rapat dengan CEO berlangsung.'
+        };
+      }
+
+      if (a.id === 'ceo') {
+        return {
+          ...a,
+          at: 'desk',
+          slot: 0,
+          now: 'Berada di Ruang CEO memantau perkembangan kantor.'
+        };
+      }
 
       if (loc === 'desk') {
         return {
@@ -521,14 +616,15 @@ export function useOfficeState() {
           status: 'working',
           sLabel: 'Bekerja',
           at: 'desk',
+          slot: 0,
           rest: 'auto',
           now: `Fokus bekerja pada target edukasi hari ini: ${routine.title}.`
         };
       } else {
         return {
           ...a,
-          status: routine.category === 'meeting' ? 'working' : 'waiting',
-          sLabel: routine.category === 'meeting' ? 'Rapat' : 'Istirahat',
+          status: 'waiting',
+          sLabel: 'Istirahat',
           rest: loc,
           at: null,
           now: `Sedang mengikuti ${routine.title} di ${routine.locationLabel}.`
@@ -580,6 +676,8 @@ export function useOfficeState() {
     toggleAutoApproval,
     submitCeoIdea,
     triggerPublishSlot,
-    triggerOfficeRoutine
+    triggerOfficeRoutine,
+    isMeetingActive,
+    toggleCeoMeeting
   };
 }

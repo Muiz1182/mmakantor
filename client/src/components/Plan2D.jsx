@@ -14,8 +14,8 @@ export function Plan2D({ agents, agentsMap, selectedAgentId, onSelectAgent, pend
 
   return (
     <div className="plan" id="plan">
-      {/* 5 Ruang Kerja */}
-      {ZONES.map(z => {
+      {/* Ruang Kerja Operasional */}
+      {ZONES.filter(z => z.id !== 'meeting').map(z => {
         const zoneAgents = agents.filter(a => a.zone === z.id);
 
         return (
@@ -44,7 +44,7 @@ export function Plan2D({ agents, agentsMap, selectedAgentId, onSelectAgent, pend
                     </span>
                     {restRoomLabel && (
                       <span className="pill resting-tag">
-                        ke {restRoomLabel}
+                        {a.at === 'meeting' ? 'Rapat CEO' : `ke ${restRoomLabel}`}
                       </span>
                     )}
                   </button>
@@ -55,7 +55,45 @@ export function Plan2D({ agents, agentsMap, selectedAgentId, onSelectAgent, pend
         );
       })}
 
-      {/* 4 Ruang Santai */}
+      {/* Ruang Meeting Kaca (Khusus Sesi Rapat dengan CEO - Bukan Tempat Santai) */}
+      <section className="room r-meeting" aria-label="Ruang Meeting Kaca">
+        <div className="room-header-flex">
+          <p className="label">💼 Ruang Meeting Kaca (Khusus Rapat CEO)</p>
+          <span className="cap-label">{agents.filter(a => a.at === 'meeting').length} / 6 orang</span>
+        </div>
+        <p className="empty" style={{ margin: '4px 0 8px 0', fontSize: '0.8rem', textAlign: 'left', color: 'var(--ink2)' }}>
+          Ruangan formal khusus sesi rapat koordinasi bersama CEO. Bukan tempat santai.
+        </p>
+        <div className="desks">
+          {agents.filter(a => a.at === 'meeting').length === 0 ? (
+            <p className="empty">Standby (Pintu tertutup di luar jam rapat)</p>
+          ) : (
+            agents.filter(a => a.at === 'meeting').map(a => {
+              const isSelected = selectedAgentId === a.id;
+              const status = getAgentStatusInfo(a);
+
+              return (
+                <button
+                  key={a.id}
+                  type="button"
+                  className="desk"
+                  aria-pressed={isSelected}
+                  onClick={() => onSelectAgent(a.id)}
+                >
+                  <Avatar hue={a.hue} />
+                  <span className="nm">{a.id === 'ceo' ? 'Anda (CEO)' : a.nama}</span>
+                  <span className="pill">
+                    <span className={`dot ${status.k}`}></span>
+                    {a.id === 'ceo' ? 'Memimpin Rapat' : 'Peserta Rapat'}
+                  </span>
+                </button>
+              );
+            })
+          )}
+        </div>
+      </section>
+
+      {/* Ruang Santai & Fasilitas Karyawan */}
       {LOUNGE_ROOMS.map(r => {
         const restingAgents = agents.filter(a => a.at === r.id);
 
