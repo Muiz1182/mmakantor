@@ -167,3 +167,75 @@ export function getVideoReviewPreset(idOrPilar) {
   const foundByPilar = VIDEO_REVIEW_PRESETS.find(p => p.pilar.toLowerCase() === String(idOrPilar).toLowerCase());
   return foundByPilar || VIDEO_REVIEW_PRESETS[0];
 }
+
+export function buildDynamicVideoReviewData(approvalItem) {
+  if (!approvalItem) return VIDEO_REVIEW_PRESETS[0];
+
+  const rawTitle = approvalItem.judul || 'Ide Edukasi Viral';
+  const cleanTitle = rawTitle.replace(/^\[.*?\]\s*/, '').replace(/^Ide CEO:\s*/i, '');
+  const pilar = approvalItem.kategori || 'Multimedia';
+
+  // Format label pengirim draf (Editor, Naskah, Ide, Videografer)
+  const agentNames = {
+    editor: 'Mochammad (Editor AI)',
+    naskah: 'Dimas (Penulis Naskah AI)',
+    ide: 'Brainstorming Tim AI',
+    kamera: 'Rian (Videographer AI)',
+    caption: 'Citra (Caption & SEO AI)',
+    carousel: 'Bayu (Desain Grafis AI)'
+  };
+  const editorName = agentNames[approvalItem.dari] || 'Mochammad (Editor AI)';
+  const videographerName = 'Rian (Videographer AI)';
+
+  const detailLines = (approvalItem.detail || approvalItem.ringkas || '').split('\n').map(s => s.trim()).filter(Boolean);
+  const hookLine = detailLines[0] || `STOP! Sebelum eksekusi ${cleanTitle}, ketahui trik rahasia ini!`;
+  const bodyLine1 = detailLines[1] || `Banyak yang salah langkah saat mengeksekusi konsep ${pilar} ini.`;
+  const bodyLine2 = detailLines[2] || `Ikuti alur praktis ini agar kualitas video kamu naik kelas seketika.`;
+  const ctaLine = `Simpan video ini sekarang dan bagikan ke rekan tim kamu!`;
+
+  const cleanHookShort = hookLine.replace(/^(Hook\s*\(\d+-\d+s?\):?\s*|Slide\s*\d+:?\s*)/i, '').replace(/["']/g, '');
+
+  return {
+    id: approvalItem.id,
+    pilar,
+    judul: cleanTitle,
+    format: 'Reels / TikTok (9:16)',
+    durasi: 30,
+    resolusi: '4K 60fps (1080x1920)',
+    editor: editorName,
+    videographer: videographerName,
+    audioProfile: '-14 LUFS (Vokal Jernih Narator + Beat Lo-Fi Ritmis)',
+    colorGrade: pilar === 'Multimedia' ? 'DaVinci Resolve Rec.709 Sinematik' : (pilar === 'Design' ? 'Adobe Premiere Rec.709 Clean Modern' : 'Final Cut Pro Rec.709 Tech Vibrant'),
+    hook3sText: cleanHookShort.slice(0, 75),
+    hookScore: approvalItem.fypScore || 94,
+    fypScore: approvalItem.fypScore || 92,
+    fypVerdict: `SANGAT LAYAK UNGGAH (Peluang FYP ${approvalItem.fypScore || 92}%)`,
+    summary: approvalItem.ringkas || `Hasil eksekusi naskah dan editing timeline dari brainstorming tim: "${cleanTitle}".`,
+    subtitles: [
+      { start: 0, end: 4, text: cleanHookShort.slice(0, 65), highlight: cleanHookShort.slice(0, 24) },
+      { start: 4, end: 11, text: bodyLine1.slice(0, 75), highlight: bodyLine1.slice(0, 25) },
+      { start: 11, end: 22, text: bodyLine2.slice(0, 80), highlight: bodyLine2.slice(0, 28) },
+      { start: 22, end: 30, text: ctaLine, highlight: 'Simpan video ini' }
+    ],
+    beforeAfter: {
+      beforeLabel: 'SEBELUM (Konsep Mentah Tanpa Grading)',
+      afterLabel: 'SESUDAH (Cut Ritmik & Rec.709 Sinematik)',
+      beforeColor: '#2b2a27',
+      afterColor: pilar === 'Design' ? '#3b82f6' : (pilar === 'Web Development' ? '#10b981' : '#ff9a3c')
+    },
+    qcChecklist: [
+      { id: 'qc-hook', label: 'Hook Detik 0-3 (Scroll Stopper)', score: approvalItem.fypScore ? Math.min(99, approvalItem.fypScore + 2) : 95, status: 'pass', note: 'Hook tajam memicu rasa ingin tahu audiens sesuai arahan naskah.' },
+      { id: 'qc-color', label: 'Visual & Color Grading Rec.709', score: 94, status: 'pass', note: 'Grading warna kulit natural, tone kontras konsisten di layar smartphone.' },
+      { id: 'qc-audio', label: 'Audio Loudness & Artikulasi (-14 LUFS)', score: 92, status: 'pass', note: 'Vokal narator jernih di atas Lo-Fi BGM, sound effect cut selaras tempo.' },
+      { id: 'qc-safe', label: 'Safe Zone Instagram & TikTok', score: 96, status: 'pass', note: 'Subtitle dan elemen penting berada di zona aman layar vertikal.' }
+    ],
+    socialStats: {
+      likes: '95.4K',
+      comments: '1,120',
+      bookmarks: '38.2K',
+      shares: '10.5K',
+      sound: 'MMA Production • Sound Edukasi Asli',
+      caption: `${cleanTitle} 🔥 Simpan video ini untuk referensi kamu! #mmaproduction #${pilar.toLowerCase().replace(/\s+/g, '')} #tipscreator #fyp`
+    }
+  };
+}

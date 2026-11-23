@@ -84,9 +84,15 @@ export function App() {
   }, [selectAgent]);
 
   const handleOpenVideoReview = useCallback((item = null) => {
-    setVideoReviewItem(item);
+    const targetItem = item ||
+      approvals.find(x => x.state === 'pending' && (x.dari === 'editor' || x.dari === 'naskah' || x.dari === 'ide' || x.dari === 'kamera')) ||
+      approvals.find(x => (x.dari === 'editor' || x.dari === 'naskah' || x.dari === 'ide')) ||
+      approvals.find(x => x.state === 'pending') ||
+      approvals[0] ||
+      null;
+    setVideoReviewItem(targetItem);
     setIsVideoReviewOpen(true);
-  }, []);
+  }, [approvals]);
 
   const handleVerifyApproval = useCallback((id, decision, notes) => {
     decideApproval(id, decision, notes);
@@ -549,7 +555,9 @@ export function App() {
         isOpen={isVideoReviewOpen}
         onClose={() => setIsVideoReviewOpen(false)}
         approvalItem={videoReviewItem}
+        allApprovals={approvals}
         onVerifyApproval={handleVerifyApproval}
+        onManualPublishTrigger={triggerPublishSlot}
         activePilar={WEEKLY_SCHEDULE.find(d => d.dayIndex === clockTime?.dayIndex)?.theme?.split(' ')[0] || 'Multimedia'}
       />
 
